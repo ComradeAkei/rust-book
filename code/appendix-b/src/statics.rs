@@ -47,9 +47,12 @@ pub fn tick() -> u32 {
 /// Переменная окружения для дочернего процесса. Окружение текущего
 /// процесса не меняется, поэтому `unsafe` не нужен.
 pub fn run_with_env(var: &str, value: &str) -> std::io::Result<String> {
-    let script = format!("printf %s \"${var}\"");
-    let out = Command::new("sh").arg("-c").arg(script).env(var, value).output()?;
-    Ok(String::from_utf8_lossy(&out.stdout).into_owned())
+    // Имя уходит аргументом, а не в текст скрипта для `sh -c`: имя вида
+    // `A-B` или с кавычкой иначе стало бы кодом оболочки.
+    let out = Command::new("printenv").arg(var).env(var, value).output()?;
+    let text = String::from_utf8_lossy(&out.stdout);
+    // `printenv` дописывает перевод строки после значения.
+    Ok(text.strip_suffix('\n').unwrap_or(&text).to_owned())
 }
 // ANCHOR_END: env
 
@@ -78,5 +81,13 @@ mod tests {
     fn child_environment() {
         assert_eq!(run_with_env("TELEMETRY_PORT", "4242").unwrap(), "4242");
         assert_eq!(std::env::var_os("TELEMETRY_PORT"), None);
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore = "Miri не запускает дочерние процессы")]
+    fn child_environment_odd_names() {
+        // Имена, которые оболочка разобрала бы по-своему.
+        assert_eq!(run_with_env("A-B", "x").unwrap(), "x");
+        assert_eq!(run_with_env("Q\"; echo INJECTED; : \"", "v").unwrap(), "v");
     }
 }

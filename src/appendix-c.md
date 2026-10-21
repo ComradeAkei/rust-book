@@ -478,6 +478,10 @@ AddressSanitizer (`RUSTFLAGS=-Zsanitizer=address`) не увидел ни одн
   ссылки через `assume_init_mut`;
 - `extend_from_slice` увеличивает `len` после каждой записи, а проверка
   ёмкости не переполняется;
+- `Drop` уничтожает элементы одним `ptr::drop_in_place` для среза
+  `buf[..len]`: если деструктор элемента запаникует, остальные всё равно
+  будут уничтожены, как в массиве и `Vec`. Цикл с `assume_init_drop`
+  на первой же панике бросил бы их;
 - ручного `Send` нет. Компилятор выводит его из поля
   `[MaybeUninit<T>; N]`, и doc-тест `compile_fail,E0277` проверяет, что
   вектор с `Rc` отправить в поток нельзя.
@@ -486,9 +490,9 @@ AddressSanitizer (`RUSTFLAGS=-Zsanitizer=address`) не увидел ни одн
 
 ```console
 $ cargo +nightly miri test -p appendix-c
-test result: ok. 5 passed; 0 failed; 4 ignored; 0 measured; 0 filtered out
+test result: ok. 6 passed; 0 failed; 4 ignored; 0 measured; 0 filtered out
 $ MIRIFLAGS=-Zmiri-tree-borrows cargo +nightly miri test -p appendix-c --lib
-test result: ok. 5 passed; 0 failed; 4 ignored; 0 measured; 0 filtered out
+test result: ok. 6 passed; 0 failed; 4 ignored; 0 measured; 0 filtered out
 ```
 
 <div class="box trap">

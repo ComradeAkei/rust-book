@@ -164,7 +164,7 @@ rustdoc сверяет только на nightly, поэтому вторая к
 {{#include ../code/appendix-b/src/statics.rs:env}}
 ```
 
-Тест `child_environment` проверяет, что дочерний `sh` видит
+Тест `child_environment` проверяет, что дочерний `printenv` видит
 `TELEMETRY_PORT=4242`, а в окружении теста её нет. `set_var` остаётся для
 начала `main`, до запуска потоков, с комментарием `SAFETY` об этом.
 

@@ -1,7 +1,7 @@
 //! Вектор фиксированной ёмкости после ревью по чек-листу приложения C.
 
 use core::mem::MaybeUninit;
-use core::slice;
+use core::{ptr, slice};
 
 // ANCHOR: after
 /// Вектор на стеке ёмкостью `N`, без кучи: для прошивок и обработчиков
@@ -70,11 +70,12 @@ impl<T, const N: usize> StackVec<T, N> {
 
 impl<T, const N: usize> Drop for StackVec<T, N> {
     fn drop(&mut self) {
-        for x in &mut self.buf[..self.len] {
-            // SAFETY: элементы `buf[..len]` инициализированы (инвариант), и
-            // после `drop` к ним никто не обратится.
-            unsafe { x.assume_init_drop() };
-        }
+        let init = ptr::slice_from_raw_parts_mut(self.buf.as_mut_ptr().cast::<T>(), self.len);
+        // SAFETY: элементы `buf[..len]` инициализированы (инвариант), и
+        // после `drop` к ним никто не обратится. `drop_in_place` для среза
+        // при панике в деструкторе одного элемента уничтожает остальные,
+        // как массив и `Vec`; цикл с `assume_init_drop` бросил бы их.
+        unsafe { ptr::drop_in_place(init) };
     }
 }
 
@@ -156,6 +157,29 @@ mod tests {
         });
         assert!(result.is_err());
         assert_eq!(*DROPPED.lock().unwrap_or_else(|e| e.into_inner()), [101]);
+    }
+
+    struct Bomb(u32);
+
+    static BOMB_DROPS: Mutex<Vec<u32>> = Mutex::new(Vec::new());
+
+    impl Drop for Bomb {
+        fn drop(&mut self) {
+            BOMB_DROPS.lock().unwrap_or_else(|e| e.into_inner()).push(self.0);
+            assert!(self.0 != 1, "drop №1 не удался");
+        }
+    }
+
+    #[test]
+    fn panic_in_drop_still_drops_the_rest() {
+        let result = std::panic::catch_unwind(|| {
+            let mut v = StackVec::<Bomb, 3>::new();
+            for id in 1..=3 {
+                assert!(v.push(Bomb(id)).is_ok());
+            }
+        });
+        assert!(result.is_err());
+        assert_eq!(*BOMB_DROPS.lock().unwrap_or_else(|e| e.into_inner()), [1, 2, 3]);
     }
 
     #[test]
