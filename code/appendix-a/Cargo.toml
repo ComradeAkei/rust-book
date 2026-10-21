@@ -1,0 +1,23 @@
+[package]
+name = "appendix-a"
+version = "0.1.0"
+description = "Приложение A: словарь соответствий C и Rust, каждое утверждение проверено тестом"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[features]
+default = ["std"]
+# Модули про потоки, файлы, кучу и завершение процесса требуют std. Без
+# этой возможности крейт собирается под Cortex-M, и проверки при компиляции
+# из types.rs сверяют c_char и размер repr(C)-перечисления на ARM.
+std = []
+
+# Программа для опыта из раздела A.4: std::process::exit не вызывает
+# деструкторы. Её запускает тест tests/exit.rs.
+[[bin]]
+name = "exit-skips-drop"
+path = "src/bin/exit_skips_drop.rs"
+required-features = ["std"]
+test = false

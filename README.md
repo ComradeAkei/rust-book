@@ -17,6 +17,9 @@
 - Готова эталонная глава 6 «Составные типы и раскладка памяти»:
   11 разделов, задачи A–D, первая задача проекта П6 и разборы в
   приложении E. Остальные главы пока содержат план из программы курса.
+- Готовы приложения A–D: словарь соответствий C → Rust, edition 2024 для
+  системного кода, чек-лист ревью `unsafe` с разбором примера, установка
+  окружения и отладка в QEMU. Их код лежит в `code/appendix-*`.
 
 ## Чтение
 
@@ -33,6 +36,10 @@ src/                      текст книги (mdBook)
   appendix-e/             разборы задач всех глав
 code/chNN/                примеры главы; листинги попадают в текст через {{#include}}
 code/ch06-regs/           драйвер UART PL011 из раздела 6.9
+code/appendix-a/          словарь C → Rust; в c/ те же примеры на C и run.sh для UBSan
+code/appendix-b/          edition 2024 для системного кода
+code/appendix-b-2021/     те же исходники в edition 2021 для сравнения
+code/appendix-c/          вектор фиксированной ёмкости до и после ревью unsafe
 exercises/chNN/           заготовки задач
 exercises/project-frame/  заготовка задачи П6
 solutions/chNN/           эталонные решения
@@ -75,10 +82,15 @@ $ cargo test -p project-frame             # задача П6
 $ cargo fmt --all --check && (cd firmware && cargo fmt --all --check)
 $ cargo clippy --workspace --all-targets -- -D warnings
 $ cargo test                              # примеры глав, решения, проект
+$ cargo test -p appendix-a --release      # часть поведения приложения A зависит от профиля
 $ cargo +nightly miri test -p ch06 -p ch06-regs -p ch06-solutions -p telemetry-frame
+$ cargo +nightly miri test -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
+$ MIRIFLAGS=-Zmiri-tree-borrows cargo +nightly miri test -p appendix-c
+$ cargo +nightly test --doc -p ch06 -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
 $ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch06-solutions
 $ cargo build -p ch06 --no-default-features --target thumbv6m-none-eabi
 $ bash firmware/run-demos.sh              # 8 опытов главы 6 в QEMU
+$ bash code/appendix-a/c/run.sh           # C-примеры приложения A под UBSan
 $ python3 tools/check-includes.py         # все {{#include}} указывают на существующие якоря
 $ mdbook build
 ```

@@ -3,6 +3,10 @@ resolver = "3"
 members = [
     "code/ch06",
     "code/ch06-regs",
+    "code/appendix-a",
+    "code/appendix-b",
+    "code/appendix-b-2021",
+    "code/appendix-c",
     "exercises/ch06",
     "exercises/project-frame",
     "project/telemetry-frame",
@@ -13,6 +17,10 @@ members = [
 default-members = [
     "code/ch06",
     "code/ch06-regs",
+    "code/appendix-a",
+    "code/appendix-b",
+    "code/appendix-b-2021",
+    "code/appendix-c",
     "project/telemetry-frame",
     "solutions/ch06",
 ]
