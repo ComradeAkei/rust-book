@@ -1,0 +1,8 @@
+[package]
+name = "appendix-b"
+version = "0.1.0"
+description = "Приложение B: изменения edition 2024, важные для системного кода"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true

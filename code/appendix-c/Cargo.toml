@@ -1,0 +1,8 @@
+[package]
+name = "appendix-c"
+version = "0.1.0"
+description = "Приложение C: разбор unsafe-кода по чек-листу, версии до и после ревью"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true

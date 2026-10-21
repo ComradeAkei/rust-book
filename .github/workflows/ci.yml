@@ -31,6 +31,10 @@ jobs:
       - run: cargo clippy --workspace --all-targets -- -D warnings
       # Корневой `cargo test` проверяет примеры глав и эталонные решения.
       - run: cargo test
+      # Часть поведения в приложении A зависит от профиля сборки.
+      - run: cargo test -p appendix-a --release
+      # C-примеры приложения A под UBSan: gcc с libubsan есть в образе.
+      - run: bash code/appendix-a/c/run.sh
       # Заготовки студента не проходят тесты, пока задачи не решены,
       # но обязаны собираться.
       - run: cargo build -p ch06-exercises -p project-frame --all-targets
@@ -44,6 +48,14 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - run: cargo +nightly miri setup
       - run: cargo +nightly miri test -p ch06 -p ch06-regs -p ch06-solutions -p telemetry-frame
+      - run: cargo +nightly miri test -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
+      # Чек-лист приложения C требует проходить Miri в обеих моделях алиасинга.
+      - run: cargo +nightly miri test -p appendix-c
+        env:
+          MIRIFLAGS: -Zmiri-tree-borrows
+      # Коды ошибок в doc-тестах compile_fail,EXXXX rustdoc сверяет только на
+      # nightly, stable проверяет лишь то, что пример не компилируется.
+      - run: cargo +nightly test --doc -p ch06 -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
 
   layout:
     name: Случайная раскладка полей
@@ -81,6 +93,11 @@ jobs:
           for t in thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabihf; do
             cargo build -p ch06 -p ch06-regs -p telemetry-frame -p ch06-solutions \
               --no-default-features --target "$t"
+          done
+      - name: Приложение A без std под три цели Cortex-M
+        run: |
+          for t in thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabihf; do
+            cargo build -p appendix-a --no-default-features --target "$t"
           done
       - name: clippy для прошивок
         working-directory: firmware

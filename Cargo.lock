@@ -3,6 +3,22 @@
 version = 4
 
 [[package]]
+name = "appendix-a"
+version = "0.1.0"
+
+[[package]]
+name = "appendix-b"
+version = "0.1.0"
+
+[[package]]
+name = "appendix-b-2021"
+version = "0.1.0"
+
+[[package]]
+name = "appendix-c"
+version = "0.1.0"
+
+[[package]]
 name = "ch06"
 version = "0.1.0"
 dependencies = [
