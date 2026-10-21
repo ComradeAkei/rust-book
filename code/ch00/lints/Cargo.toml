@@ -1,0 +1,11 @@
+# Раздел 0.5. Образец для clippy: три ошибки, которые компилятор пропускает.
+# Отдельный крейт со своим workspace, чтобы `cargo clippy -- -D warnings` в
+# корне книги оставался зелёным. Тест `code/ch00/tests/clippy.rs` следит,
+# что clippy по-прежнему находит все три.
+[package]
+name = "ch00-lints"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[workspace]

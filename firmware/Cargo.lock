@@ -18,6 +18,27 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "46afbd2983a5d5a7bd740ccb198caf5b82f45c40c09c0eed36052d91cb92e719"
 
 [[package]]
+name = "ch00"
+version = "0.1.0"
+
+[[package]]
+name = "ch00-hello"
+version = "0.1.0"
+dependencies = [
+ "ch00",
+ "cortex-m-rt",
+ "cortex-m-semihosting",
+]
+
+[[package]]
+name = "ch00-reset"
+version = "0.1.0"
+dependencies = [
+ "cortex-m-rt",
+ "cortex-m-semihosting",
+]
+
+[[package]]
 name = "ch06"
 version = "0.1.0"
 dependencies = [

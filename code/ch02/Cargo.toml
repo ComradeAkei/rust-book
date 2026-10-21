@@ -1,0 +1,16 @@
+[package]
+name = "ch02"
+version = "0.1.0"
+description = "Глава 2: выражения, циклы, match и образцы, во что компилируется match, временные значения"
+edition.workspace = true
+# Цепочки `if let ... && ...` стабильны с 1.88, `core::hint::cold_path` — с 1.95.
+rust-version = "1.95"
+license.workspace = true
+publish.workspace = true
+
+# Примеры, которым нужен std, собираются только для хоста.
+[[example]]
+name = "dispatch"
+
+[[example]]
+name = "unreachable"

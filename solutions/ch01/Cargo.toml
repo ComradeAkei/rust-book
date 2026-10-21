@@ -1,0 +1,23 @@
+[package]
+name = "ch01-solutions"
+version = "0.1.0"
+description = "Глава 1: эталонные решения задач A–D"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[features]
+# Слитное умножение-сложение для целей без ОС: в core оно пока только на
+# nightly (`core_float_math`). Нужно для ассемблера задачи D под Cortex-M4F.
+nightly = []
+
+[dependencies]
+ch01 = { path = "../../code/ch01" }
+
+[[example]]
+name = "probe"
+
+[[test]]
+name = "ch01"
+path = "tests/ch01.rs"

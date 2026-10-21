@@ -1,0 +1,25 @@
+[package]
+name = "ch01"
+version = "0.1.0"
+description = "Глава 1: целые, переполнение, плавающая точка, char, срезы и приведения на x86_64 и Cortex-M"
+edition.workspace = true
+# Семейство strict_* стабильно с 1.91, f32::next_up — с 1.86.
+rust-version = "1.91"
+license.workspace = true
+publish.workspace = true
+
+# Примеры, которым нужен std, собираются только для хоста.
+[[example]]
+name = "promote"
+
+[[example]]
+name = "floats"
+
+[[example]]
+name = "strings"
+
+[[example]]
+name = "fma"
+
+[[example]]
+name = "bool_ub"

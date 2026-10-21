@@ -1,3 +1,6 @@
 /target
 /book
 /firmware/target
+/code/ch00/lints/target
+/exercises/ch00/hello-nostd/target
+/solutions/ch00/hello-nostd/target

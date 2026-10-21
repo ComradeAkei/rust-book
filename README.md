@@ -16,7 +16,14 @@
 - Программа курса: глава 0, 31 глава в шести частях, приложения A–E.
 - Готова эталонная глава 6 «Составные типы и раскладка памяти»:
   11 разделов, задачи A–D, первая задача проекта П6 и разборы в
-  приложении E. Остальные главы пока содержат план из программы курса.
+  приложении E. Остальные главы, кроме 0–2, пока содержат план из
+  программы курса.
+- Готовы главы 0–2: окружение и инструменты (rustup, cargo, чтение
+  ассемблера, одна программа на x86_64 и Cortex-M, Miri и clippy, QEMU и
+  gdb), скалярные типы и их представление в памяти, выражения и
+  сопоставление с образцом вместе с тем, во что компилируется `match`.
+  В каждой главе задачи A–D (в главе 1 — A, B1, B2, C, D), эталонные
+  решения и разборы в приложении E.
 - Готовы приложения A–D: словарь соответствий C → Rust, edition 2024 для
   системного кода, чек-лист ревью `unsafe` с разбором примера, установка
   окружения и отладка в QEMU. Их код лежит в `code/appendix-*`.
@@ -32,17 +39,21 @@ $ mdbook build                        # статический сайт в ка�
 
 ```text
 src/                      текст книги (mdBook)
+  ch00/ ch01/ ch02/       главы 0–2, по файлу на раздел
   ch06/                   эталонная глава, по файлу на раздел
   appendix-e/             разборы задач всех глав
 code/chNN/                примеры главы; листинги попадают в текст через {{#include}}
+code/ch01/c/, ch02/c/     те же примеры на C и run.sh, который сверяет их вывод с текстом
 code/ch06-regs/           драйвер UART PL011 из раздела 6.9
 code/appendix-a/          словарь C → Rust; в c/ те же примеры на C и run.sh для UBSan
 code/appendix-b/          edition 2024 для системного кода
 code/appendix-b-2021/     те же исходники в edition 2021 для сравнения
 code/appendix-c/          вектор фиксированной ёмкости до и после ревью unsafe
 exercises/chNN/           заготовки задач
+exercises/ch02-2021/      задача 2.D в edition 2021: тот же файл, что в exercises/ch02
 exercises/project-frame/  заготовка задачи П6
 solutions/chNN/           эталонные решения
+solutions/ch02-2021/      решение задачи 2.D в edition 2021
 tests-shared/             тесты, общие для заготовок и решений
 project/                  сквозной проект «станция телеметрии»
 firmware/                 прошивки для QEMU (отдельный workspace)
@@ -59,12 +70,20 @@ tools/                    вспомогательные проверки для
   rustup поставит их сам;
 - nightly с Miri для проверки `unsafe` и флагов `-Z`;
 - `qemu-system-arm` 8.x, машины `lm3s6965evb` (Cortex-M3) и `microbit`
-  (Cortex-M0);
+  (Cortex-M0), для главы 0 ещё `mps2-an386` (Cortex-M4F), для C-примеров
+  главы 1 `mps2-an385` (Cortex-M3);
+- `gdb-multiarch` для задачи 0.D, `llvm` (`llvm-objdump`, `llvm-nm`) для
+  задачи 2.B, GCC и clang для C-примеров; `arm-none-eabi-gcc` с newlib
+  нужен только для проверки C-примеров главы 1 на Cortex-M;
 - mdBook 0.5.4 и `cargo-show-asm`.
 
 ## Задачи
 
 ```console
+$ cargo test -p ch00-exercises            # задачи A–C главы 0; D проверяет gdb
+$ cargo test -p ch01-exercises            # все задачи главы 1
+$ cargo test -p ch02-exercises            # все задачи главы 2
+$ cargo test -p ch02-exercises-2021       # задача 2.D в edition 2021
 $ cargo test -p ch06-exercises            # все задачи главы 6
 $ cargo test -p ch06-exercises task_b     # одна задача
 $ cargo test -p project-frame             # задача П6
@@ -83,14 +102,24 @@ $ cargo fmt --all --check && (cd firmware && cargo fmt --all --check)
 $ cargo clippy --workspace --all-targets -- -D warnings
 $ cargo test                              # примеры глав, решения, проект
 $ cargo test -p appendix-a --release      # часть поведения приложения A зависит от профиля
+$ cargo +nightly miri test -p ch00 -p ch01 -p ch02 -p ch00-solutions -p ch01-solutions \
+      -p ch02-solutions -p ch02-solutions-2021
 $ cargo +nightly miri test -p ch06 -p ch06-regs -p ch06-solutions -p telemetry-frame
 $ cargo +nightly miri test -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
 $ MIRIFLAGS=-Zmiri-tree-borrows cargo +nightly miri test -p appendix-c
-$ cargo +nightly test --doc -p ch06 -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
+$ cargo +nightly test --doc -p ch00 -p ch01 -p ch02 -p ch06 -p appendix-a -p appendix-b \
+      -p appendix-b-2021 -p appendix-c
 $ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch06-solutions
+$ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch00-solutions -p ch01-solutions
+$ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch02-solutions -- --skip task_a
 $ cargo build -p ch06 --no-default-features --target thumbv6m-none-eabi
-$ bash firmware/run-demos.sh              # 8 опытов главы 6 в QEMU
+$ cargo build -p ch00 -p ch01 -p ch02 -p ch00-solutions -p ch01-solutions --target thumbv6m-none-eabi
+$ bash firmware/run-demos.sh              # 6 опытов главы 0 и 8 опытов главы 6 в QEMU
+$ cargo test -p ch02-solutions -- --ignored own_firmware   # задача 2.B на всех прошивках
 $ bash code/appendix-a/c/run.sh           # C-примеры приложения A под UBSan
+$ bash code/ch01/c/run.sh                 # C-примеры главы 1 на x86_64 и в QEMU
+$ bash code/ch02/c/run.sh                 # switch из введения к главе 2
+$ bash solutions/ch01/c/run.sh            # задача 1.A на C
 $ python3 tools/check-includes.py         # все {{#include}} указывают на существующие якоря
 $ mdbook build
 ```

@@ -1,0 +1,24 @@
+# Задача 0.B, часть 2. Отдельный крейт со своим workspace: профили здесь
+# свои, и они не влияют на остальные крейты книги.
+[package]
+name = "hello-nostd"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[workspace]
+
+# ANCHOR: profile
+# Без std нет кода раскрутки стека, поэтому panic = "abort" нужен в любом
+# профиле, иначе компилятор ответит «unwinding panics are not supported
+# without std».
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"
+strip = true
+opt-level = "z"
+lto = true
+codegen-units = 1
+# ANCHOR_END: profile
