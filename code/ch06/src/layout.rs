@@ -105,14 +105,6 @@ mod tests {
             assert_eq!(align_of::<Sample>(), align_of::<u32>());
             assert_eq!(align_of::<Record>(), align_of::<u64>());
         }
-
-        #[test]
-        fn rust_layout_is_never_worse_here() {
-            // Reference не обещает оптимальную раскладку, но обещает, что
-            // repr(Rust) не хуже простого правила «каждое поле выровнено».
-            assert!(size_of::<Sample>() <= size_of::<SampleC>());
-            assert!(size_of::<Record>() <= size_of::<RecordC>());
-        }
     }
 
     mod observed {
@@ -130,6 +122,16 @@ mod tests {
             assert_eq!(size_of::<Record>(), 16);
             assert_eq!(size_of::<RecordC>(), 24);
             assert_eq!(offset_of!(Record, timestamp), 0);
+        }
+
+        #[test]
+        fn rust_layout_is_never_worse_here() {
+            // Reference этого не обещает: размер repr(Rust) не гарантирован.
+            // Текущий rustc сортирует поля, и здесь выходит не больше, чем
+            // в repr(C), но под -Zrandomize-layout Record бывает 32 байта
+            // против 24 у RecordC.
+            assert!(size_of::<Sample>() <= size_of::<SampleC>());
+            assert!(size_of::<Record>() <= size_of::<RecordC>());
         }
     }
 }
