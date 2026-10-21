@@ -1,0 +1,24 @@
+[package]
+name = "ch06"
+version = "0.1.0"
+description = "Глава 6: примеры раскладки составных типов, ниш и repr-атрибутов"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+ch06-regs = { path = "../ch06-regs" }
+
+[features]
+default = ["alloc"]
+# Модуль task_a упоминает Box<u8> и тянет крейт alloc. Прошивкам без
+# глобального аллокатора он не нужен, они отключают default-features.
+alloc = []
+
+# Примеры, которым нужен std и потоки, собираются только для хоста.
+[[example]]
+name = "sizes"
+
+[[example]]
+name = "false_sharing"

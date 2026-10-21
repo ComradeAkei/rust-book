@@ -1,0 +1,23 @@
+[package]
+name = "ch06-uart"
+version = "0.1.0"
+description = "Глава 6: таблица размеров типов на Cortex-M3, выведенная через UART PL011"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+ch06 = { path = "../../code/ch06", default-features = false }
+ch06-regs = { path = "../../code/ch06-regs" }
+cortex-m = { workspace = true }
+cortex-m-rt = { workspace = true }
+cortex-m-semihosting = { workspace = true }
+
+[[bin]]
+name = "ch06-uart"
+test = false
+bench = false

@@ -1,0 +1,16 @@
+/* Врезки книги: <div class="box KIND"> ... </div>. Цвета подобраны так,
+   чтобы читаться и в светлых, и в тёмных темах mdBook. */
+.box {
+    margin: 1.2em 0;
+    padding: 0.2em 1em;
+    border-left: 4px solid var(--box-accent);
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--box-accent) 9%, transparent);
+}
+.box > p:first-child strong:first-child { color: var(--box-accent); }
+.box.ref   { --box-accent: #3b82c4; }
+.box.c     { --box-accent: #8a6d3b; }
+.box.hood  { --box-accent: #6f42c1; }
+.box.trick { --box-accent: #2e8b57; }
+.box.trap  { --box-accent: #c0392b; }
+.box.check { --box-accent: #7f8c8d; }

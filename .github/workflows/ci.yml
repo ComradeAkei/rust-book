@@ -1,0 +1,110 @@
+# Проверки книги: всё, что глава утверждает о коде, должно воспроизводиться.
+# Каждое задание повторяет команду, которую студент может запустить сам
+# (см. README.md и приложение D).
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+# RUSTFLAGS здесь не задаётся намеренно: переменная окружения перекрывает
+# target.*.rustflags из firmware/.cargo/config.toml, и прошивки потеряли бы
+# -Tlink.x. Предупреждения запрещает clippy с -D warnings.
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  host:
+    name: fmt, clippy, тесты
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      # Версия, компоненты и цели берутся из rust-toolchain.toml.
+      - run: rustup toolchain install
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo fmt --all --check
+      - run: cargo fmt --all --check
+        working-directory: firmware
+      - run: cargo clippy --workspace --all-targets -- -D warnings
+      # Корневой `cargo test` проверяет примеры глав и эталонные решения.
+      - run: cargo test
+      # Заготовки студента не проходят тесты, пока задачи не решены,
+      # но обязаны собираться.
+      - run: cargo build -p ch06-exercises -p project-frame --all-targets
+
+  miri:
+    name: Miri
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup toolchain install nightly --profile minimal --component miri
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo +nightly miri setup
+      - run: cargo +nightly miri test -p ch06 -p ch06-regs -p ch06-solutions -p telemetry-frame
+
+  layout:
+    name: Случайная раскладка полей
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        seed: [1, 2, 3]
+    env:
+      RUSTFLAGS: -Zrandomize-layout -Zlayout-seed=${{ matrix.seed }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup toolchain install nightly --profile minimal
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: layout-${{ matrix.seed }}
+      # Решения и проект не должны зависеть от раскладки repr(Rust).
+      - run: cargo +nightly test -p ch06-solutions -p telemetry-frame -p ch06-regs
+      # Тесты группы `observed` фиксируют поведение текущего rustc и под
+      # случайной раскладкой обязаны падать (раздел 6.2), поэтому их пропускаем.
+      - run: cargo +nightly test -p ch06 -- --skip observed
+
+  thumb:
+    name: Cortex-M и QEMU
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup toolchain install
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            . -> target
+            firmware -> target
+      - name: Крейты глав под три цели Cortex-M
+        run: |
+          for t in thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabihf; do
+            cargo build -p ch06 -p ch06-regs -p telemetry-frame -p ch06-solutions \
+              --no-default-features --target "$t"
+          done
+      - name: clippy для прошивок
+        working-directory: firmware
+        run: |
+          for t in thumbv7m-none-eabi thumbv6m-none-eabi; do
+            cargo clippy --workspace --target "$t" -- -D warnings
+          done
+      - run: sudo apt-get update && sudo apt-get install -y qemu-system-arm
+      - name: Опыты главы 6 в QEMU
+        run: bash firmware/run-demos.sh
+
+  book:
+    name: mdBook
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Установить mdBook 0.5.4
+        run: |
+          curl -sSL https://github.com/rust-lang/mdBook/releases/download/v0.5.4/mdbook-v0.5.4-x86_64-unknown-linux-gnu.tar.gz \
+            | tar -xz -C "$HOME/.cargo/bin"
+      # mdBook на пропущенный файл печатает ERROR, но завершается с кодом 0,
+      # а на пропущенный якорь молча вставляет пустой блок. Первое ловит
+      # grep по журналу, второе — отдельная проверка всех ссылок.
+      - run: python3 tools/check-includes.py
+      - run: |
+          mdbook build 2>&1 | tee mdbook.log
+          ! grep -E "WARN|ERROR" mdbook.log

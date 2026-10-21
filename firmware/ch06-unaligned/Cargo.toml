@@ -1,0 +1,16 @@
+[package]
+name = "ch06-unaligned"
+version = "0.1.0"
+description = "Глава 6: невыровненный доступ на Cortex-M0 и Cortex-M3 в QEMU"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+cortex-m = { workspace = true }
+cortex-m-rt = { workspace = true }
+cortex-m-semihosting = { workspace = true }

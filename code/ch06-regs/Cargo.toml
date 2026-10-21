@@ -1,0 +1,11 @@
+[package]
+name = "ch06-regs"
+version = "0.1.0"
+description = "Глава 6: блок регистров PL011 UART как repr(C)-структура с типизированными полями"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+test = true

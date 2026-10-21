@@ -1,0 +1,12 @@
+[package]
+name = "telemetry-frame"
+version = "0.1.0"
+description = "Станция телеметрии: формат кадра, общий для прошивки и хоста (шаг главы 6)"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[[test]]
+name = "frame"
+path = "tests/frame.rs"

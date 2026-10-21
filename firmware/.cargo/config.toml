@@ -1,0 +1,12 @@
+[build]
+target = "thumbv7m-none-eabi"
+
+# Cortex-M3: Stellaris LM3S6965EVB, UART0 = PL011 по адресу 0x4000_C000.
+[target.thumbv7m-none-eabi]
+runner = "qemu-system-arm -cpu cortex-m3 -machine lm3s6965evb -nographic -semihosting-config enable=on,target=native -kernel"
+rustflags = ["-C", "link-arg=-Tlink.x"]
+
+# Cortex-M0: BBC micro:bit (nRF51822). Здесь нужен только semihosting.
+[target.thumbv6m-none-eabi]
+runner = "qemu-system-arm -cpu cortex-m0 -machine microbit -nographic -semihosting-config enable=on,target=native -kernel"
+rustflags = ["-C", "link-arg=-Tlink.x"]

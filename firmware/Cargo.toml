@@ -1,0 +1,33 @@
+# Прошивки для QEMU. Отдельный workspace: у него своя цель по умолчанию
+# (thumbv7m-none-eabi), свой скрипт компоновки и свой раннер.
+[workspace]
+resolver = "3"
+members = ["ch06-uart", "ch06-unaligned"]
+
+[workspace.package]
+edition = "2024"
+rust-version = "1.85"
+license = "MIT OR Apache-2.0"
+publish = false
+
+[workspace.dependencies]
+cortex-m = "0.7.7"
+cortex-m-rt = "0.7.5"
+cortex-m-semihosting = "0.5.0"
+
+[workspace.lints.clippy]
+# После debug::exit под QEMU управление не возвращается: semihosting
+# завершает эмулятор. Пустой цикл нужен только ради типа `!`. Замена на сон
+# в `wfi` сдвинула бы адреса, которые глава 6 приводит в выводе QEMU, а сам
+# сон разбирается в главе 19.
+empty_loop = "allow"
+
+[profile.dev]
+# Без оптимизаций core::fmt раздувает прошивку в несколько раз.
+# opt-level = "s" оставляет отладочную сборку компактной и близкой к release.
+opt-level = "s"
+
+[profile.release]
+debug = true
+lto = true
+codegen-units = 1

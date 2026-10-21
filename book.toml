@@ -1,0 +1,20 @@
+[book]
+title = "Rust для системного программиста"
+authors = ["Comrade"]
+language = "ru"
+src = "src"
+
+[build]
+build-dir = "book"
+
+[output.html]
+mathjax-support = false
+additional-css = ["theme/boxes.css"]
+# Номера глав уже стоят в заголовках («6.3. enum ...»), автонумерация mdBook
+# дала бы двойные номера в оглавлении.
+no-section-label = true
+
+# Фрагменты кода в книге компилируются и тестируются cargo в workspace,
+# а не песочницей play.rust-lang.org, поэтому кнопка «Run» не нужна.
+[output.html.playground]
+runnable = false
