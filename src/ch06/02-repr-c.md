@@ -104,7 +104,7 @@ Reference обещает для `repr(Rust)` совсем немного: пол
 
 ```console
 $ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch06 --lib layout
-thread 'layout::tests::observed::rustc_reorders_sample' panicked at code/ch06/src/layout.rs:125:13:
+thread 'layout::tests::observed::rustc_reorders_sample' panicked at code/ch06/src/layout.rs:117:13:
 assertion `left == right` failed
   left: [0, 4, 1]
  right: [4, 0, 5]
