@@ -11,6 +11,8 @@ pub enum WriteError {
 }
 
 /// Повторяет запись, пока шина занята, но не больше `max` попыток.
+/// Первая попытка делается всегда, даже при `max == 0`: проверка стоит
+/// после вызова, как в `do { } while` из C.
 /// `loop` возвращает значение через `break`: число попыток или ошибку.
 pub fn write_with_retry(
     mut try_write: impl FnMut() -> Result<(), WriteError>,
@@ -115,6 +117,19 @@ mod tests {
             4,
         );
         assert_eq!((r, calls), (Err(WriteError::Nack), 1));
+    }
+
+    #[test]
+    fn zero_max_still_tries_once() {
+        let mut calls = 0;
+        let r = write_with_retry(
+            || {
+                calls += 1;
+                Err(WriteError::Busy)
+            },
+            0,
+        );
+        assert_eq!((r, calls), (Err(WriteError::Busy), 1));
     }
 
     #[test]
