@@ -82,7 +82,9 @@ jobs:
       RUSTFLAGS: -Zrandomize-layout -Zlayout-seed=${{ matrix.seed }}
     steps:
       - uses: actions/checkout@v4
-      - run: rustup toolchain install nightly --profile minimal
+      # clippy нужен тесту clippy_finds_all_three из code/ch00: он вызывает
+      # `cargo clippy` тем же cargo, что и сам, то есть nightly.
+      - run: rustup toolchain install nightly --profile minimal --component clippy
       - uses: Swatinem/rust-cache@v2
         with:
           key: layout-${{ matrix.seed }}
