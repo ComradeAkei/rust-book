@@ -21,3 +21,4 @@
 | 4. Заимствование и ссылки | [разбор](ch04.md), код в `solutions/ch04` |
 | 5. Времена жизни | [разбор](ch05.md), код в `solutions/ch05` |
 | 6. Составные типы и раскладка памяти | [разбор](ch06.md), код в `solutions/ch06`, проект в `project/telemetry-frame` |
+| 7. Обработка ошибок и паника | [разбор](ch07.md), код в `solutions/ch07`, проект в `project/telemetry-frame` |

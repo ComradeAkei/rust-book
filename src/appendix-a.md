@@ -353,7 +353,7 @@ help: <178040> was created by a SharedReadWrite retag at offsets [0x8..0x10]
 | `goto` на выход из вложенных циклов | метки `'outer:` и `break 'outer` | |
 | `goto err_N` для отката | `?` и `Drop` | пример ниже |
 | оператор «запятая» | блок `{ a; b }` | |
-| `setjmp` / `longjmp` | нет; паника и `catch_unwind` — не для управления потоком | [гл. 7](ch07.md) |
+| `setjmp` / `longjmp` | нет; паника и `catch_unwind` — не для управления потоком | [гл. 7](ch07/index.md) |
 | `exit(code)` | `std::process::exit(code)` | деструкторы не вызываются, ловушка ниже |
 | `abort()` | `std::process::abort()` | |
 | `__builtin_unreachable()` | `unreachable!()` или `unsafe { unreachable_unchecked() }` | первое паникует, второе — UB, если достижимо |
@@ -428,7 +428,7 @@ err_clk:
 
 | C | Rust | Замечание |
 |---|---|---|
-| `return -1` и `errno` | `Result<T, E>` | ошибка — значение, её нельзя не заметить ([гл. 7](ch07.md)) |
+| `return -1` и `errno` | `Result<T, E>` | ошибка — значение, её нельзя не заметить ([гл. 7](ch07/index.md)) |
 | `NULL` как «не найдено» | `Option<T>` | |
 | `if (rc < 0) return rc;` | `?` | с преобразованием через `From` |
 | `perror(msg)` | `eprintln!("{msg}: {e}")` | `io::Error` печатает текст `strerror` |
@@ -723,7 +723,7 @@ appa_clz:                   appa_clz:
 | `-march=native` | `-C target-cpu=native` | |
 | `-mcpu=cortex-m4 -mthumb -mfloat-abi=hard` | `--target thumbv7em-none-eabihf` | |
 | `-ffreestanding -nostdlib` | `#![no_std]`, `#![no_main]` | [гл. 26](ch26.md) |
-| `-fno-exceptions` | `panic = "abort"` | [гл. 7](ch07.md) |
+| `-fno-exceptions` | `panic = "abort"` | [гл. 7](ch07/index.md) |
 | `-ftrapv` | `overflow-checks = true` | |
 | `-fwrapv` | `wrapping_*`, `Wrapping<T>` | |
 | `-fno-strict-aliasing` | не нужен: алиасинг на основе типов в Rust не используется | правила для `&` и `&mut` ([гл. 4](ch04/index.md)) |
