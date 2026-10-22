@@ -1,0 +1,10 @@
+[package]
+name = "app-a"
+version = "0.1.0"
+edition.workspace = true
+publish.workspace = true
+
+# ANCHOR: deps
+[dependencies]
+report = { path = "../report" }
+# ANCHOR_END: deps

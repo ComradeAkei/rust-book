@@ -1,0 +1,22 @@
+# Задача 8.C: библиотека станции для программы на C. Отдельное рабочее
+# пространство: её собирает Makefile, а не cargo в корне репозитория.
+[package]
+name = "station"
+version = "0.1.0"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+publish = false
+
+[lib]
+# staticlib — архив .a со всем, что нужно коду: крейт, std, core и
+# compiler_builtins. Линковщику C больше ничего из Rust не понадобится.
+crate-type = ["staticlib"]
+
+# Раскрутка через границу extern "C" не пройдёт (глава 7): прерываем сразу.
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"
+
+[workspace]

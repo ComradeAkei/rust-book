@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Прогоняет все прошивки глав 0, 3, 5, 6 и 7 в QEMU и сверяет вывод с ожидаемым.
+# Прогоняет все прошивки глав 0, 3, 5, 6, 7 и 8 в QEMU и сверяет вывод с ожидаемым.
 # Запуск: ./run-demos.sh (из каталога firmware). Используется и в CI.
 set -u
 cd "$(dirname "$0")"
@@ -107,5 +107,13 @@ run "M3: причина без dyn Error"            "  причина: CRC не
 symbols "M3: без сообщений нет core::fmt"  нет "core::fmt" ch07-frame quiet
 symbols "M3: без dyn Error нет Debug"      нет "FrameError as core::fmt::Debug" ch07-frame direct
 symbols "M3: dyn Error тянет Debug"        есть "FrameError as core::fmt::Debug" ch07-frame verbose
+
+run "M3: ch08_bump на LDREX/STREX"         "ch08_bump (LDREX/STREX): было 41, стало 42" -p ch08-sections --bin target
+run "M0: ch08_bump с запретом прерываний"  "ch08_bump (запрет прерываний): было 41, стало 42" -p ch08-sections --bin target "${M0[@]}"
+run "M0: cfg! в build.rs — про хост"       "cfg!(target_arch = \"arm\") = false" -p ch08-sections --bin target "${M0[@]}"
+run "M3: таблица из sensors.csv"           "датчик 12 battery    ×2 mV" -p ch08-sections --bin target
+run "M3: .uninit переживает сброс"         "загрузка 2: .uninit 0x2000000c, RUNS = 0" -p ch08-sections --bin boot
+run "M0: .uninit переживает сброс"         "загрузка 2: .uninit 0x2000000c, RUNS = 0" -p ch08-sections --bin boot "${M0[@]}"
+run "M4F: .uninit переживает сброс"        "загрузка 2: .uninit 0x2000000c, RUNS = 0" -p ch08-sections --bin boot "${M4F[@]}"
 
 exit $fail

@@ -1,0 +1,11 @@
+# Задача 8.D: рабочее пространство станции после перестройки. Возможности
+# units только добавляют шкалы, поэтому пакеты собираются и по одному, и
+# вместе, и результат не зависит от того, что собрано рядом.
+[workspace]
+resolver = "3"
+members = ["units", "panel", "export"]
+
+[workspace.package]
+edition = "2024"
+license = "MIT OR Apache-2.0"
+publish = false

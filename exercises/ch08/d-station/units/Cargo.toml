@@ -1,0 +1,12 @@
+[package]
+name = "units"
+version = "0.1.0"
+description = "Температура с датчика станции"
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[features]
+# Шкала, в которой библиотека показывает температуру. Ровно одна.
+celsius = []
+fahrenheit = []

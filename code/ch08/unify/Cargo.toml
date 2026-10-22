@@ -1,0 +1,9 @@
+# Раздел 8.4: унификация возможностей. Отдельное рабочее пространство:
+# тест code/ch08/tests/cargo.rs собирает app-a в одиночку и вместе с app-b.
+[workspace]
+resolver = "3"
+members = ["report", "app-a", "app-b"]
+
+[workspace.package]
+edition = "2024"
+publish = false

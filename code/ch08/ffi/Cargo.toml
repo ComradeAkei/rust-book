@@ -1,0 +1,18 @@
+# Раздел 8.6: один крейт — три вида результата. Отдельное рабочее
+# пространство: тест code/ch08/tests/cargo.rs собирает его и смотрит, что
+# внутри каждого файла.
+[package]
+name = "sensorlib"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+# ANCHOR: types
+[lib]
+crate-type = ["rlib", "staticlib", "cdylib"]
+# ANCHOR_END: types
+
+[profile.release]
+panic = "abort"
+
+[workspace]

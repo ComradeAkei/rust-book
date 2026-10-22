@@ -1,0 +1,13 @@
+[package]
+name = "units"
+version = "0.1.0"
+description = "Температура с датчика станции"
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[features]
+# Каждая возможность добавляет метод для своей шкалы. Включить можно любые,
+# в том числе обе: какую шкалу показывать, решает вызывающий код.
+celsius = []
+fahrenheit = []

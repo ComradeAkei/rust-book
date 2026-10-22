@@ -4,3 +4,10 @@
 /code/ch00/lints/target
 /exercises/ch00/hello-nostd/target
 /solutions/ch00/hello-nostd/target
+/code/ch08/*/target
+/exercises/ch08/c/build
+/exercises/ch08/c/station/target
+/exercises/ch08/d-station/target
+/solutions/ch08/c/build
+/solutions/ch08/c/station/target
+/solutions/ch08/d-station/target

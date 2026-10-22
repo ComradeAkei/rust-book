@@ -120,6 +120,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "ch08"
+version = "0.1.0"
+
+[[package]]
+name = "ch08-sections"
+version = "0.1.0"
+dependencies = [
+ "ch08",
+ "cortex-m",
+ "cortex-m-rt",
+ "cortex-m-semihosting",
+]
+
+[[package]]
 name = "cortex-m"
 version = "0.7.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"

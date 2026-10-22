@@ -1,0 +1,27 @@
+[package]
+name = "ch08-sections"
+version = "0.1.0"
+description = "Глава 8: условная компиляция по цели, код из build.rs на Cortex-M, секция .uninit"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+ch08 = { path = "../../code/ch08", default-features = false }
+cortex-m = { workspace = true }
+cortex-m-rt = { workspace = true }
+cortex-m-semihosting = { workspace = true }
+
+[[bin]]
+name = "target"
+test = false
+bench = false
+
+[[bin]]
+name = "boot"
+test = false
+bench = false

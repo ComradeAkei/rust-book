@@ -1,0 +1,12 @@
+# Раздел 8.3: опечатки в условиях cfg. Отдельное рабочее пространство:
+# тест code/ch08/tests/cargo.rs собирает его и сверяет предупреждения.
+[package]
+name = "typo"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[features]
+dma = []
+
+[workspace]

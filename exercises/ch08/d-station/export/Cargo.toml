@@ -1,0 +1,10 @@
+[package]
+name = "export"
+version = "0.1.0"
+description = "Выгрузка для заказчика: температура в градусах Фаренгейта"
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+units = { path = "../units", features = ["fahrenheit"] }
