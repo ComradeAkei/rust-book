@@ -31,14 +31,14 @@ C-примеры лежат в `code/appendix-a/c/`. Скрипт собирае
 |---|---|---|
 | `int8_t` … `int64_t`, `uint8_t` … `uint64_t` | `i8` … `i64`, `u8` … `u64` | ширина в имени типа; `i128` и `u128` есть на всех целях |
 | `int`, `long`, `unsigned` | `c_int`, `c_long`, `c_uint` из `core::ffi` | только на границе с C, в остальном коде ширину выбирают явно |
-| `size_t`, `uintptr_t` | `usize` | индексы и длины всегда `usize` ([гл. 1](ch01.md)) |
+| `size_t`, `uintptr_t` | `usize` | индексы и длины всегда `usize` ([гл. 1](ch01/01-integers.md)) |
 | `ptrdiff_t`, `intptr_t` | `isize` | |
 | `char` как байт | `u8`, на границе с C `c_char` | `char` в Rust — скалярное значение Unicode, 4 байта |
 | `bool`, `_Bool` | `bool` | 1 байт; значение, отличное от 0 и 1, — UB ([гл. 16](ch16.md)) |
 | `float`, `double` | `f32`, `f64` | |
 | `void` в типе возврата | `()` | тип нулевого размера |
 | `void *` | `*mut c_void`, `*mut u8` или обобщённый `T` | обобщения вместо стирания типа ([гл. 10](ch10.md)) |
-| `T *`, не NULL, на один объект | `&T`, `&mut T` | `&mut T` означает единственный доступ ([гл. 4](ch04.md)) |
+| `T *`, не NULL, на один объект | `&T`, `&mut T` | `&mut T` означает единственный доступ ([гл. 4](ch04/index.md)) |
 | `T *`, может быть NULL | `Option<&T>`, `Option<NonNull<T>>` | размер тот же, NULL кодирует `None` ([6.4](ch06/04-niches.md)) |
 | `T *p, size_t n` | `&[T]`, `&mut [T]` | указатель и длина в одном значении, индекс проверяется |
 | `T a[N]` | `[T; N]` | передаётся по значению и в указатель не распадается |
@@ -345,7 +345,7 @@ help: <178040> was created by a SharedReadWrite retag at offsets [0x8..0x10]
 
 | C | Rust | Замечание |
 |---|---|---|
-| `switch` | `match` | проверка полноты, без провала в следующую ветку, `\|` для нескольких значений ([гл. 2](ch02.md)) |
+| `switch` | `match` | проверка полноты, без провала в следующую ветку, `\|` для нескольких значений ([гл. 2](ch02/03-match.md)) |
 | `cond ? a : b` | `if cond { a } else { b }` | `if` — выражение |
 | `for (i = 0; i < n; i++)` | `for i in 0..n` | чаще итератор по самой коллекции ([гл. 13](ch13.md)) |
 | `for (;;)`, `while (1)` | `loop` | `break значение` возвращает результат |
@@ -715,7 +715,7 @@ appa_clz:                   appa_clz:
 
 | C | Rust | Замечание |
 |---|---|---|
-| `make`, CMake | `cargo build` | [гл. 0](ch00.md), [гл. 8](ch08.md) |
+| `make`, CMake | `cargo build` | [гл. 0](ch00/02-cargo.md), [гл. 8](ch08.md) |
 | `-O0`, `-O2`, `-Os`, `-Oz` | `opt-level = 0`, `2`, `"s"`, `"z"` в `[profile]` | release по умолчанию `opt-level = 3` |
 | `-g` | `debug = true` | |
 | `-flto` | `lto = true` или `"thin"` | |
@@ -726,13 +726,13 @@ appa_clz:                   appa_clz:
 | `-fno-exceptions` | `panic = "abort"` | [гл. 7](ch07.md) |
 | `-ftrapv` | `overflow-checks = true` | |
 | `-fwrapv` | `wrapping_*`, `Wrapping<T>` | |
-| `-fno-strict-aliasing` | не нужен: алиасинг на основе типов в Rust не используется | правила для `&` и `&mut` ([гл. 4](ch04.md)) |
+| `-fno-strict-aliasing` | не нужен: алиасинг на основе типов в Rust не используется | правила для `&` и `&mut` ([гл. 4](ch04/index.md)) |
 | `-Wall -Wextra -Werror` | `cargo clippy -- -D warnings` | |
 | `-fsanitize=address`, `thread` | `-Zsanitizer=address`, `thread` (nightly) | для `unsafe` — ещё и Miri ([гл. 31](ch31.md)) |
 | скрипт компоновки `-T` | `memory.x` и `-C link-arg=-Tlink.x` | `firmware/.cargo/config.toml` |
 | `.a`, `.so` | `crate-type = ["staticlib"]`, `["cdylib"]` | [гл. 8](ch08.md), [гл. 18](ch18.md) |
 | `pkg-config`, `-lfoo` | `build.rs` и `cargo:rustc-link-lib=foo` | |
-| `objdump -d`, `nm` | `cargo asm`, `llvm-objdump`, `nm` | [гл. 0](ch00.md) |
+| `objdump -d`, `nm` | `cargo asm`, `llvm-objdump`, `nm` | [гл. 0](ch00/03-asm.md) |
 
 ## A.11. Что в C — неопределённое поведение
 

@@ -1,0 +1,25 @@
+[package]
+name = "ch00-reset"
+version = "0.1.0"
+description = "Глава 0, задача D: пустая прошивка, по которой gdb проходит от вектора сброса до main"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+cortex-m-rt = { workspace = true }
+cortex-m-semihosting = { workspace = true }
+
+[[bin]]
+name = "ch00-reset"
+test = false
+bench = false
+
+[[bin]]
+name = "nocp"
+test = false
+bench = false

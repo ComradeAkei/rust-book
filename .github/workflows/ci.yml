@@ -35,9 +35,24 @@ jobs:
       - run: cargo test -p appendix-a --release
       # C-примеры приложения A под UBSan: gcc с libubsan есть в образе.
       - run: bash code/appendix-a/c/run.sh
+      # C-примеры глав 1 и 2 и задача 1.A на C: вывод программ и
+      # предупреждения GCC и clang (clang 18 есть в образе). Части для
+      # Cortex-M здесь пропускаются, их проверяет задание thumb.
+      - run: bash code/ch01/c/run.sh
+      - run: bash code/ch02/c/run.sh
+      - run: bash solutions/ch01/c/run.sh
+      # C-примеры из введений к главам 3–5 и раздела 4.5: ASan, UBSan и
+      # анализаторы GCC и clang. Часть главы 4 с arm-none-eabi-gcc здесь
+      # пропускается, её проверяет задание thumb.
+      - run: bash code/ch03/c/run.sh
+      - run: bash code/ch04/c/run.sh
+      - run: bash code/ch05/c/run.sh
       # Заготовки студента не проходят тесты, пока задачи не решены,
       # но обязаны собираться.
-      - run: cargo build -p ch06-exercises -p project-frame --all-targets
+      - run: |
+          cargo build -p ch00-exercises -p ch01-exercises -p ch02-exercises \
+            -p ch02-exercises-2021 -p ch03-exercises -p ch04-exercises \
+            -p ch05-exercises -p ch06-exercises -p project-frame --all-targets
 
   miri:
     name: Miri
@@ -47,6 +62,21 @@ jobs:
       - run: rustup toolchain install nightly --profile minimal --component miri
       - uses: Swatinem/rust-cache@v2
       - run: cargo +nightly miri setup
+      # Тесты, которые запускают cargo, компилятор или внешние программы,
+      # под Miri помечены ignore.
+      - run: |
+          cargo +nightly miri test -p ch00 -p ch01 -p ch02 -p ch00-solutions \
+            -p ch01-solutions -p ch02-solutions -p ch02-solutions-2021
+      - run: |
+          cargo +nightly miri test -p ch03 -p ch04 -p ch05 -p ch03-solutions \
+            -p ch04-solutions -p ch05-solutions
+      # Главы 3–5 разбирают алиасинг ссылок, поэтому их код проходит и
+      # вторую модель Miri.
+      - run: |
+          cargo +nightly miri test -p ch03 -p ch04 -p ch05 -p ch03-solutions \
+            -p ch04-solutions -p ch05-solutions
+        env:
+          MIRIFLAGS: -Zmiri-tree-borrows
       - run: cargo +nightly miri test -p ch06 -p ch06-regs -p ch06-solutions -p telemetry-frame
       - run: cargo +nightly miri test -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
       # Чек-лист приложения C требует проходить Miri в обеих моделях алиасинга.
@@ -55,7 +85,12 @@ jobs:
           MIRIFLAGS: -Zmiri-tree-borrows
       # Коды ошибок в doc-тестах compile_fail,EXXXX rustdoc сверяет только на
       # nightly, stable проверяет лишь то, что пример не компилируется.
-      - run: cargo +nightly test --doc -p ch06 -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
+      - run: |
+          cargo +nightly test --doc -p ch00 -p ch01 -p ch02 -p ch06 \
+            -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
+      - run: |
+          cargo +nightly test --doc -p ch03 -p ch04 -p ch05 -p ch03-solutions \
+            -p ch04-solutions -p ch05-solutions
 
   layout:
     name: Случайная раскладка полей
@@ -67,12 +102,27 @@ jobs:
       RUSTFLAGS: -Zrandomize-layout -Zlayout-seed=${{ matrix.seed }}
     steps:
       - uses: actions/checkout@v4
-      - run: rustup toolchain install nightly --profile minimal
+      # clippy нужен тесту clippy_finds_all_three из code/ch00: он вызывает
+      # `cargo clippy` тем же cargo, что и сам, то есть nightly.
+      - run: rustup toolchain install nightly --profile minimal --component clippy
       - uses: Swatinem/rust-cache@v2
         with:
           key: layout-${{ matrix.seed }}
       # Решения и проект не должны зависеть от раскладки repr(Rust).
       - run: cargo +nightly test -p ch06-solutions -p telemetry-frame -p ch06-regs
+      - run: cargo +nightly test -p ch00-solutions -p ch01-solutions
+      # Задача 2.A сверяет ответы с ассемблером, а LLVM у nightly другой, чем
+      # у закреплённого rustc (приложение E): к раскладке это не относится.
+      - run: cargo +nightly test -p ch02-solutions -p ch02-solutions-2021 -- --skip task_a
+      # Примеры глав 0–2 не проверяют раскладку repr(Rust) и проходят целиком.
+      - run: cargo +nightly test -p ch00 -p ch01 -p ch02
+      # Главы 3–5. Тесты, которые запускают закреплённый rustc (Polonius,
+      # задачи 4.A и 4.B) или сверяют ассемблер nightly с ответом для
+      # rustc 1.97 (задача 3.C), к раскладке не относятся и требуют
+      # тулчейнов, которых в этом задании нет. Их проверяет задание host.
+      - run: cargo +nightly test -p ch03 -p ch04 -p ch05 -p ch05-solutions -- --skip polonius
+      - run: cargo +nightly test -p ch03-solutions -- --skip task_c
+      - run: cargo +nightly test -p ch04-solutions -- --skip polonius --skip task_a --skip task_b
       # Тесты группы `observed` фиксируют поведение текущего rustc и под
       # случайной раскладкой обязаны падать (раздел 6.2), поэтому их пропускаем.
       - run: cargo +nightly test -p ch06 -- --skip observed
@@ -94,6 +144,17 @@ jobs:
             cargo build -p ch06 -p ch06-regs -p telemetry-frame -p ch06-solutions \
               --no-default-features --target "$t"
           done
+      - name: Главы 0–2 без std под три цели Cortex-M
+        run: |
+          for t in thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabihf; do
+            cargo build -p ch00 -p ch01 -p ch02 -p ch00-solutions -p ch01-solutions --target "$t"
+          done
+      - name: Главы 3–5 без std под три цели Cortex-M
+        run: |
+          for t in thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabihf; do
+            cargo build -p ch03 -p ch04 -p ch05 -p ch03-solutions -p ch04-solutions \
+              -p ch05-solutions --target "$t"
+          done
       - name: Приложение A без std под три цели Cortex-M
         run: |
           for t in thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabihf; do
@@ -102,12 +163,24 @@ jobs:
       - name: clippy для прошивок
         working-directory: firmware
         run: |
-          for t in thumbv7m-none-eabi thumbv6m-none-eabi; do
+          for t in thumbv7m-none-eabi thumbv6m-none-eabi thumbv7em-none-eabihf; do
             cargo clippy --workspace --target "$t" -- -D warnings
           done
-      - run: sudo apt-get update && sudo apt-get install -y qemu-system-arm
-      - name: Опыты главы 6 в QEMU
+      # gdb-multiarch нужен задаче 0.D в run-demos.sh, llvm — задаче 2.B,
+      # arm-none-eabi-gcc с newlib — C-примерам главы 1 на Cortex-M.
+      - run: |
+          sudo apt-get update && sudo apt-get install -y qemu-system-arm \
+            gdb-multiarch llvm gcc-arm-none-eabi libnewlib-arm-none-eabi
+      - name: Опыты глав 0, 3, 5 и 6 в QEMU
         run: bash firmware/run-demos.sh
+      - name: Задача 2.B на дизассемблере всех прошивок
+        run: cargo test -p ch02-solutions -- --ignored own_firmware --nocapture
+      - name: C-примеры главы 1 на Cortex-M3 и Cortex-M4F в QEMU
+        run: |
+          bash code/ch01/c/run.sh
+          bash solutions/ch01/c/run.sh
+      - name: C-примеры главы 4 с arm-none-eabi-gcc
+        run: bash code/ch04/c/run.sh
 
   book:
     name: mdBook

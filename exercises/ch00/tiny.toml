@@ -1,0 +1,12 @@
+# Задача 0.B, часть 1. Настройки профиля release для примера hello.
+#
+# Файл подключается к сборке ключом --config, поэтому Cargo.toml трогать не
+# нужно. Добавляйте ключи по одному и после каждого записывайте размер в
+# таблицу отчёта:
+#
+#   cargo build --release -p ch00 --example hello --config exercises/ch00/tiny.toml
+#   ls -l target/release/examples/hello
+#
+# Проверка: cargo test -p ch00-exercises task_b::tiny_profile
+
+[profile.release]

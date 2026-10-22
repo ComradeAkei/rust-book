@@ -1,0 +1,9 @@
+# Задача 0.B, часть 2. Отдельный крейт со своим workspace: профили здесь
+# свои, и они не влияют на остальные крейты книги.
+[package]
+name = "hello-nostd"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[workspace]

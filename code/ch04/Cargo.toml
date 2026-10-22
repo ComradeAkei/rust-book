@@ -1,0 +1,9 @@
+[package]
+name = "ch04"
+version = "0.1.0"
+description = "Глава 4: ссылки, перезаимствование, NLL, раздельные заимствования, срезы и авторазыменование, noalias, арена с индексами"
+edition.workspace = true
+# as_chunks_mut и get_disjoint_mut из раздела 4.3 стабильны с 1.88.
+rust-version = "1.88"
+license.workspace = true
+publish.workspace = true
