@@ -1,0 +1,26 @@
+[package]
+name = "ch07-panic"
+version = "0.1.0"
+description = "Глава 7: #[panic_handler] в no_std — отчёт о панике по semihosting и цена форматирования"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+cortex-m = { workspace = true }
+cortex-m-rt = { workspace = true }
+cortex-m-semihosting = { workspace = true }
+
+[[bin]]
+name = "report"
+test = false
+bench = false
+
+[[bin]]
+name = "silent"
+test = false
+bench = false

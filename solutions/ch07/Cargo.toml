@@ -1,0 +1,22 @@
+[package]
+name = "ch07-solutions"
+version = "0.1.0"
+description = "Глава 7: эталонные решения задач A–D"
+edition.workspace = true
+# PanicHookInfo и прочее из главы 7 требуют 1.91, как и сам крейт ch07.
+rust-version = "1.91"
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+# Задача B строит конфигурацию на лексере из задачи 5.B.
+ch05-solutions = { path = "../ch05" }
+
+[[bin]]
+name = "d_double"
+test = false
+bench = false
+
+[[test]]
+name = "ch07"
+path = "tests/ch07.rs"

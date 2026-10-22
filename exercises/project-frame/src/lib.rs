@@ -1,6 +1,8 @@
 //! Сквозной проект «станция телеметрии», шаг главы 6: формат кадра.
+//! Шаг главы 7 (задача П7): сообщения и классификация ошибок протокола.
 //! ЗАГОТОВКА: реализуйте функции, помеченные `todo!()`, по спецификации
-//! ниже и проверьте себя тестами `cargo test -p project-frame`.
+//! ниже и проверьте себя тестами `cargo test -p project-frame` (только П7:
+//! `cargo test -p project-frame p7`).
 //!
 //! Крейт `no_std` и без аллокаций: его подключают и прошивка на Cortex-M,
 //! и хост на Linux. Кадр на проводе (все многобайтовые поля little-endian):
@@ -19,6 +21,7 @@
 // Параметры заготовок пока не используются, и это ожидаемо.
 #![allow(unused_variables)]
 
+use core::fmt;
 use core::mem::{align_of, offset_of, size_of};
 use core::num::NonZeroU16;
 
@@ -92,6 +95,60 @@ pub enum FrameError {
     BadPayload,
 }
 // ANCHOR_END: error
+
+// Задача П7 (раздел 7.10): сообщения и классификация ошибок протокола,
+// контекст ошибки в потоке байт. Тексты сообщений — в условии задачи.
+
+impl fmt::Display for FrameError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        todo!()
+    }
+}
+
+impl core::error::Error for FrameError {}
+
+/// Что делать приёмнику после ошибки разбора.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum Recovery {
+    /// Кадр ещё не пришёл целиком: дождаться стольких байт.
+    NeedMore(usize),
+    /// Заголовку верить нельзя: сдвинуться на один байт и искать маркер.
+    Resync,
+    /// Кадр цел, но не годится: пропустить его целиком.
+    Drop,
+    /// Ошибка отправителя, на приёме не возникает.
+    Reject,
+}
+
+impl FrameError {
+    pub const fn recovery(&self) -> Recovery {
+        todo!()
+    }
+}
+
+/// Ошибка разбора с контекстом: где в потоке байт начинался кадр.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub struct RxError {
+    pub offset: usize,
+    pub error: FrameError,
+}
+
+impl fmt::Display for RxError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        todo!()
+    }
+}
+
+impl core::error::Error for RxError {
+    fn source(&self) -> Option<&(dyn core::error::Error + 'static)> {
+        todo!()
+    }
+}
+
+/// Разобрать кадр, начинающийся в `stream[offset..]`.
+pub fn decode_at(stream: &[u8], offset: usize) -> Result<Frame<'_>, RxError> {
+    todo!()
+}
 
 // ANCHOR: crc
 /// Пошаговое обновление CRC-16/CCITT-FALSE: полином 0x1021, начальное

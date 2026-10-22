@@ -1,4 +1,6 @@
 //! Сквозной проект «станция телеметрии», шаг главы 6: формат кадра.
+//! Шаг главы 7: сообщения и классификация ошибок протокола, контекст
+//! ошибки в потоке байт.
 //!
 //! Крейт `no_std` и без аллокаций: его подключают и прошивка на Cortex-M,
 //! и хост на Linux. Кадр на проводе (все многобайтовые поля little-endian):
@@ -15,6 +17,7 @@
 //! ```
 #![no_std]
 
+use core::fmt;
 use core::mem::{align_of, offset_of, size_of};
 use core::num::NonZeroU16;
 
@@ -93,6 +96,93 @@ pub enum FrameError {
     BadPayload,
 }
 // ANCHOR_END: error
+
+// ANCHOR: display
+impl fmt::Display for FrameError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match *self {
+            FrameError::Short { need, have } => {
+                write!(f, "кадр не полон: нужно {need} байт, есть {have}")
+            }
+            FrameError::BufferTooSmall { need, have } => {
+                write!(f, "буфер мал: нужно {need} байт, есть {have}")
+            }
+            FrameError::BadMagic(b) => write!(f, "неверный маркер {b:#04x}"),
+            FrameError::BadVersion(v) => write!(f, "версия {v} не поддерживается"),
+            FrameError::BadKind(k) => write!(f, "неизвестный тип кадра {k}"),
+            FrameError::TooLong(n) => write!(f, "нагрузка {n} байт длиннее {MAX_PAYLOAD}"),
+            FrameError::BadCrc { stored, computed } => {
+                write!(f, "CRC не совпадает: в кадре {stored:#06x}, посчитано {computed:#06x}")
+            }
+            FrameError::BadPayload => f.write_str("нагрузка не соответствует типу кадра"),
+        }
+    }
+}
+
+impl core::error::Error for FrameError {}
+// ANCHOR_END: display
+
+// ANCHOR: recovery
+/// Что делать приёмнику после ошибки разбора.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum Recovery {
+    /// Кадр ещё не пришёл целиком: дождаться стольких байт.
+    NeedMore(usize),
+    /// Заголовку верить нельзя: сдвинуться на один байт и искать маркер.
+    Resync,
+    /// Кадр цел, но не годится: пропустить его целиком.
+    Drop,
+    /// Ошибка отправителя, на приёме не возникает.
+    Reject,
+}
+
+impl FrameError {
+    pub const fn recovery(&self) -> Recovery {
+        match *self {
+            // decode всегда даёт need > have; saturating_sub защищает от
+            // ошибки, собранной вручную, — иначе в release приёмник ждал бы
+            // почти usize::MAX байт.
+            FrameError::Short { need, have } => Recovery::NeedMore(need.saturating_sub(have)),
+            // Длина из повреждённого заголовка может быть любой, поэтому
+            // и при неверной CRC кадр не пропускают по длине.
+            FrameError::BadMagic(_)
+            | FrameError::BadVersion(_)
+            | FrameError::BadKind(_)
+            | FrameError::TooLong(_)
+            | FrameError::BadCrc { .. } => Recovery::Resync,
+            FrameError::BadPayload => Recovery::Drop,
+            FrameError::BufferTooSmall { .. } => Recovery::Reject,
+        }
+    }
+}
+// ANCHOR_END: recovery
+
+// ANCHOR: rx_error
+/// Ошибка разбора с контекстом: где в потоке байт начинался кадр.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub struct RxError {
+    pub offset: usize,
+    pub error: FrameError,
+}
+
+impl fmt::Display for RxError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "кадр со смещения {} отвергнут", self.offset)
+    }
+}
+
+impl core::error::Error for RxError {
+    fn source(&self) -> Option<&(dyn core::error::Error + 'static)> {
+        Some(&self.error)
+    }
+}
+
+/// Разобрать кадр, начинающийся в `stream[offset..]`.
+pub fn decode_at(stream: &[u8], offset: usize) -> Result<Frame<'_>, RxError> {
+    let rest = stream.get(offset..).unwrap_or(&[]);
+    decode(rest).map_err(|error| RxError { offset, error })
+}
+// ANCHOR_END: rx_error
 
 // ANCHOR: crc
 /// Пошаговое обновление CRC-16/CCITT-FALSE: полином 0x1021, начальное

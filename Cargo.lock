@@ -161,6 +161,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "ch07"
+version = "0.1.0"
+
+[[package]]
+name = "ch07-exercises"
+version = "0.1.0"
+dependencies = [
+ "ch05-solutions",
+]
+
+[[package]]
+name = "ch07-solutions"
+version = "0.1.0"
+dependencies = [
+ "ch05-solutions",
+]
+
+[[package]]
 name = "memchr"
 version = "2.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"

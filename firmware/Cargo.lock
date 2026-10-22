@@ -102,6 +102,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "ch07-frame"
+version = "0.1.0"
+dependencies = [
+ "cortex-m-rt",
+ "cortex-m-semihosting",
+ "telemetry-frame",
+]
+
+[[package]]
+name = "ch07-panic"
+version = "0.1.0"
+dependencies = [
+ "cortex-m",
+ "cortex-m-rt",
+ "cortex-m-semihosting",
+]
+
+[[package]]
 name = "cortex-m"
 version = "0.7.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -256,6 +274,10 @@ dependencies = [
  "quote",
  "unicode-ident",
 ]
+
+[[package]]
+name = "telemetry-frame"
+version = "0.1.0"
 
 [[package]]
 name = "unicode-ident"

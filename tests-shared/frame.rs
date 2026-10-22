@@ -1,4 +1,5 @@
-// Общие тесты формата кадра сквозного проекта (шаг главы 6).
+// Общие тесты формата кадра сквозного проекта (шаги глав 6 и 7; тесты
+// задачи П7 начинаются с `p7_`).
 //
 // Подключаются через `include!` из `project/telemetry-frame/tests/frame.rs`
 // и `exercises/project-frame/tests/frame.rs` после `use <крейт> as sut;`.
@@ -119,4 +120,83 @@ fn measurement_payload() {
     assert_eq!(core::mem::size_of::<Option<Measurement>>(), core::mem::size_of::<Measurement>());
     assert_eq!(core::mem::size_of::<HeaderWire>(), HEADER_LEN);
     assert_eq!(core::mem::align_of::<HeaderWire>(), 1);
+}
+
+// ---------------------------------------------------------- задача П7
+
+#[test]
+fn p7_messages() {
+    let cases = [
+        (FrameError::Short { need: 18, have: 5 }, "кадр не полон: нужно 18 байт, есть 5"),
+        (FrameError::BufferTooSmall { need: 18, have: 12 }, "буфер мал: нужно 18 байт, есть 12"),
+        (FrameError::BadMagic(0x5a), "неверный маркер 0x5a"),
+        (FrameError::BadVersion(2), "версия 2 не поддерживается"),
+        (FrameError::BadKind(9), "неизвестный тип кадра 9"),
+        (FrameError::TooLong(241), "нагрузка 241 байт длиннее 240"),
+        (
+            FrameError::BadCrc { stored: 0x73e5, computed: 0x0a1b },
+            "CRC не совпадает: в кадре 0x73e5, посчитано 0x0a1b",
+        ),
+        (FrameError::BadPayload, "нагрузка не соответствует типу кадра"),
+    ];
+    for (e, msg) in cases {
+        assert_eq!(e.to_string(), msg);
+        let dyn_err: &dyn core::error::Error = &e;
+        assert!(dyn_err.source().is_none(), "{e:?}: у ошибки разбора нет причины");
+    }
+}
+
+#[test]
+fn p7_recovery() {
+    assert_eq!(FrameError::Short { need: 18, have: 5 }.recovery(), Recovery::NeedMore(13));
+    // Несогласованная ошибка, собранная вручную, не должна ни паниковать,
+    // ни заставлять приёмник ждать почти usize::MAX байт.
+    assert_eq!(FrameError::Short { need: 1, have: 5 }.recovery(), Recovery::NeedMore(0));
+    for e in [
+        FrameError::BadMagic(0),
+        FrameError::BadVersion(7),
+        FrameError::BadKind(0),
+        FrameError::TooLong(1000),
+        FrameError::BadCrc { stored: 1, computed: 2 },
+    ] {
+        assert_eq!(e.recovery(), Recovery::Resync, "{e:?}");
+    }
+    assert_eq!(FrameError::BadPayload.recovery(), Recovery::Drop);
+    assert_eq!(FrameError::BufferTooSmall { need: 1, have: 0 }.recovery(), Recovery::Reject);
+}
+
+#[test]
+fn p7_context_in_stream() {
+    let mut stream = [0u8; 40];
+    stream[..8].copy_from_slice(&ACK);
+    stream[8..26].copy_from_slice(&MEAS);
+    stream[26..34].copy_from_slice(&ACK);
+    stream[33] ^= 0x01; // порча CRC третьего кадра
+    assert_eq!(decode_at(&stream, 0).unwrap().header.kind, Kind::Ack);
+    assert_eq!(decode_at(&stream, 8).unwrap().payload, &MEAS[8..]);
+    let e = decode_at(&stream, 26).unwrap_err();
+    assert_eq!(e.offset, 26);
+    assert_eq!(e.error.recovery(), Recovery::Resync);
+    assert_eq!(e.to_string(), "кадр со смещения 26 отвергнут");
+    let src = core::error::Error::source(&e).unwrap();
+    assert_eq!(src.to_string(), e.error.to_string());
+    assert_eq!(src.downcast_ref::<FrameError>(), Some(&e.error));
+    // Порча длины выглядит как неполный кадр: 8 + 64 байта вместо 8.
+    // Приёмник будет ждать, пока не сработает тайм-аут (главы 12–13).
+    let mut bad_len = stream;
+    bad_len[30] ^= 0x40;
+    let e = decode_at(&bad_len, 26).unwrap_err();
+    assert_eq!(e.error, FrameError::Short { need: 72, have: 14 });
+    assert_eq!(e.error.recovery(), Recovery::NeedMore(58));
+    // Смещение за концом потока — неполный кадр, а не паника.
+    let e = decode_at(&stream, 100).unwrap_err();
+    assert_eq!(e.error, FrameError::Short { need: HEADER_LEN, have: 0 });
+    let e = decode_at(&stream[..30], 26).unwrap_err();
+    assert_eq!(e.error.recovery(), Recovery::NeedMore(4));
+}
+
+#[test]
+fn p7_errors_are_small() {
+    assert!(core::mem::size_of::<FrameError>() <= 24);
+    assert!(core::mem::size_of::<RxError>() <= 32);
 }
