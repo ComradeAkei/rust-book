@@ -47,12 +47,16 @@ jobs:
       - run: bash code/ch03/c/run.sh
       - run: bash code/ch04/c/run.sh
       - run: bash code/ch05/c/run.sh
+      # C-примеры главы 7: errno, забытая проверка кода возврата и longjmp
+      # мимо очистки (анализаторы GCC и clang, LeakSanitizer).
+      - run: bash code/ch07/c/run.sh
       # Заготовки студента не проходят тесты, пока задачи не решены,
       # но обязаны собираться.
       - run: |
           cargo build -p ch00-exercises -p ch01-exercises -p ch02-exercises \
             -p ch02-exercises-2021 -p ch03-exercises -p ch04-exercises \
-            -p ch05-exercises -p ch06-exercises -p project-frame --all-targets
+            -p ch05-exercises -p ch06-exercises -p ch07-exercises -p project-frame \
+            --all-targets
 
   miri:
     name: Miri
@@ -78,6 +82,12 @@ jobs:
         env:
           MIRIFLAGS: -Zmiri-tree-borrows
       - run: cargo +nightly miri test -p ch06 -p ch06-regs -p ch06-solutions -p telemetry-frame
+      # Глава 7: раскрутка через деструкторы, catch_unwind и буфер задачи
+      # 7.D проходят обе модели алиасинга.
+      - run: cargo +nightly miri test -p ch07 -p ch07-solutions
+      - run: cargo +nightly miri test -p ch07 -p ch07-solutions
+        env:
+          MIRIFLAGS: -Zmiri-tree-borrows
       - run: cargo +nightly miri test -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
       # Чек-лист приложения C требует проходить Miri в обеих моделях алиасинга.
       - run: cargo +nightly miri test -p appendix-c
@@ -86,7 +96,7 @@ jobs:
       # Коды ошибок в doc-тестах compile_fail,EXXXX rustdoc сверяет только на
       # nightly, stable проверяет лишь то, что пример не компилируется.
       - run: |
-          cargo +nightly test --doc -p ch00 -p ch01 -p ch02 -p ch06 \
+          cargo +nightly test --doc -p ch00 -p ch01 -p ch02 -p ch06 -p ch07 \
             -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
       - run: |
           cargo +nightly test --doc -p ch03 -p ch04 -p ch05 -p ch03-solutions \
@@ -126,6 +136,12 @@ jobs:
       # Тесты группы `observed` фиксируют поведение текущего rustc и под
       # случайной раскладкой обязаны падать (раздел 6.2), поэтому их пропускаем.
       - run: cargo +nightly test -p ch06 -- --skip observed
+      # Глава 7: задача 7.A собирает фрагменты закреплённым rustc, 7.C —
+      # программу закреплённым cargo; `observed_sizes` фиксирует размеры
+      # repr(Rust) у текущего rustc.
+      - run: |
+          cargo +nightly test -p ch07 -p ch07-solutions -- \
+            --skip task_a --skip task_c --skip observed
 
   thumb:
     name: Cortex-M и QEMU
@@ -141,7 +157,7 @@ jobs:
       - name: Крейты глав под три цели Cortex-M
         run: |
           for t in thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabihf; do
-            cargo build -p ch06 -p ch06-regs -p telemetry-frame -p ch06-solutions \
+            cargo build -p ch06 -p ch06-regs -p telemetry-frame -p ch06-solutions -p ch07 \
               --no-default-features --target "$t"
           done
       - name: Главы 0–2 без std под три цели Cortex-M
@@ -171,7 +187,7 @@ jobs:
       - run: |
           sudo apt-get update && sudo apt-get install -y qemu-system-arm \
             gdb-multiarch llvm gcc-arm-none-eabi libnewlib-arm-none-eabi
-      - name: Опыты глав 0, 3, 5 и 6 в QEMU
+      - name: Опыты глав 0, 3, 5, 6 и 7 в QEMU
         run: bash firmware/run-demos.sh
       - name: Задача 2.B на дизассемблере всех прошивок
         run: cargo test -p ch02-solutions -- --ignored own_firmware --nocapture

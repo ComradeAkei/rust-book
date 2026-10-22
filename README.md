@@ -31,6 +31,12 @@
   (элизия, разбор без копирования, `'static` во flash, вариантность,
   `for<'a>`, GAT, захват в `impl Trait`). Задачи A–D, решения и разборы
   в приложении E, прошивки в `firmware/ch03-*` и `firmware/ch05-addr`.
+- Готова глава 7 «Обработка ошибок и паника»: `Result` и `?` в машинном
+  коде, `From` и `Box<dyn Error>`, цепочки `source`, размер ошибки,
+  паника и раскрутка по таблицам `.eh_frame`, граница FFI и
+  `extern "C-unwind"`, `#[panic_handler]` на Cortex-M. Задачи A–D,
+  второй шаг проекта П7 (ошибки протокола), прошивки
+  `firmware/ch07-panic` и `firmware/ch07-frame`.
 - Готовы приложения A–D: словарь соответствий C → Rust, edition 2024 для
   системного кода, чек-лист ревью `unsafe` с разбором примера, установка
   окружения и отладка в QEMU. Их код лежит в `code/appendix-*`.
@@ -49,11 +55,14 @@ src/                      текст книги (mdBook)
   ch00/ ch01/ ch02/       главы 0–2, по файлу на раздел
   ch03/ ch04/ ch05/       главы 3–5, по файлу на раздел
   ch06/                   эталонная глава, по файлу на раздел
+  ch07/                   глава 7, по файлу на раздел
   appendix-e/             разборы задач всех глав
 code/chNN/                примеры главы; листинги попадают в текст через {{#include}}
-code/ch01/c/ … ch05/c/    те же примеры на C и run.sh, который сверяет их вывод с текстом
+code/ch01/c/ … ch07/c/    те же примеры на C и run.sh, который сверяет их вывод с текстом
 code/ch0[45]/rejected/    программы, которые проверка отвергает; их собирают тесты
-code/ch0[45]/fragments/   фрагменты к задачам A глав 4 и 5
+code/ch0[457]/fragments/  фрагменты к задачам A глав 4, 5 и 7
+code/ch07/c-size/         программа задачи 7.C: размер при panic = "unwind" и "abort"
+code/ch07/hir/            во что раскрывается `?`: снимок HIR для раздела 7.1
 code/ch06-regs/           драйвер UART PL011 из раздела 6.9
 code/appendix-a/          словарь C → Rust; в c/ те же примеры на C и run.sh для UBSan
 code/appendix-b/          edition 2024 для системного кода
@@ -61,7 +70,7 @@ code/appendix-b-2021/     те же исходники в edition 2021 для с
 code/appendix-c/          вектор фиксированной ёмкости до и после ревью unsafe
 exercises/chNN/           заготовки задач
 exercises/ch02-2021/      задача 2.D в edition 2021: тот же файл, что в exercises/ch02
-exercises/project-frame/  заготовка задачи П6
+exercises/project-frame/  заготовка задач П6 и П7
 solutions/chNN/           эталонные решения
 solutions/ch02-2021/      решение задачи 2.D в edition 2021
 tests-shared/             тесты, общие для заготовок и решений
@@ -99,7 +108,9 @@ $ cargo test -p ch04-exercises            # все задачи главы 4
 $ cargo test -p ch05-exercises            # все задачи главы 5
 $ cargo test -p ch06-exercises            # все задачи главы 6
 $ cargo test -p ch06-exercises task_b     # одна задача
-$ cargo test -p project-frame             # задача П6
+$ cargo test -p ch07-exercises            # все задачи главы 7
+$ cargo test -p project-frame             # задачи П6 и П7
+$ cargo test -p project-frame p7          # только П7
 ```
 
 Пока функции не реализованы, тесты падают на `todo!()`. Тесты общие для
@@ -120,10 +131,11 @@ $ cargo +nightly miri test -p ch00 -p ch01 -p ch02 -p ch00-solutions -p ch01-sol
 $ cargo +nightly miri test -p ch03 -p ch04 -p ch05 -p ch03-solutions -p ch04-solutions \
       -p ch05-solutions                   # и ещё раз с MIRIFLAGS=-Zmiri-tree-borrows
 $ cargo +nightly miri test -p ch06 -p ch06-regs -p ch06-solutions -p telemetry-frame
+$ cargo +nightly miri test -p ch07 -p ch07-solutions   # и ещё раз с MIRIFLAGS=-Zmiri-tree-borrows
 $ cargo +nightly miri test -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
 $ MIRIFLAGS=-Zmiri-tree-borrows cargo +nightly miri test -p appendix-c
-$ cargo +nightly test --doc -p ch00 -p ch01 -p ch02 -p ch06 -p appendix-a -p appendix-b \
-      -p appendix-b-2021 -p appendix-c
+$ cargo +nightly test --doc -p ch00 -p ch01 -p ch02 -p ch06 -p ch07 -p appendix-a \
+      -p appendix-b -p appendix-b-2021 -p appendix-c
 $ cargo +nightly test --doc -p ch03 -p ch04 -p ch05 -p ch03-solutions -p ch04-solutions \
       -p ch05-solutions
 $ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch06-solutions
@@ -131,11 +143,13 @@ $ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch00-sol
 $ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch02-solutions -- --skip task_a
 $ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch03 -p ch04 -p ch05 \
       -p ch05-solutions -- --skip polonius
-$ cargo build -p ch06 --no-default-features --target thumbv6m-none-eabi
+$ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch07 -p ch07-solutions \
+      -- --skip task_a --skip task_c --skip observed
+$ cargo build -p ch06 -p ch07 --no-default-features --target thumbv6m-none-eabi
 $ cargo build -p ch00 -p ch01 -p ch02 -p ch00-solutions -p ch01-solutions --target thumbv6m-none-eabi
 $ cargo build -p ch03 -p ch04 -p ch05 -p ch03-solutions -p ch04-solutions -p ch05-solutions \
       --target thumbv6m-none-eabi
-$ bash firmware/run-demos.sh              # опыты глав 0, 3, 5 и 6 в QEMU: 6, 5, 2 и 8
+$ bash firmware/run-demos.sh              # опыты глав 0, 3, 5, 6 и 7 в QEMU: 6, 5, 2, 8 и 11
 $ cargo test -p ch02-solutions -- --ignored own_firmware   # задача 2.B на всех прошивках
 $ bash code/appendix-a/c/run.sh           # C-примеры приложения A под UBSan
 $ bash code/ch01/c/run.sh                 # C-примеры главы 1 на x86_64 и в QEMU
@@ -143,6 +157,7 @@ $ bash code/ch02/c/run.sh                 # switch из введения к гл
 $ bash code/ch03/c/run.sh                 # queue.c из введения к главе 3: ASan и анализаторы
 $ bash code/ch04/c/run.sh                 # samples.c, count.c и overlap.c из главы 4
 $ bash code/ch05/c/run.sh                 # config.c из введения к главе 5
+$ bash code/ch07/c/run.sh                 # errno.c, unchecked.c и longjmp.c из главы 7
 $ bash solutions/ch01/c/run.sh            # задача 1.A на C
 $ python3 tools/check-includes.py         # все {{#include}} указывают на существующие якоря
 $ mdbook build
@@ -154,8 +169,9 @@ $ mdbook build
 под случайной раскладкой падают намеренно (раздел 6.2), поэтому там они
 пропускаются. В главах 3–5 там же пропускаются тесты, которые запускают
 закреплённый rustc или сверяют ассемблер с ответом (Polonius, задачи 3.C,
-4.A и 4.B): к раскладке они не относятся, а в этом задании установлен
-только nightly. Их проверяет основное задание.
+4.A и 4.B), в главе 7 — задачи 7.A и 7.C: к раскладке они не
+относятся, а в этом задании установлен только nightly. Их проверяет
+основное задание.
 
 ## Лицензия
 
