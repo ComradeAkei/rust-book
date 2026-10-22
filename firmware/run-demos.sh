@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Прогоняет все прошивки глав 0, 3, 5, 6, 7 и 8 в QEMU и сверяет вывод с ожидаемым.
+# Прогоняет все прошивки глав 0, 3, 5, 6, 7, 8 и 9 в QEMU и сверяет вывод с ожидаемым.
 # Запуск: ./run-demos.sh (из каталога firmware). Используется и в CI.
 set -u
 cd "$(dirname "$0")"
@@ -115,5 +115,9 @@ run "M3: таблица из sensors.csv"           "датчик 12 battery    
 run "M3: .uninit переживает сброс"         "загрузка 2: .uninit 0x2000000c, RUNS = 0" -p ch08-sections --bin boot
 run "M0: .uninit переживает сброс"         "загрузка 2: .uninit 0x2000000c, RUNS = 0" -p ch08-sections --bin boot "${M0[@]}"
 run "M4F: .uninit переживает сброс"        "загрузка 2: .uninit 0x2000000c, RUNS = 0" -p ch08-sections --bin boot "${M4F[@]}"
+
+run "M3: SysTick через трейт Register"     "SysTick: 3 периода по 100000 тактов отсчитаны" -p ch09-systick
+run "M0: SysTick через трейт Register"     "SysTick: 3 периода по 100000 тактов отсчитаны" -p ch09-systick "${M0[@]}"
+run "M4F: SysTick через трейт Register"    "SysTick: 3 периода по 100000 тактов отсчитаны" -p ch09-systick "${M4F[@]}"
 
 exit $fail

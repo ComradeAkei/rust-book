@@ -53,13 +53,16 @@ jobs:
       # C-примеры главы 8: #ifdef с опечаткой и столкновение глобальных
       # имён при компоновке двух файлов.
       - run: bash code/ch08/c/run.sh
+      # C-пример главы 9: таблица указателей на функции вместо трейта, где
+      # забытый указатель компиляторы пропускают, а программа падает.
+      - run: bash code/ch09/c/run.sh
       # Заготовки студента не проходят тесты, пока задачи не решены,
       # но обязаны собираться.
       - run: |
           cargo build -p ch00-exercises -p ch01-exercises -p ch02-exercises \
             -p ch02-exercises-2021 -p ch03-exercises -p ch04-exercises \
             -p ch05-exercises -p ch06-exercises -p ch07-exercises -p ch08-exercises \
-            -p project-frame --all-targets
+            -p ch09-exercises -p project-frame --all-targets
       # Вложенные рабочие пространства глав 7 и 8 корневой cargo не видит:
       # их собирают тесты, а формат и clippy проверяются здесь. В typo
       # предупреждения о cfg — предмет опыта, в заготовке d-station ошибка
@@ -109,6 +112,8 @@ jobs:
       # Глава 8: таблица датчиков из build.rs, видимость и задачи без
       # запуска cargo и компилятора.
       - run: cargo +nightly miri test -p ch08 -p ch08-solutions
+      # Глава 9: трейты, маркеры и драйверы задач 9.B и 9.D на моделях шин.
+      - run: cargo +nightly miri test -p ch09 -p ch09-solutions
       - run: cargo +nightly miri test -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
       # Чек-лист приложения C требует проходить Miri в обеих моделях алиасинга.
       - run: cargo +nightly miri test -p appendix-c
@@ -117,7 +122,7 @@ jobs:
       # Коды ошибок в doc-тестах compile_fail,EXXXX rustdoc сверяет только на
       # nightly, stable проверяет лишь то, что пример не компилируется.
       - run: |
-          cargo +nightly test --doc -p ch00 -p ch01 -p ch02 -p ch06 -p ch07 -p ch08 \
+          cargo +nightly test --doc -p ch00 -p ch01 -p ch02 -p ch06 -p ch07 -p ch08 -p ch09 \
             -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
       - run: |
           cargo +nightly test --doc -p ch03 -p ch04 -p ch05 -p ch03-solutions \
@@ -168,6 +173,11 @@ jobs:
       - run: |
           cargo +nightly test -p ch08 -p ch08-solutions -- \
             --skip cargo_ --skip task_a --skip task_b_flash --skip task_c_from_c --skip task_d
+      # Глава 9: раскрытие derive и пробы задач 9.A, 9.B и 9.C собирает
+      # закреплённый rustc, а 9.B ещё и cargo под Cortex-M0.
+      - run: |
+          cargo +nightly test -p ch09 -p ch09-solutions -- --skip rustc_ \
+            --skip task_a --skip task_b_access --skip task_b_thumb --skip task_c_sealed
 
   thumb:
     name: Cortex-M и QEMU
@@ -190,6 +200,14 @@ jobs:
         run: |
           for t in thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabihf; do
             cargo build -p ch08 -p ch08-solutions --no-default-features --target "$t"
+          done
+      # Глава 9: без alloc, с alloc (BTreeMap и Vec) и задачи с embedded-hal.
+      - name: Глава 9 без std под три цели Cortex-M
+        run: |
+          for t in thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabihf; do
+            cargo build -p ch09 --no-default-features --target "$t"
+            cargo build -p ch09 --no-default-features --features alloc --target "$t"
+            cargo build -p ch09-solutions -p ch09-exercises --target "$t"
           done
       - name: Главы 0–2 без std под три цели Cortex-M
         run: |
@@ -218,7 +236,7 @@ jobs:
       - run: |
           sudo apt-get update && sudo apt-get install -y qemu-system-arm \
             gdb-multiarch llvm gcc-arm-none-eabi libnewlib-arm-none-eabi
-      - name: Опыты глав 0, 3, 5, 6, 7 и 8 в QEMU
+      - name: Опыты глав 0, 3, 5, 6, 7, 8 и 9 в QEMU
         run: bash firmware/run-demos.sh
       - name: Задача 2.B на дизассемблере всех прошивок
         run: cargo test -p ch02-solutions -- --ignored own_firmware --nocapture
