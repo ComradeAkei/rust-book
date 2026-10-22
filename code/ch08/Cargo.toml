@@ -7,8 +7,10 @@ rust-version.workspace = true
 license.workspace = true
 publish.workspace = true
 
+# ANCHOR: features
 [features]
 default = ["std"]
-# Тесты и примеры с std. Без этой фичи библиотека собирается в no_std для
-# Cortex-M, и её подключает прошивка firmware/ch08-sections.
+# Тесты и примеры с std. Без этой возможности библиотека собирается в
+# no_std для Cortex-M, и её подключает прошивка firmware/ch08-sections.
 std = []
+# ANCHOR_END: features

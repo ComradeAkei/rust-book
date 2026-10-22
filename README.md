@@ -37,6 +37,14 @@
   `extern "C-unwind"`, `#[panic_handler]` на Cortex-M. Задачи A–D,
   второй шаг проекта П7 (ошибки протокола), прошивки
   `firmware/ch07-panic` и `firmware/ch07-frame`.
+- Готова глава 8 «Модули, крейты и сборка»: видимость и что она делает
+  с символами, крейты и `Cargo.lock`, `cfg` и `target_has_atomic` на
+  Cortex-M0, аддитивность возможностей, `build.rs` на хосте и для цели,
+  `rlib`, `staticlib` и `cdylib` изнутри, манглинг v0 и legacy,
+  столкновения имён без манглинга, секции и `.uninit`. Задачи A–D
+  (видимость, таблица синуса для M0, staticlib для программы на C с
+  разбором имён, неаддитивные возможности), прошивка
+  `firmware/ch08-sections`.
 - Готовы приложения A–D: словарь соответствий C → Rust, edition 2024 для
   системного кода, чек-лист ревью `unsafe` с разбором примера, установка
   окружения и отладка в QEMU. Их код лежит в `code/appendix-*`.
@@ -55,14 +63,16 @@ src/                      текст книги (mdBook)
   ch00/ ch01/ ch02/       главы 0–2, по файлу на раздел
   ch03/ ch04/ ch05/       главы 3–5, по файлу на раздел
   ch06/                   эталонная глава, по файлу на раздел
-  ch07/                   глава 7, по файлу на раздел
+  ch07/ ch08/             главы 7 и 8, по файлу на раздел
   appendix-e/             разборы задач всех глав
 code/chNN/                примеры главы; листинги попадают в текст через {{#include}}
-code/ch01/c/ … ch07/c/    те же примеры на C и run.sh, который сверяет их вывод с текстом
+code/ch01/c/ … ch08/c/    те же примеры на C и run.sh, который сверяет их вывод с текстом
 code/ch0[45]/rejected/    программы, которые проверка отвергает; их собирают тесты
-code/ch0[457]/fragments/  фрагменты к задачам A глав 4, 5 и 7
+code/ch0[4578]/fragments/ фрагменты к задачам A глав 4, 5, 7 и 8
 code/ch07/c-size/         программа задачи 7.C: размер при panic = "unwind" и "abort"
 code/ch07/hir/            во что раскрывается `?`: снимок HIR для раздела 7.1
+code/ch08/typo/ unify/ ffi/  отдельные рабочие пространства для опытов главы 8 с cargo
+code/ch08/dup/            столкновение имён без манглинга: исходники для rustc
 code/ch06-regs/           драйвер UART PL011 из раздела 6.9
 code/appendix-a/          словарь C → Rust; в c/ те же примеры на C и run.sh для UBSan
 code/appendix-b/          edition 2024 для системного кода
@@ -70,9 +80,12 @@ code/appendix-b-2021/     те же исходники в edition 2021 для с
 code/appendix-c/          вектор фиксированной ёмкости до и после ревью unsafe
 exercises/chNN/           заготовки задач
 exercises/ch02-2021/      задача 2.D в edition 2021: тот же файл, что в exercises/ch02
+exercises/ch08/c/         задача 8.C: программа на C, Makefile и крейт station
+exercises/ch08/d-station/ задача 8.D: рабочее пространство с неаддитивными возможностями
 exercises/project-frame/  заготовка задач П6 и П7
 solutions/chNN/           эталонные решения
 solutions/ch02-2021/      решение задачи 2.D в edition 2021
+solutions/ch08/c/ d-station/  решения задач 8.C и 8.D
 tests-shared/             тесты, общие для заготовок и решений
 project/                  сквозной проект «станция телеметрии»
 firmware/                 прошивки для QEMU (отдельный workspace)
@@ -109,6 +122,7 @@ $ cargo test -p ch05-exercises            # все задачи главы 5
 $ cargo test -p ch06-exercises            # все задачи главы 6
 $ cargo test -p ch06-exercises task_b     # одна задача
 $ cargo test -p ch07-exercises            # все задачи главы 7
+$ cargo test -p ch08-exercises            # все задачи главы 8
 $ cargo test -p project-frame             # задачи П6 и П7
 $ cargo test -p project-frame p7          # только П7
 ```
@@ -132,9 +146,10 @@ $ cargo +nightly miri test -p ch03 -p ch04 -p ch05 -p ch03-solutions -p ch04-sol
       -p ch05-solutions                   # и ещё раз с MIRIFLAGS=-Zmiri-tree-borrows
 $ cargo +nightly miri test -p ch06 -p ch06-regs -p ch06-solutions -p telemetry-frame
 $ cargo +nightly miri test -p ch07 -p ch07-solutions   # и ещё раз с MIRIFLAGS=-Zmiri-tree-borrows
+$ cargo +nightly miri test -p ch08 -p ch08-solutions
 $ cargo +nightly miri test -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
 $ MIRIFLAGS=-Zmiri-tree-borrows cargo +nightly miri test -p appendix-c
-$ cargo +nightly test --doc -p ch00 -p ch01 -p ch02 -p ch06 -p ch07 -p appendix-a \
+$ cargo +nightly test --doc -p ch00 -p ch01 -p ch02 -p ch06 -p ch07 -p ch08 -p appendix-a \
       -p appendix-b -p appendix-b-2021 -p appendix-c
 $ cargo +nightly test --doc -p ch03 -p ch04 -p ch05 -p ch03-solutions -p ch04-solutions \
       -p ch05-solutions
@@ -145,11 +160,14 @@ $ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch03 -p 
       -p ch05-solutions -- --skip polonius
 $ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch07 -p ch07-solutions \
       -- --skip task_a --skip task_c --skip observed
+$ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch08 -p ch08-solutions \
+      -- --skip cargo_ --skip task_a --skip task_b_flash --skip task_c_from_c --skip task_d
 $ cargo build -p ch06 -p ch07 --no-default-features --target thumbv6m-none-eabi
+$ cargo build -p ch08 -p ch08-solutions --no-default-features --target thumbv6m-none-eabi
 $ cargo build -p ch00 -p ch01 -p ch02 -p ch00-solutions -p ch01-solutions --target thumbv6m-none-eabi
 $ cargo build -p ch03 -p ch04 -p ch05 -p ch03-solutions -p ch04-solutions -p ch05-solutions \
       --target thumbv6m-none-eabi
-$ bash firmware/run-demos.sh              # опыты глав 0, 3, 5, 6 и 7 в QEMU: 6, 5, 2, 8 и 11
+$ bash firmware/run-demos.sh              # опыты глав 0, 3, 5, 6, 7 и 8 в QEMU: 6, 5, 2, 8, 11 и 7
 $ cargo test -p ch02-solutions -- --ignored own_firmware   # задача 2.B на всех прошивках
 $ bash code/appendix-a/c/run.sh           # C-примеры приложения A под UBSan
 $ bash code/ch01/c/run.sh                 # C-примеры главы 1 на x86_64 и в QEMU
@@ -158,6 +176,10 @@ $ bash code/ch03/c/run.sh                 # queue.c из введения к г�
 $ bash code/ch04/c/run.sh                 # samples.c, count.c и overlap.c из главы 4
 $ bash code/ch05/c/run.sh                 # config.c из введения к главе 5
 $ bash code/ch07/c/run.sh                 # errno.c, unchecked.c и longjmp.c из главы 7
+$ bash code/ch08/c/run.sh                 # ifdef.c и столкновение глобальных имён из главы 8
+$ cargo fmt --all --check --manifest-path code/ch08/ffi/Cargo.toml   # и так каждое вложенное
+      # рабочее пространство: code/ch07/c-size, code/ch08/{typo,unify,ffi},
+      # {exercises,solutions}/ch08/c/station, {exercises,solutions}/ch08/d-station
 $ bash solutions/ch01/c/run.sh            # задача 1.A на C
 $ python3 tools/check-includes.py         # все {{#include}} указывают на существующие якоря
 $ mdbook build
@@ -169,7 +191,8 @@ $ mdbook build
 под случайной раскладкой падают намеренно (раздел 6.2), поэтому там они
 пропускаются. В главах 3–5 там же пропускаются тесты, которые запускают
 закреплённый rustc или сверяют ассемблер с ответом (Polonius, задачи 3.C,
-4.A и 4.B), в главе 7 — задачи 7.A и 7.C: к раскладке они не
+4.A и 4.B), в главе 7 — задачи 7.A и 7.C, в главе 8 — опыты с cargo и
+задачи, которые запускают rustc, cargo или `make`: к раскладке они не
 относятся, а в этом задании установлен только nightly. Их проверяет
 основное задание.
 

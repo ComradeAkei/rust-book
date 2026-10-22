@@ -107,6 +107,8 @@ mod tests {
     #[test]
     fn inside_the_crate() {
         let mut s = Sample::new(7, 100);
+        // Приватные поля ничего не стоят: 2 + 2 + 1 байт и выравнивание 2.
+        assert_eq!(core::mem::size_of::<Sample>(), 6);
         assert_eq!(super::raw_of(&s), (0xA5, 100));
         s.calibrate();
         assert_eq!(s.raw, 200);

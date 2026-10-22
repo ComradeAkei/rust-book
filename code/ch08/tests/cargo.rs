@@ -1,10 +1,12 @@
-//! Опыты главы 8, которым нужен сам cargo: проверка имён в `cfg`
-//! (раздел 8.3), унификация возможностей (8.4) и типы крейтов (8.6).
-//! Каждый опыт — отдельное рабочее пространство рядом с крейтом; тест
-//! собирает его закреплённым cargo в свой каталог и сверяет результат с
-//! текстом главы. Под Miri и в задании CI со случайной раскладкой (там
-//! только nightly) эти тесты пропускаются.
+//! Опыты главы 8, которым нужен сам cargo или rustc: проверка имён в `cfg`
+//! (раздел 8.3), унификация возможностей (8.4), типы крейтов (8.6) и
+//! столкновения имён без манглинга (8.7). Опыты с cargo — отдельные
+//! рабочие пространства рядом с крейтом; тест собирает каждое закреплённым
+//! cargo в свой каталог и сверяет результат с текстом главы. Под Miri и в
+//! задании CI со случайной раскладкой (там только nightly) эти тесты
+//! пропускаются.
 
+use std::os::unix::process::ExitStatusExt;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 
@@ -107,4 +109,52 @@ fn cargo_crate_types() {
     let members = String::from_utf8(members.stdout).unwrap();
     assert!(members.lines().any(|m| m == "lib.rmeta"), "{members}");
     assert!(!members.contains("std-"), "{members}");
+}
+
+/// `rustc <args>` в каталоге `dup` с выходными файлами в `out`.
+fn rustc(out: &Path, args: &[&str]) -> Output {
+    Command::new("rustc")
+        .current_dir(here("dup"))
+        .env_remove("RUSTUP_TOOLCHAIN")
+        .args(["--edition", "2024", "--out-dir"])
+        .arg(out)
+        .args(["-L"])
+        .arg(out)
+        .args(args)
+        .output()
+        .unwrap()
+}
+
+#[test]
+#[cfg_attr(miri, ignore = "запускает rustc")]
+fn cargo_no_mangle_clashes() {
+    let out = tmp("dup");
+    for lib in ["uart.rs", "dma.rs"] {
+        assert!(rustc(&out, &["--crate-type", "rlib", lib]).status.success());
+    }
+    // Два крейта с одним и тем же именем: ни ошибки, ни предупреждения.
+    // Компоновщик берёт из архивов первое определение, второй объектный
+    // файл ему уже не нужен. Какое первое — решает порядок rlib в команде
+    // компоновки, которой управляет rustc, а не автор.
+    let mut sums = Vec::new();
+    for main in ["main.rs", "main2.rs"] {
+        let r = rustc(&out, &["--extern", "uart", "--extern", "dma", main]);
+        assert!(r.status.success(), "{}", String::from_utf8_lossy(&r.stderr));
+        assert!(r.stderr.is_empty(), "{}", String::from_utf8_lossy(&r.stderr));
+        sums.push(run(&out.join(main.trim_end_matches(".rs"))));
+    }
+    assert_eq!(sums, ["4\n", "2\n"]);
+
+    // В одном крейте rustc видит оба определения сам.
+    let r = rustc(&out, &["--crate-type", "rlib", "same.rs"]);
+    assert!(!r.status.success());
+    let err = String::from_utf8_lossy(&r.stderr);
+    assert!(err.contains("error: symbol `station_reset` is already defined"), "{err}");
+
+    // Своя malloc заменяет malloc из libc для всего процесса.
+    assert!(rustc(&out, &["malloc.rs"]).status.success());
+    let r = Command::new(out.join("malloc")).output().unwrap();
+    assert_eq!(r.status.signal(), Some(6), "ждали abort");
+    let err = String::from_utf8_lossy(&r.stderr);
+    assert!(err.starts_with("memory allocation of "), "{err}");
 }

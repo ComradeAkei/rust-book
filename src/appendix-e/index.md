@@ -22,3 +22,4 @@
 | 5. Времена жизни | [разбор](ch05.md), код в `solutions/ch05` |
 | 6. Составные типы и раскладка памяти | [разбор](ch06.md), код в `solutions/ch06`, проект в `project/telemetry-frame` |
 | 7. Обработка ошибок и паника | [разбор](ch07.md), код в `solutions/ch07`, проект в `project/telemetry-frame` |
+| 8. Модули, крейты и сборка | [разбор](ch08.md), код в `solutions/ch08` |

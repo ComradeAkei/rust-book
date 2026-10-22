@@ -99,6 +99,7 @@ fn unescape(part: &str, out: &mut String) -> Option<()> {
 // ---------------------------------------------------------------- v0
 
 // ANCHOR: v0
+// ANCHOR: v0-entry
 /// Схема v0 (RFC 2603): `_R` путь [крейт конкретизации] [.суффикс].
 fn v0(rest: &str) -> Option<String> {
     // Суффикс после точки добавляют LLVM и rustc (`.llvm.1234`, `.0`); в
@@ -127,7 +128,9 @@ fn with_suffix(mut out: String, suffix: &str) -> String {
     }
     out
 }
+// ANCHOR_END: v0-entry
 
+// ANCHOR: v0-lexer
 struct Parser<'s> {
     /// Имя без `_R`: от его начала отсчитываются ссылки на повторы `B`.
     sym: &'s [u8],
@@ -221,7 +224,9 @@ impl<'s> Parser<'s> {
         self.pos = back;
         Some(())
     }
+    // ANCHOR_END: v0-lexer
 
+    // ANCHOR: v0-path
     /// Путь. В пути значения обобщённые аргументы пишутся через `::<>`,
     /// в типе — через `<>`.
     fn path(&mut self, in_value: bool) -> Option<()> {
@@ -318,7 +323,9 @@ impl<'s> Parser<'s> {
             self.ty()
         }
     }
+    // ANCHOR_END: v0-path
 
+    // ANCHOR: v0-ty
     fn ty(&mut self) -> Option<()> {
         self.enter()?;
         let tag = self.next()?;
@@ -436,4 +443,5 @@ fn basic(tag: u8) -> Option<&'static str> {
         _ => return None,
     })
 }
+// ANCHOR_END: v0-ty
 // ANCHOR_END: v0

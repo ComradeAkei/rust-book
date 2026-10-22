@@ -10,11 +10,13 @@ publish.workspace = true
 [lints]
 workspace = true
 
+# ANCHOR: deps
 [dependencies]
 ch08 = { path = "../../code/ch08", default-features = false }
 cortex-m = { workspace = true }
 cortex-m-rt = { workspace = true }
 cortex-m-semihosting = { workspace = true }
+# ANCHOR_END: deps
 
 [[bin]]
 name = "target"

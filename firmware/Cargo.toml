@@ -10,10 +10,12 @@ rust-version = "1.85"
 license = "MIT OR Apache-2.0"
 publish = false
 
+# ANCHOR: deps
 [workspace.dependencies]
 cortex-m = "0.7.7"
 cortex-m-rt = "0.7.5"
 cortex-m-semihosting = "0.5.0"
+# ANCHOR_END: deps
 
 [workspace.lints.clippy]
 # После debug::exit под QEMU управление не возвращается: semihosting
