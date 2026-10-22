@@ -11,8 +11,12 @@ use cortex_m_semihosting::{debug, hprintln};
 // ANCHOR: main
 #[entry]
 fn main() -> ! {
-    hprintln!("стек: {:#010x}..{:#010x}, {} байт", stack_bottom(), stack_top(),
-              stack_top() - stack_bottom());
+    hprintln!(
+        "стек: {:#010x}..{:#010x}, {} байт",
+        stack_bottom(),
+        stack_top(),
+        stack_top() - stack_bottom()
+    );
 
     let (crc, used) = stack_used(|| build_by_value(black_box(7), 0xA5).crc);
     hprintln!("по значению: crc = {:#x}, стек {} байт", crc, used);

@@ -38,17 +38,27 @@ fn damaged(words: &[u32; 64], expect: u32) -> usize {
 fn show(when: &str) {
     // SAFETY: прерываний нет, к статическим переменным обращается только
     // этот поток; читаем копию через сырой указатель, без ссылок на static mut.
-    let (s, c) = unsafe { (addr_of!(SETTINGS).read_volatile(), addr_of!(COUNTERS).read_volatile()) };
-    say!("{}: испорчено SETTINGS {}/64, COUNTERS {}/64, COUNTERS[63] = {:#010x}",
-              when, damaged(&s, 0x5E77_1495), damaged(&c, 0), c[63]);
+    let (s, c) =
+        unsafe { (addr_of!(SETTINGS).read_volatile(), addr_of!(COUNTERS).read_volatile()) };
+    say!(
+        "{}: испорчено SETTINGS {}/64, COUNTERS {}/64, COUNTERS[63] = {:#010x}",
+        when,
+        damaged(&s, 0x5E77_1495),
+        damaged(&c, 0),
+        c[63]
+    );
 }
 
 // ANCHOR: main
 #[entry]
 fn main() -> ! {
-    say!("SETTINGS {:#010x}, COUNTERS {:#010x}, стек {:#010x}..{:#010x}",
-              addr_of!(SETTINGS) as usize, addr_of!(COUNTERS) as usize,
-              stack_bottom(), stack_top());
+    say!(
+        "SETTINGS {:#010x}, COUNTERS {:#010x}, стек {:#010x}..{:#010x}",
+        addr_of!(SETTINGS) as usize,
+        addr_of!(COUNTERS) as usize,
+        stack_bottom(),
+        stack_top()
+    );
     show("до");
     // Останавливаемся на 64 байта ниже границы стека, то есть внутри .bss.
     let levels = dig(0, stack_bottom() - 64);
