@@ -110,6 +110,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "ch04"
+version = "0.1.0"
+
+[[package]]
+name = "ch04-exercises"
+version = "0.1.0"
+
+[[package]]
+name = "ch04-solutions"
+version = "0.1.0"
+
+[[package]]
 name = "ch06"
 version = "0.1.0"
 dependencies = [

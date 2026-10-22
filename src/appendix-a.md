@@ -38,7 +38,7 @@ C-примеры лежат в `code/appendix-a/c/`. Скрипт собирае
 | `float`, `double` | `f32`, `f64` | |
 | `void` в типе возврата | `()` | тип нулевого размера |
 | `void *` | `*mut c_void`, `*mut u8` или обобщённый `T` | обобщения вместо стирания типа ([гл. 10](ch10.md)) |
-| `T *`, не NULL, на один объект | `&T`, `&mut T` | `&mut T` означает единственный доступ ([гл. 4](ch04.md)) |
+| `T *`, не NULL, на один объект | `&T`, `&mut T` | `&mut T` означает единственный доступ ([гл. 4](ch04/index.md)) |
 | `T *`, может быть NULL | `Option<&T>`, `Option<NonNull<T>>` | размер тот же, NULL кодирует `None` ([6.4](ch06/04-niches.md)) |
 | `T *p, size_t n` | `&[T]`, `&mut [T]` | указатель и длина в одном значении, индекс проверяется |
 | `T a[N]` | `[T; N]` | передаётся по значению и в указатель не распадается |
@@ -726,7 +726,7 @@ appa_clz:                   appa_clz:
 | `-fno-exceptions` | `panic = "abort"` | [гл. 7](ch07.md) |
 | `-ftrapv` | `overflow-checks = true` | |
 | `-fwrapv` | `wrapping_*`, `Wrapping<T>` | |
-| `-fno-strict-aliasing` | не нужен: алиасинг на основе типов в Rust не используется | правила для `&` и `&mut` ([гл. 4](ch04.md)) |
+| `-fno-strict-aliasing` | не нужен: алиасинг на основе типов в Rust не используется | правила для `&` и `&mut` ([гл. 4](ch04/index.md)) |
 | `-Wall -Wextra -Werror` | `cargo clippy -- -D warnings` | |
 | `-fsanitize=address`, `thread` | `-Zsanitizer=address`, `thread` (nightly) | для `unsafe` — ещё и Miri ([гл. 31](ch31.md)) |
 | скрипт компоновки `-T` | `memory.x` и `-C link-arg=-Tlink.x` | `firmware/.cargo/config.toml` |
