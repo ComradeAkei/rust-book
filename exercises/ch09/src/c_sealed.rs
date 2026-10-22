@@ -7,6 +7,7 @@
 /// Базовый адрес GPIOA (STM32F103); порты идут через 0x400.
 pub const GPIOA: usize = 0x4001_0800;
 
+// ANCHOR: pins
 /// Вывод порта GPIO. Должен быть запечатан: выводы задаёт только этот
 /// крейт.
 pub trait PinId {
@@ -36,7 +37,9 @@ pins! {
     PB0: 1, 0; PB1: 1, 1; PB2: 1, 2; PB3: 1, 3;
     PB4: 1, 4; PB5: 1, 5; PB6: 1, 6; PB7: 1, 7;
 }
+// ANCHOR_END: pins
 
+// ANCHOR: bsrr
 /// Адрес регистра BSRR порта, к которому относится вывод.
 pub fn bsrr_addr<P: PinId>() -> usize {
     todo!("GPIOA, шаг 0x400 на порт, смещение BSRR 0x10")
@@ -46,7 +49,9 @@ pub fn bsrr_addr<P: PinId>() -> usize {
 pub fn bsrr<P: PinId>(high: bool) -> u32 {
     todo!()
 }
+// ANCHOR_END: bsrr
 
+// ANCHOR: ext
 /// Битовые поля регистров. Тоже должно быть запечатано.
 pub trait U32Ext {
     /// Бит `n`.
@@ -58,6 +63,7 @@ pub trait U32Ext {
     /// То же число, но поле заменено на `value`.
     fn with_field(self, lsb: u32, width: u32, value: u32) -> Self;
 }
+// ANCHOR_END: ext
 
 impl U32Ext for u32 {
     fn bit(self, n: u32) -> bool {

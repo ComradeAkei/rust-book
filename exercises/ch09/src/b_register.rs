@@ -9,6 +9,7 @@ use core::marker::PhantomData;
 /// Базовый адрес UART0 (LM3S6965, тот же PL011 в QEMU `lm3s6965evb`).
 pub const BASE: usize = 0x4000_C000;
 
+// ANCHOR: traits
 /// Регистр UART0.
 ///
 /// # Safety
@@ -40,6 +41,7 @@ pub trait Bus {
     /// `addr` — адрес регистра, в который можно писать.
     unsafe fn write(&mut self, addr: usize, value: u32);
 }
+// ANCHOR_END: traits
 
 /// Настоящая шина: обращения к памяти через `volatile`.
 pub struct Mmio(());
@@ -85,6 +87,7 @@ pub struct Icr;
 // Реализуйте `Register`, `Readable` и `Writable` для регистров выше по
 // таблице из условия задачи.
 
+// ANCHOR: reg
 /// Доступ к регистру `R`. Значений этого типа не бывает: всё, что он
 /// знает, записано в константах `R`.
 pub struct Reg<R>(PhantomData<R>);
@@ -116,6 +119,7 @@ impl<R> Reg<R> {
         todo!("прочитать, изменить, записать")
     }
 }
+// ANCHOR_END: reg
 
 /// FR.TXFF: FIFO передатчика полон.
 pub const FR_TXFF: u32 = 1 << 5;
@@ -124,6 +128,7 @@ pub const LCRH_8N1_FIFO: u32 = 0b11 << 5 | 1 << 4;
 /// CR: UARTEN, TXE и RXE.
 pub const CR_ENABLE: u32 = 1 | 1 << 8 | 1 << 9;
 
+// ANCHOR: api
 /// Делитель не помещается в IBRD и FBRD.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct BadBaud;
@@ -143,6 +148,7 @@ pub fn write_byte<B: Bus>(bus: &mut B, byte: u8) {
 pub fn deinit<B: Bus>(bus: &mut B) {
     todo!()
 }
+// ANCHOR_END: api
 
 /// Для проверки под Cortex-M0: 12 МГц, 115200 бод.
 ///

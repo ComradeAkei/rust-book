@@ -1,4 +1,5 @@
 // Задача 9.A, фрагмент a6. Отдельный крейт: всё из core и std для него чужое.
+// ANCHOR: header
 use std::fmt;
 
 pub struct Reading(pub i32);
@@ -6,7 +7,9 @@ pub struct Reading(pub i32);
 pub trait Describe {
     fn describe(&self) -> String;
 }
+// ANCHOR_END: header
 
+// ANCHOR: impls
 // ⟨1⟩
 impl std::ops::Add<i32> for Reading {
     type Output = Reading;
@@ -24,3 +27,4 @@ impl<T> std::ops::Add<Reading> for T {
         rhs
     }
 }
+// ANCHOR_END: impls

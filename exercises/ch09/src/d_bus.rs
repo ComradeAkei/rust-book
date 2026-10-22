@@ -32,6 +32,7 @@ pub enum Error<E> {
     Timeout,
 }
 
+// ANCHOR: regs
 /// Регистры датчика, доступные через какую-то шину. Добавьте методы
 /// чтения и записи регистров и реализуйте их для обеих шин.
 pub trait Regs {
@@ -57,7 +58,9 @@ impl<I: I2c> Regs for I2cRegs<I> {
 impl<S: SpiDevice> Regs for SpiRegs<S> {
     type Error = S::Error;
 }
+// ANCHOR_END: regs
 
+// ANCHOR: driver
 /// Драйвер TMP-9. Логика одна, шина — параметр типа.
 pub struct Tmp9<R> {
     regs: R,
@@ -93,3 +96,4 @@ impl<S: SpiDevice> Tmp9<SpiRegs<S>> {
         todo!()
     }
 }
+// ANCHOR_END: driver

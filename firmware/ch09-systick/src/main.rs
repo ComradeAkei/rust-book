@@ -15,6 +15,7 @@ use ch09::assoc::{
 use cortex_m_rt::entry;
 use cortex_m_semihosting::{debug, hprintln};
 
+// ANCHOR: main
 const RELOAD: u32 = 99_999;
 const PERIODS: u32 = 3;
 
@@ -43,6 +44,7 @@ fn main() -> ! {
     debug::exit(debug::EXIT_SUCCESS);
     loop {}
 }
+// ANCHOR_END: main
 
 #[panic_handler]
 fn panic(_: &core::panic::PanicInfo) -> ! {
