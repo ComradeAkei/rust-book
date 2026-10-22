@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Прогоняет все прошивки глав 0, 3, 5, 6, 7, 8 и 9 в QEMU и сверяет вывод с ожидаемым.
+# Прогоняет все прошивки глав 0, 3, 5, 6, 7, 8, 9 и 10 в QEMU и сверяет вывод с ожидаемым.
 # Запуск: ./run-demos.sh (из каталога firmware). Используется и в CI.
 set -u
 cd "$(dirname "$0")"
@@ -119,5 +119,8 @@ run "M4F: .uninit переживает сброс"        "загрузка 2: .
 run "M3: SysTick через трейт Register"     "SysTick: 3 периода по 100000 тактов отсчитаны" -p ch09-systick
 run "M0: SysTick через трейт Register"     "SysTick: 3 периода по 100000 тактов отсчитаны" -p ch09-systick "${M0[@]}"
 run "M4F: SysTick через трейт Register"    "SysTick: 3 периода по 100000 тактов отсчитаны" -p ch09-systick "${M4F[@]}"
+
+run "M3: Uart<S> не больше ссылки"         "Uart<Enabled>: 4 байта, Uart<Disabled>: 4 байта, &Pl011: 4 байта" -p ch10-typestate
+run "M3: disable и повторный enable"       "снова включён: CR = 0x301" -p ch10-typestate
 
 exit $fail

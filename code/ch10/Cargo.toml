@@ -1,0 +1,20 @@
+[package]
+name = "ch10"
+version = "0.1.0"
+description = "Глава 10: обобщения, ограничения, impl Trait, const generics, мономорфизация и typestate"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[features]
+default = ["std"]
+# Примеры с std. Без этой возможности библиотека собирается в no_std для
+# Cortex-M.
+std = ["alloc"]
+# Примеры с Vec и String. Прошивке, у которой нет распределителя памяти,
+# они не нужны.
+alloc = []
+
+[dependencies]
+ch06-regs = { path = "../ch06-regs" }
