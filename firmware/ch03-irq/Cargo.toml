@@ -1,0 +1,21 @@
+[package]
+name = "ch03-irq"
+version = "0.1.0"
+description = "Глава 3: страж критической секции на Cortex-M, let _ и let _g"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+cortex-m = { workspace = true }
+cortex-m-rt = { workspace = true }
+cortex-m-semihosting = { workspace = true }
+
+[[bin]]
+name = "ch03-irq"
+test = false
+bench = false
