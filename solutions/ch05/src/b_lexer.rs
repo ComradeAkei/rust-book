@@ -99,6 +99,7 @@ fn comment_start(v: &str) -> Option<usize> {
 }
 
 impl<'a> Lexer<'a> {
+    // ANCHOR: next_line
     /// Следующая строка без `\n` и `\r` на конце.
     fn next_line(&mut self) -> Option<&'a str> {
         if self.rest.is_empty() {
@@ -109,6 +110,7 @@ impl<'a> Lexer<'a> {
         self.line += 1;
         Some(line.strip_suffix('\r').unwrap_or(line))
     }
+    // ANCHOR_END: next_line
 
     /// Лексема из строки или ошибка; `None` для пустой строки и комментария.
     fn lex_line(&mut self, line: &'a str) -> Option<Result<Token<'a>, LexError>> {

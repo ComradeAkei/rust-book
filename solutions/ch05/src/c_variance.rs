@@ -28,6 +28,7 @@ pub const TYPES: [&str; 10] = [
     "core::str::Lines<'a>",
 ];
 
+// ANCHOR: answers
 pub const VARIANCE: [Option<Variance>; 10] = [
     Some(Co),     // &'a T ковариантен по 'a
     Some(Co),     // &'a mut T ковариантен по 'a, инвариантен по T
@@ -40,3 +41,4 @@ pub const VARIANCE: [Option<Variance>; 10] = [
     Some(Inv),    // параметры трейта у dyn инвариантны
     Some(Inv),    // внутри Lines — проекция Pattern::Searcher<'a>
 ];
+// ANCHOR_END: answers

@@ -59,6 +59,18 @@ pub fn section<'c>(cfg: &'c Config, name: &str) -> impl Iterator<Item = &'c str>
 }
 // ANCHOR_END: capture
 
+// ANCHOR: outlives
+/// Старый способ, граница `+ 'c`: тип по-прежнему захватывает `'n`, но
+/// обещает, что живёт не меньше `'c`, и проверке у вызывающего этого
+/// хватает.
+pub fn section_outlives<'c, 'n>(
+    cfg: &'c Config,
+    name: &'n str,
+) -> impl Iterator<Item = &'c str> + 'c {
+    cfg.lines[cfg.range(name)].iter().map(String::as_str)
+}
+// ANCHOR_END: outlives
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -70,10 +82,13 @@ mod tests {
     #[test]
     fn sections() {
         let cfg = Config::parse(TEXT);
-        let uart: Vec<_> = section(&cfg, &format!("ua{}", "rt")).collect();
-        assert_eq!(uart, ["baud=9600", "mode=8N1"]);
+        // Временное имя умирает в конце строки, итератор живёт дальше.
+        let it = section(&cfg, &format!("ua{}", "rt"));
+        assert_eq!(it.collect::<Vec<_>>(), ["baud=9600", "mode=8N1"]);
         let name = String::from("spi");
         assert_eq!(section_all(&cfg, &name).collect::<Vec<_>>(), ["clock=1000000"]);
         assert_eq!(section(&cfg, "i2c").count(), 0);
+        let spi = section_outlives(&cfg, &format!("s{}", "pi"));
+        assert_eq!(spi.collect::<Vec<_>>(), ["clock=1000000"]);
     }
 }

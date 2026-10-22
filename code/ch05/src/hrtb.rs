@@ -26,6 +26,36 @@
 //! }
 //! ```
 //!
+//! С временем жизни из параметров ссылка для обхода держит буфер весь
+//! вызов, и очистить его нельзя:
+//!
+//! ```compile_fail,E0506
+//! pub fn take_sum_named<'x, C>(buf: &'x mut C) -> u32
+//! where
+//!     C: Default,
+//!     &'x C: IntoIterator<Item = &'x u32>,
+//! {
+//!     let sum = (&*buf).into_iter().sum();
+//!     *buf = C::default();
+//!     sum
+//! }
+//! ```
+//!
+//! Замыкание не может сохранить строку, которую ему дали: она
+//! действительна только на время вызова.
+//!
+//! ```compile_fail,E0521
+//! use ch05::hrtb::total_after;
+//!
+//! let text = String::from("rx=1\nr\\x=2");
+//! let mut saved = Vec::new();
+//! total_after(&text, |l| {
+//!     saved.push(l);
+//!     None
+//! });
+//! println!("{saved:?}");
+//! ```
+//!
 //! Замыкание, которое возвращает часть аргумента, без подсказки не
 //! компилируется: компилятор выводит его сигнатуру с одним временем жизни
 //! на входе и другим на выходе.
@@ -88,18 +118,22 @@ pub fn total_after_short<F: FnMut(&str) -> Option<u32>>(text: &str, f: F) -> u32
 }
 // ANCHOR_END: total
 
-// ANCHOR: sum_all
-/// Сумма по любой коллекции, которую можно обойти по ссылке: `Vec<u32>`,
-/// массив, `BTreeSet<u32>`. Граница стоит на типе `&'a C`, а не на
-/// замыкании, и без `for<'a>` её не записать: время жизни ссылки
-/// появляется только внутри функции.
-pub fn sum_all<C>(c: &C) -> u32
+// ANCHOR: take_sum
+/// Сумма отсчётов в буфере и очистка буфера, для любой коллекции, которую
+/// можно обойти по ссылке: `Vec<u32>`, массива, `BTreeSet<u32>`. Ссылка
+/// `&C` для обхода берётся внутри функции и должна умереть до записи в
+/// `*buf`. Назвать её время жизни параметром функции нельзя, и это не
+/// замыкание: сокращённой записи нет, нужен `for<'a>`.
+pub fn take_sum<C>(buf: &mut C) -> u32
 where
+    C: Default,
     for<'a> &'a C: IntoIterator<Item = &'a u32>,
 {
-    c.into_iter().sum()
+    let sum = (&*buf).into_iter().sum();
+    *buf = C::default();
+    sum
 }
-// ANCHOR_END: sum_all
+// ANCHOR_END: take_sum
 
 // ANCHOR: slicer
 /// Подсказка для замыкания: функция с ограничением `for<'a>` задаёт его
@@ -136,10 +170,13 @@ mod tests {
     }
 
     #[test]
-    fn sum_any_collection() {
-        assert_eq!(sum_all(&vec![1, 2, 3]), 6);
-        assert_eq!(sum_all(&[10, 20]), 30);
-        assert_eq!(sum_all(&BTreeSet::from([5, 5, 7])), 12);
+    fn take_sum_any_collection() {
+        let mut v = vec![1, 2, 3];
+        assert_eq!((take_sum(&mut v), v.len()), (6, 0));
+        let mut a = [10, 20];
+        assert_eq!((take_sum(&mut a), a), (30, [0, 0]));
+        let mut set = BTreeSet::from([5, 5, 7]);
+        assert_eq!((take_sum(&mut set), set.len()), (12, 0));
     }
 
     #[test]

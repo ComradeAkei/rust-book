@@ -582,6 +582,11 @@ mod task_d {
         let mut s = [10, 10, 99, 10, 10, -50, 10, 11];
         assert_eq!(despike(&mut s, 20), 2);
         assert_eq!(s, [10, 10, 10, 10, 10, 10, 10, 11]);
+        // Исправленный отсчёт виден следующему окну. Если читать исходные
+        // значения, окно [50, 0, 50] «исправит» ноль.
+        let mut s = [0, 50, 0, 50, 0];
+        assert_eq!(despike(&mut s, 20), 2);
+        assert_eq!(s, [0; 5]);
         let mut extreme = [i32::MIN, i32::MAX, i32::MIN];
         assert_eq!(despike(&mut extreme, 0), 1);
         assert_eq!(extreme, [i32::MIN; 3]);

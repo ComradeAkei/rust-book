@@ -113,4 +113,14 @@ mod tests {
         assert_eq!(find(&rx, 7), Some(&b"bme280"[..]));
         assert_eq!(find(&rx, 9), None);
     }
+
+    #[test]
+    fn sizes() {
+        use core::mem::size_of;
+        // Тег, указатель и длина среза; время жизни места не занимает.
+        assert_eq!(size_of::<Tlv<'_>>(), 3 * size_of::<usize>());
+        // Ссылка не бывает нулевой: None помещается в нишу (раздел 6.4).
+        assert_eq!(size_of::<Option<Tlv<'_>>>(), size_of::<Tlv<'_>>());
+        assert_eq!(size_of::<Records<'_>>(), 3 * size_of::<usize>());
+    }
 }

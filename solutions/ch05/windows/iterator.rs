@@ -1,4 +1,11 @@
 // Задача 5.D, часть 1: окна через стандартный `Iterator` не компилируются.
+//
+// Если бы реализация компилировалась, два окна из двух вызовов `next` жили
+// бы одновременно и делили элемент:
+//
+//     let mut it = WindowsMut { slice: &mut v[..], size: 2, pos: 0 };
+//     let (a, b) = (it.next().unwrap(), it.next().unwrap());
+//     a[1] = 1; b[0] = 2; // a[1] и b[0] — один и тот же v[1]
 
 pub struct WindowsMut<'s, T> {
     slice: &'s mut [T],

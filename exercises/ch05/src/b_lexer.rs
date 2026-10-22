@@ -23,6 +23,7 @@
 //!   `MissingEquals`, открывающая кавычка для `UnclosedQuote`, первый
 //!   лишний символ для `TrailingGarbage`.
 
+// ANCHOR: types
 /// Лексема. Строки внутри — срезы исходного текста, `'a` — его время жизни.
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Token<'a> {
@@ -57,6 +58,7 @@ pub struct LexError {
     pub col: u32,
     pub kind: LexErrorKind,
 }
+// ANCHOR_END: types
 
 /// Лексер. Поля придумайте сами; `src` здесь только для того, чтобы `'a`
 /// было использовано. Выделять память нельзя: тест считает выделения.

@@ -5,6 +5,7 @@
 //! исходной, или `"E0106"`, если элизия к исходной не применима и она не
 //! компилируется.
 
+// ANCHOR: answers
 pub const SIGNATURES: [&str; 8] = [
     // Правило 2: одна ссылка на входе.
     "fn trim_cr<'a>(line: &'a str) -> &'a str",
@@ -24,3 +25,4 @@ pub const SIGNATURES: [&str; 8] = [
     // Правило 3: слово заимствует парсер, а не текст `'s`.
     "fn next_token<'a>(&'a mut self) -> Option<&'a str>",
 ];
+// ANCHOR_END: answers
