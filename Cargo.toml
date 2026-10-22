@@ -4,6 +4,7 @@ members = [
     "code/ch00",
     "code/ch01",
     "code/ch02",
+    "code/ch03",
     "code/ch06",
     "code/ch06-regs",
     "code/appendix-a",
@@ -14,6 +15,7 @@ members = [
     "exercises/ch01",
     "exercises/ch02",
     "exercises/ch02-2021",
+    "exercises/ch03",
     "exercises/ch06",
     "exercises/project-frame",
     "project/telemetry-frame",
@@ -21,6 +23,7 @@ members = [
     "solutions/ch01",
     "solutions/ch02",
     "solutions/ch02-2021",
+    "solutions/ch03",
     "solutions/ch06",
 ]
 # Заготовки задач не компилируются в рабочее состояние, пока студент их не решит,
@@ -29,6 +32,7 @@ default-members = [
     "code/ch00",
     "code/ch01",
     "code/ch02",
+    "code/ch03",
     "code/ch06",
     "code/ch06-regs",
     "code/appendix-a",
@@ -40,6 +44,7 @@ default-members = [
     "solutions/ch01",
     "solutions/ch02",
     "solutions/ch02-2021",
+    "solutions/ch03",
     "solutions/ch06",
 ]
 # Прошивки собираются под thumbv7m-none-eabi и живут в отдельном workspace.

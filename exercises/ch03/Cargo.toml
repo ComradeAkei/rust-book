@@ -1,0 +1,15 @@
+[package]
+name = "ch03-exercises"
+version = "0.1.0"
+description = "Глава 3: заготовки задач A–D для студента"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+ch03 = { path = "../../code/ch03" }
+
+[[test]]
+name = "ch03"
+path = "tests/ch03.rs"

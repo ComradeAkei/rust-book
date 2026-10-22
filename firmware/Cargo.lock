@@ -39,6 +39,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "ch03"
+version = "0.1.0"
+
+[[package]]
+name = "ch03-irq"
+version = "0.1.0"
+dependencies = [
+ "cortex-m",
+ "cortex-m-rt",
+ "cortex-m-semihosting",
+]
+
+[[package]]
+name = "ch03-stack"
+version = "0.1.0"
+dependencies = [
+ "ch03",
+ "cortex-m",
+ "cortex-m-rt",
+ "cortex-m-semihosting",
+]
+
+[[package]]
 name = "ch06"
 version = "0.1.0"
 dependencies = [

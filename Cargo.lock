@@ -92,6 +92,24 @@ name = "ch02-solutions-2021"
 version = "0.1.0"
 
 [[package]]
+name = "ch03"
+version = "0.1.0"
+
+[[package]]
+name = "ch03-exercises"
+version = "0.1.0"
+dependencies = [
+ "ch03",
+]
+
+[[package]]
+name = "ch03-solutions"
+version = "0.1.0"
+dependencies = [
+ "ch03",
+]
+
+[[package]]
 name = "ch06"
 version = "0.1.0"
 dependencies = [
