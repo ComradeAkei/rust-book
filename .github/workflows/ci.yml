@@ -138,7 +138,7 @@ jobs:
       - run: |
           sudo apt-get update && sudo apt-get install -y qemu-system-arm \
             gdb-multiarch llvm gcc-arm-none-eabi libnewlib-arm-none-eabi
-      - name: Опыты глав 0 и 6 в QEMU
+      - name: Опыты глав 0, 3, 5 и 6 в QEMU
         run: bash firmware/run-demos.sh
       - name: Задача 2.B на дизассемблере всех прошивок
         run: cargo test -p ch02-solutions -- --ignored own_firmware --nocapture

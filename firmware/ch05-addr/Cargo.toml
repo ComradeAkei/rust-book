@@ -1,0 +1,22 @@
+[package]
+name = "ch05-addr"
+version = "0.1.0"
+description = "Глава 5: где лежат данные со временем жизни 'static — flash или ОЗУ"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+# singleton! берёт критическую секцию: на одноядерном Cortex-M это cpsid i.
+cortex-m = { workspace = true, features = ["critical-section-single-core"] }
+cortex-m-rt = { workspace = true }
+cortex-m-semihosting = { workspace = true }
+
+[[bin]]
+name = "ch05-addr"
+test = false
+bench = false

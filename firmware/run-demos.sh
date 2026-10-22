@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Прогоняет все прошивки глав 0, 3 и 6 в QEMU и сверяет вывод с ожидаемым.
+# Прогоняет все прошивки глав 0, 3, 5 и 6 в QEMU и сверяет вывод с ожидаемым.
 # Запуск: ./run-demos.sh (из каталога firmware). Используется и в CI.
 set -u
 cd "$(dirname "$0")"
@@ -63,6 +63,9 @@ run "M3: переполнение стека портит .bss"   "COUNTERS[63] 
 run "M3: стек ниже ОЗУ, lockup"            "Lockup"                     -p ch03-stack --bin lockup
 run "M3: страж PRIMASK, let _ и вложенность" "drop(outer), inner жив:  PRIMASK = 0, тиков 5" -p ch03-irq
 run "M0: страж PRIMASK, let _ и вложенность" "вложенная, NaiveGuard: PRIMASK = 0, тиков 4" -p ch03-irq "${M0[@]}"
+
+run "M3: 'static во flash и в ОЗУ"        "&GAINS (const)           0x000017d2  flash" -p ch05-addr
+run "M0: 'static во flash и в ОЗУ"        "singleton! буфер         0x20000010  ОЗУ" -p ch05-addr "${M0[@]}"
 
 run "UART PL011, таблица размеров на M3"  "offsets Sample: [4, 0, 5]"  -p ch06-uart
 run "M3: LDR по нечётному адресу"          "прочитано 0x44332211"       -p ch06-unaligned --bin ldr

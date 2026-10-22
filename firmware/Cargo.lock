@@ -62,6 +62,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "ch05-addr"
+version = "0.1.0"
+dependencies = [
+ "cortex-m",
+ "cortex-m-rt",
+ "cortex-m-semihosting",
+]
+
+[[package]]
 name = "ch06"
 version = "0.1.0"
 dependencies = [
