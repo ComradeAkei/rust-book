@@ -163,3 +163,20 @@ impl PinnedRx {
     }
 }
 // ANCHOR_END: pinned
+
+// ANCHOR: asm
+// Обёртки для сравнения `push` по ассемблеру. Маленькие методы без
+// `#[inline]` rustc сам делает встраиваемыми в другие крейты и не
+// порождает в этом, пока их никто не вызывает.
+#[inline(never)]
+#[unsafe(no_mangle)]
+pub fn ch03d_push_idx(rx: &mut RxIdx, byte: u8) -> Result<(), Full> {
+    rx.push(byte)
+}
+
+#[inline(never)]
+#[unsafe(no_mangle)]
+pub fn ch03d_push_pinned(rx: Pin<&mut PinnedRx>, byte: u8) -> Result<(), Full> {
+    rx.push(byte)
+}
+// ANCHOR_END: asm

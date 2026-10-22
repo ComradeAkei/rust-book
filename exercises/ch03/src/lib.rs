@@ -7,7 +7,7 @@
 //! Задачи B и D под Miri:
 //!
 //! ```text
-//! cargo +nightly miri test -p ch03-exercises task_b task_d
+//! cargo +nightly miri test -p ch03-exercises -- task_b task_d
 //! cargo +nightly miri test -p ch03-exercises -- --ignored --exact task_d::naive_in_place_ub
 //! ```
 // Параметры заготовок пока не используются, и это ожидаемо.

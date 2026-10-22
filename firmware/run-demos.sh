@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Прогоняет все прошивки глав 0 и 6 в QEMU и сверяет вывод с ожидаемым.
+# Прогоняет все прошивки глав 0, 3 и 6 в QEMU и сверяет вывод с ожидаемым.
 # Запуск: ./run-demos.sh (из каталога firmware). Используется и в CI.
 set -u
 cd "$(dirname "$0")"
@@ -57,6 +57,12 @@ run "M4F: один исходник, CPUID"            "Cortex-M4 (CPUID = 0x410
 run "M4F: .data и .bss до main"            "SIGNATURE = 0x54454c45"     -p ch00-reset --bin ch00-reset "${M4F[@]}"
 run "M4F: FPU закрыт, UsageFault NOCP"     "UFSR.NOCP"                  -p ch00-reset --bin nocp "${M4F[@]}"
 rungdb "M4F: gdb от сброса до main"        "New value = 0xf00000"       ch00-reset ch00-reset ../solutions/ch00/reset.gdb
+
+run "M3: стек сборки блока по значению"    "через &mut:  crc = 0x2871b, стек 76 байт" -p ch03-stack --bin stack
+run "M3: переполнение стека портит .bss"   "COUNTERS[63] = 0xeeeeeeee"  -p ch03-stack --bin overflow
+run "M3: стек ниже ОЗУ, lockup"            "Lockup"                     -p ch03-stack --bin lockup
+run "M3: страж PRIMASK, let _ и вложенность" "drop(outer), inner жив:  PRIMASK = 0, тиков 5" -p ch03-irq
+run "M0: страж PRIMASK, let _ и вложенность" "вложенная, NaiveGuard: PRIMASK = 0, тиков 4" -p ch03-irq "${M0[@]}"
 
 run "UART PL011, таблица размеров на M3"  "offsets Sample: [4, 0, 5]"  -p ch06-uart
 run "M3: LDR по нечётному адресу"          "прочитано 0x44332211"       -p ch06-unaligned --bin ldr

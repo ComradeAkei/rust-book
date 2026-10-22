@@ -77,5 +77,7 @@ mod tests {
         // ch03_ready(3) == true: аренда перемещена в ch03_start.
         assert!(ch03_send_when_ready(Lease(1), 10));
         assert!(!ch03_send_when_ready(Lease(1), 3));
+        // Флаг живёт в кадре функции, а не в значении.
+        assert_eq!(size_of::<Lease>(), 1);
     }
 }

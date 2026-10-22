@@ -125,6 +125,14 @@ fn main() -> ! {
         hprintln!("вложенная, NaiveGuard: PRIMASK = {}, тиков {}", primask_bit(), ticks());
     }
 
+    {
+        let outer = IrqGuard::new();
+        let _inner = IrqGuard::new();
+        drop(outer); // внешний страж уничтожен раньше внутреннего
+        SCB::set_pendst();
+        hprintln!("drop(outer), inner жив:  PRIMASK = {}, тиков {}", primask_bit(), ticks());
+    }
+
     debug::exit(debug::EXIT_SUCCESS);
     loop {}
 }

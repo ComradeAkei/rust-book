@@ -34,3 +34,72 @@ pub const X86_64_MEMCPY_FROM: usize = 132;
 /// байт, дальше — вызов `__aeabi_memcpy4`.
 pub const THUMB_MEMCPY_FROM: usize = 68;
 // ANCHOR_END: answers
+
+// ANCHOR: probes
+/// Пробные функции для опытов, по образцу пробного крейта из теста:
+/// `cargo asm -p ch03-solutions --lib --llvm ch03c_arg_rust_3`. Модуль
+/// `wN` содержит структуру из N слов и функции с ней в аргументе и в
+/// результате для обоих ABI, а также вызывающего, которому приходится
+/// делать копию: вызываемая функция меняет свой аргумент.
+macro_rules! probe {
+    ($m:ident, $n:literal) => {
+        pub mod $m {
+            use core::hint::black_box;
+
+            #[repr(C)]
+            pub struct W(pub [u32; $n]);
+
+            #[inline(never)]
+            #[unsafe(export_name = concat!("ch03c_arg_rust_", $n))]
+            pub fn arg_rust(mut s: W) -> u32 {
+                s.0.reverse();
+                black_box(&mut s);
+                s.0[0]
+            }
+
+            #[inline(never)]
+            #[unsafe(export_name = concat!("ch03c_arg_c_", $n))]
+            pub extern "C" fn arg_c(mut s: W) -> u32 {
+                s.0.reverse();
+                black_box(&mut s);
+                s.0[0]
+            }
+
+            #[inline(never)]
+            #[unsafe(export_name = concat!("ch03c_ret_rust_", $n))]
+            pub fn ret_rust(x: u32) -> W {
+                W([x; $n])
+            }
+
+            #[inline(never)]
+            #[unsafe(export_name = concat!("ch03c_ret_c_", $n))]
+            pub extern "C" fn ret_c(x: u32) -> W {
+                W([x; $n])
+            }
+
+            #[inline(never)]
+            #[unsafe(export_name = concat!("ch03c_call_rust_", $n))]
+            pub fn call_rust(s: &W) -> u32 {
+                arg_rust(W(s.0))
+            }
+
+            #[inline(never)]
+            #[unsafe(export_name = concat!("ch03c_call_c_", $n))]
+            pub fn call_c(s: &W) -> u32 {
+                arg_c(W(s.0))
+            }
+        }
+    };
+}
+
+probe!(w1, 1);
+probe!(w2, 2);
+probe!(w3, 3);
+probe!(w4, 4);
+probe!(w5, 5);
+probe!(w16, 16);
+probe!(w17, 17);
+probe!(w32, 32);
+probe!(w33, 33);
+probe!(w1024, 1024);
+// ANCHOR_END: probes

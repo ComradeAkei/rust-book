@@ -123,6 +123,33 @@ pub fn partial_array() {
 }
 // ANCHOR_END: partial_array
 
+// ANCHOR: temporaries
+fn peek(n: &Noisy) -> usize {
+    log("peek");
+    n.0.len()
+}
+
+/// Временное значение живёт до конца инструкции, в которой создано. Если
+/// ссылку на временное значение сразу кладут в переменную `let`, оно живёт
+/// до конца блока.
+pub fn temporaries() -> usize {
+    let len = peek(&Noisy("врем."));
+    log("следующая инструкция");
+    let _r = &Noisy("продлённое");
+    log("конец блока");
+    len
+}
+// ANCHOR_END: temporaries
+
+// ANCHOR: tail
+/// Редакция 2024: временные значения хвостового выражения блока
+/// уничтожаются раньше локальных переменных этого блока.
+pub fn tail() -> usize {
+    let _x = Noisy("x");
+    Noisy("хвост").0.len()
+}
+// ANCHOR_END: tail
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -170,6 +197,21 @@ mod tests {
         assert_eq!(take_log(), ["без паники", "b", "a"]);
         assert!(catch_unwind(|| unwinding(true)).is_err());
         assert_eq!(take_log(), ["b", "a"]);
+    }
+
+    #[test]
+    fn temporaries_live_to_end_of_statement() {
+        assert_eq!(temporaries(), 9);
+        assert_eq!(
+            take_log(),
+            ["peek", "врем.", "следующая инструкция", "конец блока", "продлённое"]
+        );
+    }
+
+    #[test]
+    fn tail_temporaries_first() {
+        assert_eq!(tail(), 10);
+        assert_eq!(take_log(), ["хвост", "x"]);
     }
 
     #[test]
