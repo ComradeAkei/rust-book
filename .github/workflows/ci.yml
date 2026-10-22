@@ -59,13 +59,19 @@ jobs:
       # C-пример главы 10: qsort с компаратором через указатель против
       # сортировки, размноженной макросом.
       - run: bash code/ch10/c/run.sh
+      # C-пример главы 11: struct file_operations, указатель на таблицу в
+      # каждом объекте, промахи предсказателя по модели valgrind и вызов
+      # через переходник retpoline.
+      - run: sudo apt-get update && sudo apt-get install -y valgrind
+      - run: bash code/ch11/c/run.sh
       # Заготовки студента не проходят тесты, пока задачи не решены,
       # но обязаны собираться.
       - run: |
           cargo build -p ch00-exercises -p ch01-exercises -p ch02-exercises \
             -p ch02-exercises-2021 -p ch03-exercises -p ch04-exercises \
             -p ch05-exercises -p ch06-exercises -p ch07-exercises -p ch08-exercises \
-            -p ch09-exercises -p ch10-exercises -p project-frame --all-targets
+            -p ch09-exercises -p ch10-exercises -p ch11-exercises -p project-frame \
+            --all-targets
       # Вложенные рабочие пространства глав 7 и 8 корневой cargo не видит:
       # их собирают тесты, а формат и clippy проверяются здесь. В typo
       # предупреждения о cfg — предмет опыта, в заготовке d-station ошибка
@@ -121,6 +127,10 @@ jobs:
       # SPI-flash задачи 10.D на модели W25Q. qsort из libc Miri не
       # исполняет, эти тесты помечены ignore.
       - run: cargo +nightly miri test -p ch10 -p ch10-solutions
+      # Глава 11: объекты трейтов, таблица задачи 11.B и её деструкторы.
+      # Чтение таблицы методов в задаче 11.D Miri отвергает, этот тест
+      # помечен ignore.
+      - run: cargo +nightly miri test -p ch11 -p ch11-solutions
       - run: cargo +nightly miri test -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
       # Чек-лист приложения C требует проходить Miri в обеих моделях алиасинга.
       - run: cargo +nightly miri test -p appendix-c
@@ -130,7 +140,9 @@ jobs:
       # nightly, stable проверяет лишь то, что пример не компилируется.
       - run: |
           cargo +nightly test --doc -p ch00 -p ch01 -p ch02 -p ch06 -p ch07 -p ch08 -p ch09 \
-            -p ch10 -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
+            -p ch10 -p ch11 -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
+      # Глава 11: DynMetadata и -Zretpoline есть только в nightly.
+      - run: cargo +nightly test -p ch11 --features nightly --test nightly
       - run: |
           cargo +nightly test --doc -p ch03 -p ch04 -p ch05 -p ch03-solutions \
             -p ch04-solutions -p ch05-solutions
@@ -191,6 +203,11 @@ jobs:
       - run: |
           cargo +nightly test -p ch10 -p ch10-solutions -- --skip rustc_ --skip task_a \
             --skip task_b_inlined --skip task_c_types --skip task_c_sizes --skip task_d_types
+      # Глава 11: ассемблер `rustc_`, проба 11.A для Cortex-M3 и ассемблер
+      # задач 11.B и 11.C собираются закреплённым cargo.
+      - run: |
+          cargo +nightly test -p ch11 -p ch11-solutions -- --skip rustc_ --skip task_a_thumb \
+            --skip task_b_same_code --skip task_c_calls
 
   thumb:
     name: Cortex-M и QEMU
@@ -230,6 +247,14 @@ jobs:
             cargo build -p ch10 --no-default-features --features alloc --target "$t"
             cargo build -p ch10-solutions -p ch10-exercises --target "$t"
           done
+      # Глава 11: без alloc (таблицы во flash) и с alloc (Box, Rc, задачи).
+      - name: Глава 11 без std под три цели Cortex-M
+        run: |
+          for t in thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabihf; do
+            cargo build -p ch11 --no-default-features --target "$t"
+            cargo build -p ch11 --no-default-features --features alloc --target "$t"
+            cargo build -p ch11-solutions -p ch11-exercises --target "$t"
+          done
       - name: Главы 0–2 без std под три цели Cortex-M
         run: |
           for t in thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabihf; do
@@ -257,7 +282,7 @@ jobs:
       - run: |
           sudo apt-get update && sudo apt-get install -y qemu-system-arm \
             gdb-multiarch llvm gcc-arm-none-eabi libnewlib-arm-none-eabi
-      - name: Опыты глав 0, 3, 5, 6, 7, 8, 9 и 10 в QEMU
+      - name: Опыты глав 0, 3, 5–11 в QEMU
         run: bash firmware/run-demos.sh
       - name: Задача 2.B на дизассемблере всех прошивок
         run: cargo test -p ch02-solutions -- --ignored own_firmware --nocapture
