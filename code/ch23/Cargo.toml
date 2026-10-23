@@ -1,0 +1,16 @@
+[package]
+name = "ch23"
+version = "0.1.0"
+description = "Глава 23: декларативные макросы — правила, фрагменты, повторения, гигиена, TT-muncher, макросы для железа"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[features]
+default = ["std"]
+# Макросы раскрываются на хосте при любой цели, а сгенерированный ими код —
+# обычный no_std: без этой возможности библиотека собирается для Cortex-M,
+# и тест кодогенерации сравнивает раскрытый макрос с рукописным кодом на
+# thumbv7m-none-eabi.
+std = []

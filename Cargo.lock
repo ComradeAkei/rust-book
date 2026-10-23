@@ -394,6 +394,18 @@ name = "ch22-solutions"
 version = "0.1.0"
 
 [[package]]
+name = "ch23"
+version = "0.1.0"
+
+[[package]]
+name = "ch23-exercises"
+version = "0.1.0"
+
+[[package]]
+name = "ch23-solutions"
+version = "0.1.0"
+
+[[package]]
 name = "embedded-hal"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

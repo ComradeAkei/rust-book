@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Прогоняет все прошивки глав 0, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15 и 22 в QEMU и сверяет вывод с ожидаемым.
+# Прогоняет все прошивки глав 0, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 22 и 23 в QEMU и сверяет вывод с ожидаемым.
 # Запуск: ./run-demos.sh (из каталога firmware). Используется и в CI.
 set -u
 cd "$(dirname "$0")"
@@ -177,5 +177,10 @@ run "M3: автомат задачи без кучи"          "автомат �
 runin "M3: задачи в арене, байты UART0"      "uart: «ping»" $'ping\n' -p ch22-tasks
 runin "M3: SysTick будит только свою задачу" "задачи завершены: опросов [4, " $'ping\n' -p ch22-tasks
 runin "M3: очередь приёма без потерь"        "потеряно байт 0" $'ping\n' -p ch22-tasks
+
+run "M3: peripheral! — строка через UART0"   "uart0: hello from peripheral!" -p ch23-periph
+run "M3: flags! — CR после сброса"          "CR после сброса: Cr(TXE | RXE)" -p ch23-periph
+run "M3: flags! — CR после включения"       "CR: Cr(UARTEN | TXE | RXE)" -p ch23-periph
+run "M3: flags! — передатчик пуст"         "FR, передатчик: Fr(TXFE)" -p ch23-periph
 
 exit $fail

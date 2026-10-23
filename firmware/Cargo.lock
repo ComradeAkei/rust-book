@@ -261,6 +261,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "ch23-periph"
+version = "0.1.0"
+dependencies = [
+ "ch23-solutions",
+ "cortex-m",
+ "cortex-m-rt",
+ "cortex-m-semihosting",
+]
+
+[[package]]
+name = "ch23-solutions"
+version = "0.1.0"
+
+[[package]]
 name = "cortex-m"
 version = "0.7.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
