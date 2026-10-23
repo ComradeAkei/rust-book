@@ -491,4 +491,9 @@ jobs:
       - run: python3 tools/check-includes.py
       - run: |
           mdbook build 2>&1 | tee mdbook.log
-          ! grep -E "WARN|ERROR" mdbook.log
+          # Предупреждение «search index is very large» безвредно (поиск
+          # работает) и неизбежно растёт вместе с книгой; на нём не падаем.
+          # Любой другой WARN/ERROR (пропущенный файл, битая ссылка) — отказ.
+          if grep -E "WARN|ERROR" mdbook.log | grep -qv "search index is very large"; then
+            echo "mdBook: неожиданные WARN/ERROR в журнале"; exit 1
+          fi

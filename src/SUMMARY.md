@@ -201,7 +201,14 @@
 # Часть IV. Конкурентность
 
 - [О части IV](part4.md)
-- [20. Потоки, Send и Sync](ch20.md)
+- [20. Потоки, Send и Sync](ch20/index.md)
+    - [20.1. Потоки: spawn, join, move](ch20/01-spawn.md)
+    - [20.2. Send и Sync](ch20/02-marker.md)
+    - [20.3. Общее состояние: Arc, Mutex, RwLock](ch20/03-shared.md)
+    - [20.4. Области потоков: thread::scope](ch20/04-scoped.md)
+    - [20.5. Передача сообщений и ожидание](ch20/05-channels.md)
+    - [20.6. Цена: ложное разделение](ch20/06-padding.md)
+    - [20.7. Задачи](ch20/07-tasks.md)
 - [21. Атомики и модель памяти](ch21.md)
 - [22. Асинхронность изнутри](ch22.md)
 
@@ -253,3 +260,4 @@
     - [Глава 17](appendix-e/ch17.md)
     - [Глава 18](appendix-e/ch18.md)
     - [Глава 19](appendix-e/ch19.md)
+    - [Глава 20](appendix-e/ch20.md)

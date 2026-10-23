@@ -179,7 +179,7 @@ src/                      текст книги (mdBook)
   ch10/ ch11/ ch12/       главы 10–12, по файлу на раздел
   ch13/ ch14/ ch15/        главы 13–15, по файлу на раздел
   ch16/ ch17/ ch18/        главы 16–18, по файлу на раздел
-  ch19/                   глава 19, по файлу на раздел
+  ch19/ ch20/             главы 19–20, по файлу на раздел
   appendix-e/             разборы задач всех глав
 code/chNN/                примеры главы; листинги попадают в текст через {{#include}}
 code/ch01/c/ … ch15/c/    те же примеры на C и run.sh, который сверяет их вывод с текстом
@@ -283,6 +283,7 @@ $ bash code/ch17/ub/run.sh                # UB-вызовы каталога tra
 $ cargo test -p ch18-exercises            # задачи A, B, D и логика FIFO задачи C главы 18
 $ bash solutions/ch18/c/run.sh            # драйвер кольцевого буфера задачи C на C под ASan
 $ cargo test -p ch19-exercises            # задачи A–D главы 19
+$ cargo test -p ch20-exercises            # задачи A–D главы 20 (C — свой futex-мьютекс)
 $ cargo test -p project-frame             # задачи П6, П7, П12 и П13
 $ cargo test -p project-frame p7          # только П7
 $ cargo test -p project-frame p12         # только П12
