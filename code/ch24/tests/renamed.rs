@@ -14,6 +14,9 @@ fn check(features: &[&str]) -> Output {
         .env_remove("RUSTUP_TOOLCHAIN")
         .env_remove("RUSTFLAGS")
         .arg("check")
+        // Текст ошибки сравнивается ниже: без кодов цвета, даже если
+        // снаружи задан CARGO_TERM_COLOR=always (так в CI).
+        .args(["--color", "never"])
         .arg("--target-dir")
         .arg(&target)
         .arg("--manifest-path")
