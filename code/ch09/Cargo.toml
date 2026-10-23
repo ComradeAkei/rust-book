@@ -1,0 +1,17 @@
+[package]
+name = "ch09"
+version = "0.1.0"
+description = "Глава 9: трейты, ассоциированные типы и константы, когерентность, маркерные и стандартные трейты"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[features]
+default = ["std"]
+# Примеры с std. Без этой возможности библиотека собирается в no_std для
+# Cortex-M.
+std = ["alloc"]
+# Примеры с Vec, String и BTreeMap. Прошивке, у которой нет распределителя
+# памяти, они не нужны.
+alloc = []

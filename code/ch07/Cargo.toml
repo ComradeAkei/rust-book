@@ -1,0 +1,27 @@
+[package]
+name = "ch07"
+version = "0.1.0"
+description = "Глава 7: Result и ?, преобразование и цепочки ошибок, паника, раскрутка стека, граница FFI"
+edition.workspace = true
+# PanicHookInfo::payload_as_str в программе panics стабильна с 1.91.
+rust-version = "1.91"
+license.workspace = true
+publish.workspace = true
+
+[features]
+default = ["std"]
+# Программа panics и примеры с std::io и раскруткой стека. Без этой фичи
+# библиотека собирается в no_std для Cortex-M.
+std = []
+
+[[bin]]
+name = "panics"
+required-features = ["std"]
+
+[[bin]]
+name = "main_result"
+required-features = ["std"]
+
+[[test]]
+name = "panics"
+required-features = ["std"]

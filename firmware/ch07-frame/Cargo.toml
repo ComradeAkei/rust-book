@@ -1,0 +1,31 @@
+[package]
+name = "ch07-frame"
+version = "0.1.0"
+description = "Глава 7, сквозной проект: ошибки протокола telemetry-frame на Cortex-M и цена их Display"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+cortex-m-rt = { workspace = true }
+cortex-m-semihosting = { workspace = true }
+telemetry-frame = { path = "../../project/telemetry-frame" }
+
+[[bin]]
+name = "quiet"
+test = false
+bench = false
+
+[[bin]]
+name = "verbose"
+test = false
+bench = false
+
+[[bin]]
+name = "direct"
+test = false
+bench = false

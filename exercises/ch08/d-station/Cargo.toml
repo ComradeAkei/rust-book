@@ -1,0 +1,11 @@
+# Задача 8.D: рабочее пространство станции. Пакеты собираются по одному,
+# но не вместе: `cargo build --workspace` падает. Перестройте возможности
+# крейта units так, чтобы они стали аддитивными.
+[workspace]
+resolver = "3"
+members = ["units", "panel", "export"]
+
+[workspace.package]
+edition = "2024"
+license = "MIT OR Apache-2.0"
+publish = false

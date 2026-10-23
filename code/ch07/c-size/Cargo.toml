@@ -1,0 +1,13 @@
+# Программа для задачи 7.C: её размер и таблицы раскрутки измеряют при
+# panic = "unwind" (по умолчанию) и panic = "abort". Отдельный workspace,
+# чтобы профиль сборки задавался здесь, а не корнем репозитория.
+[package]
+name = "ch07-c-size"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[workspace]
+
+[profile.release]
+opt-level = 3

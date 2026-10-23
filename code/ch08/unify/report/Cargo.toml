@@ -1,0 +1,12 @@
+[package]
+name = "report"
+version = "0.1.0"
+edition.workspace = true
+publish.workspace = true
+
+# ANCHOR: features
+[features]
+# Шестнадцатеричный вывод значений. Возможность меняет поведение, а не
+# добавляет его, — так делать нельзя (раздел 8.4).
+hex = []
+# ANCHOR_END: features

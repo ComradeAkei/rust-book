@@ -1,0 +1,10 @@
+[package]
+name = "panel"
+version = "0.1.0"
+description = "Табло станции: температура в градусах Цельсия"
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+units = { path = "../units", features = ["celsius"] }

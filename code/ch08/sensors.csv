@@ -1,0 +1,7 @@
+# Датчики станции: номер, имя, единица, множитель сырого отсчёта.
+# Из этого файла build.rs генерирует таблицу SENSORS (раздел 8.5).
+id,name,unit,scale
+1,board_temp,mC,10
+2,ext_temp,mC,10
+7,pressure,Pa,25
+12,battery,mV,2

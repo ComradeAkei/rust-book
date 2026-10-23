@@ -353,7 +353,7 @@ help: <178040> was created by a SharedReadWrite retag at offsets [0x8..0x10]
 | `goto` на выход из вложенных циклов | метки `'outer:` и `break 'outer` | |
 | `goto err_N` для отката | `?` и `Drop` | пример ниже |
 | оператор «запятая» | блок `{ a; b }` | |
-| `setjmp` / `longjmp` | нет; паника и `catch_unwind` — не для управления потоком | [гл. 7](ch07.md) |
+| `setjmp` / `longjmp` | нет; паника и `catch_unwind` — не для управления потоком | [гл. 7](ch07/index.md) |
 | `exit(code)` | `std::process::exit(code)` | деструкторы не вызываются, ловушка ниже |
 | `abort()` | `std::process::abort()` | |
 | `__builtin_unreachable()` | `unreachable!()` или `unsafe { unreachable_unchecked() }` | первое паникует, второе — UB, если достижимо |
@@ -428,7 +428,7 @@ err_clk:
 
 | C | Rust | Замечание |
 |---|---|---|
-| `return -1` и `errno` | `Result<T, E>` | ошибка — значение, её нельзя не заметить ([гл. 7](ch07.md)) |
+| `return -1` и `errno` | `Result<T, E>` | ошибка — значение, её нельзя не заметить ([гл. 7](ch07/index.md)) |
 | `NULL` как «не найдено» | `Option<T>` | |
 | `if (rc < 0) return rc;` | `?` | с преобразованием через `From` |
 | `perror(msg)` | `eprintln!("{msg}: {e}")` | `io::Error` печатает текст `strerror` |
@@ -536,7 +536,7 @@ char boundary`.
 |---|---|---|
 | `int (*f)(int)` | `fn(i32) -> i32` | никогда не NULL; `Option<fn(...)>` того же размера |
 | колбэк + `void *ctx` | замыкание: `impl FnMut(...)`, `&mut dyn FnMut(...)` | контекст типизирован ([гл. 12](ch12.md)) |
-| `static` функция в файле | функция без `pub` | видимость на уровне модуля ([гл. 8](ch08.md)) |
+| `static` функция в файле | функция без `pub` | видимость на уровне модуля ([гл. 8](ch08/01-modules.md)) |
 | `extern` объявление | `use`; для C — `unsafe extern "C" { ... }` | [гл. 18](ch18.md), [приложение B](appendix-b.md) |
 | `inline`, `__attribute__((always_inline))`, `noinline` | `#[inline]`, `#[inline(always)]`, `#[inline(never)]` | |
 | `__attribute__((noreturn))` | `-> !` | |
@@ -581,12 +581,12 @@ overflow: 2147483647 - -1 cannot be represented in type 'int'`, а без
 
 | C | Rust | Замечание |
 |---|---|---|
-| `#include` | `mod`, `use` | заголовков нет ([гл. 8](ch08.md)) |
+| `#include` | `mod`, `use` | заголовков нет ([гл. 8](ch08/01-modules.md)) |
 | `#define N 16` | `const N: usize = 16;` | типизирована, видна отладчику |
 | `#define MAX(a, b) ...` | `fn`, `core::cmp::max`, `macro_rules!` | ловушка ниже |
 | `#ifdef DEBUG` | `#[cfg(debug_assertions)]`, `cfg!(...)` | |
 | `#if defined(__x86_64__)` | `#[cfg(target_arch = "x86_64")]` | также `target_os`, `target_has_atomic` |
-| `-DFEATURE` | возможности Cargo (`features`), `--cfg` | [гл. 8](ch08.md) |
+| `-DFEATURE` | возможности Cargo (`features`), `--cfg` | [гл. 8](ch08/04-features.md) |
 | `#error` | `compile_error!` | |
 | `_Static_assert` | `const _: () = assert!(...);` | [6.2](ch06/02-repr-c.md) |
 | `__FILE__`, `__LINE__` | `file!()`, `line!()` | `#[track_caller]` и `Location::caller()` для места вызова |
@@ -715,7 +715,7 @@ appa_clz:                   appa_clz:
 
 | C | Rust | Замечание |
 |---|---|---|
-| `make`, CMake | `cargo build` | [гл. 0](ch00/02-cargo.md), [гл. 8](ch08.md) |
+| `make`, CMake | `cargo build` | [гл. 0](ch00/02-cargo.md), [гл. 8](ch08/02-crates.md) |
 | `-O0`, `-O2`, `-Os`, `-Oz` | `opt-level = 0`, `2`, `"s"`, `"z"` в `[profile]` | release по умолчанию `opt-level = 3` |
 | `-g` | `debug = true` | |
 | `-flto` | `lto = true` или `"thin"` | |
@@ -723,14 +723,14 @@ appa_clz:                   appa_clz:
 | `-march=native` | `-C target-cpu=native` | |
 | `-mcpu=cortex-m4 -mthumb -mfloat-abi=hard` | `--target thumbv7em-none-eabihf` | |
 | `-ffreestanding -nostdlib` | `#![no_std]`, `#![no_main]` | [гл. 26](ch26.md) |
-| `-fno-exceptions` | `panic = "abort"` | [гл. 7](ch07.md) |
+| `-fno-exceptions` | `panic = "abort"` | [гл. 7](ch07/index.md) |
 | `-ftrapv` | `overflow-checks = true` | |
 | `-fwrapv` | `wrapping_*`, `Wrapping<T>` | |
 | `-fno-strict-aliasing` | не нужен: алиасинг на основе типов в Rust не используется | правила для `&` и `&mut` ([гл. 4](ch04/index.md)) |
 | `-Wall -Wextra -Werror` | `cargo clippy -- -D warnings` | |
 | `-fsanitize=address`, `thread` | `-Zsanitizer=address`, `thread` (nightly) | для `unsafe` — ещё и Miri ([гл. 31](ch31.md)) |
 | скрипт компоновки `-T` | `memory.x` и `-C link-arg=-Tlink.x` | `firmware/.cargo/config.toml` |
-| `.a`, `.so` | `crate-type = ["staticlib"]`, `["cdylib"]` | [гл. 8](ch08.md), [гл. 18](ch18.md) |
+| `.a`, `.so` | `crate-type = ["staticlib"]`, `["cdylib"]` | [гл. 8](ch08/06-crate-types.md), [гл. 18](ch18.md) |
 | `pkg-config`, `-lfoo` | `build.rs` и `cargo:rustc-link-lib=foo` | |
 | `objdump -d`, `nm` | `cargo asm`, `llvm-objdump`, `nm` | [гл. 0](ch00/03-asm.md) |
 

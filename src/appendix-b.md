@@ -88,7 +88,7 @@ rustdoc сверяет только на nightly, поэтому вторая к
 ```
 
 В прошивках для Cortex-M так кладут данные в нужную область памяти
-([гл. 8](ch08.md), [гл. 27](ch27.md)). Макросы `#[entry]` и `#[exception]`
+([гл. 8](ch08/08-sections.md), [гл. 27](ch27.md)). Макросы `#[entry]` и `#[exception]`
 из `cortex-m-rt` раскрываются как раз в `export_name` и `link_section`.
 
 ### Тело unsafe fn

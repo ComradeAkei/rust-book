@@ -47,12 +47,37 @@ jobs:
       - run: bash code/ch03/c/run.sh
       - run: bash code/ch04/c/run.sh
       - run: bash code/ch05/c/run.sh
+      # C-примеры главы 7: errno, забытая проверка кода возврата и longjmp
+      # мимо очистки (анализаторы GCC и clang, LeakSanitizer).
+      - run: bash code/ch07/c/run.sh
+      # C-примеры главы 8: #ifdef с опечаткой и столкновение глобальных
+      # имён при компоновке двух файлов.
+      - run: bash code/ch08/c/run.sh
+      # C-пример главы 9: таблица указателей на функции вместо трейта, где
+      # забытый указатель компиляторы пропускают, а программа падает.
+      - run: bash code/ch09/c/run.sh
       # Заготовки студента не проходят тесты, пока задачи не решены,
       # но обязаны собираться.
       - run: |
           cargo build -p ch00-exercises -p ch01-exercises -p ch02-exercises \
             -p ch02-exercises-2021 -p ch03-exercises -p ch04-exercises \
-            -p ch05-exercises -p ch06-exercises -p project-frame --all-targets
+            -p ch05-exercises -p ch06-exercises -p ch07-exercises -p ch08-exercises \
+            -p ch09-exercises -p project-frame --all-targets
+      # Вложенные рабочие пространства глав 7 и 8 корневой cargo не видит:
+      # их собирают тесты, а формат и clippy проверяются здесь. В typo
+      # предупреждения о cfg — предмет опыта, в заготовке d-station ошибка
+      # сборки — условие задачи 8.D, поэтому clippy их не проверяет.
+      - name: fmt и clippy вложенных рабочих пространств
+        run: |
+          for ws in code/ch07/c-size code/ch08/typo code/ch08/unify code/ch08/ffi \
+              exercises/ch08/c/station solutions/ch08/c/station \
+              exercises/ch08/d-station solutions/ch08/d-station; do
+            cargo fmt --all --check --manifest-path "$ws/Cargo.toml"
+          done
+          for ws in code/ch07/c-size code/ch08/unify code/ch08/ffi \
+              exercises/ch08/c/station solutions/ch08/c/station solutions/ch08/d-station; do
+            cargo clippy --manifest-path "$ws/Cargo.toml" --all-targets -- -D warnings
+          done
 
   miri:
     name: Miri
@@ -78,6 +103,17 @@ jobs:
         env:
           MIRIFLAGS: -Zmiri-tree-borrows
       - run: cargo +nightly miri test -p ch06 -p ch06-regs -p ch06-solutions -p telemetry-frame
+      # Глава 7: раскрутка через деструкторы, catch_unwind и буфер задачи
+      # 7.D проходят обе модели алиасинга.
+      - run: cargo +nightly miri test -p ch07 -p ch07-solutions
+      - run: cargo +nightly miri test -p ch07 -p ch07-solutions
+        env:
+          MIRIFLAGS: -Zmiri-tree-borrows
+      # Глава 8: таблица датчиков из build.rs, видимость и задачи без
+      # запуска cargo и компилятора.
+      - run: cargo +nightly miri test -p ch08 -p ch08-solutions
+      # Глава 9: трейты, маркеры и драйверы задач 9.B и 9.D на моделях шин.
+      - run: cargo +nightly miri test -p ch09 -p ch09-solutions
       - run: cargo +nightly miri test -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
       # Чек-лист приложения C требует проходить Miri в обеих моделях алиасинга.
       - run: cargo +nightly miri test -p appendix-c
@@ -86,7 +122,7 @@ jobs:
       # Коды ошибок в doc-тестах compile_fail,EXXXX rustdoc сверяет только на
       # nightly, stable проверяет лишь то, что пример не компилируется.
       - run: |
-          cargo +nightly test --doc -p ch00 -p ch01 -p ch02 -p ch06 \
+          cargo +nightly test --doc -p ch00 -p ch01 -p ch02 -p ch06 -p ch07 -p ch08 -p ch09 \
             -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
       - run: |
           cargo +nightly test --doc -p ch03 -p ch04 -p ch05 -p ch03-solutions \
@@ -126,6 +162,22 @@ jobs:
       # Тесты группы `observed` фиксируют поведение текущего rustc и под
       # случайной раскладкой обязаны падать (раздел 6.2), поэтому их пропускаем.
       - run: cargo +nightly test -p ch06 -- --skip observed
+      # Глава 7: задача 7.A собирает фрагменты закреплённым rustc, 7.C —
+      # программу закреплённым cargo; `observed_sizes` фиксирует размеры
+      # repr(Rust) у текущего rustc.
+      - run: |
+          cargo +nightly test -p ch07 -p ch07-solutions -- \
+            --skip task_a --skip task_c --skip observed
+      # Глава 8: опыты `cargo_` и задачи 8.A, 8.B (сборка под Cortex-M),
+      # 8.C (make) и 8.D запускают закреплённые rustc и cargo.
+      - run: |
+          cargo +nightly test -p ch08 -p ch08-solutions -- \
+            --skip cargo_ --skip task_a --skip task_b_flash --skip task_c_from_c --skip task_d
+      # Глава 9: раскрытие derive и пробы задач 9.A, 9.B и 9.C собирает
+      # закреплённый rustc, а 9.B ещё и cargo под Cortex-M0.
+      - run: |
+          cargo +nightly test -p ch09 -p ch09-solutions -- --skip rustc_ \
+            --skip task_a --skip task_b_access --skip task_b_thumb --skip task_c_sealed
 
   thumb:
     name: Cortex-M и QEMU
@@ -141,8 +193,21 @@ jobs:
       - name: Крейты глав под три цели Cortex-M
         run: |
           for t in thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabihf; do
-            cargo build -p ch06 -p ch06-regs -p telemetry-frame -p ch06-solutions \
+            cargo build -p ch06 -p ch06-regs -p telemetry-frame -p ch06-solutions -p ch07 \
               --no-default-features --target "$t"
+          done
+      - name: Глава 8 без std под три цели Cortex-M
+        run: |
+          for t in thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabihf; do
+            cargo build -p ch08 -p ch08-solutions --no-default-features --target "$t"
+          done
+      # Глава 9: без alloc, с alloc (BTreeMap и Vec) и задачи с embedded-hal.
+      - name: Глава 9 без std под три цели Cortex-M
+        run: |
+          for t in thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabihf; do
+            cargo build -p ch09 --no-default-features --target "$t"
+            cargo build -p ch09 --no-default-features --features alloc --target "$t"
+            cargo build -p ch09-solutions -p ch09-exercises --target "$t"
           done
       - name: Главы 0–2 без std под три цели Cortex-M
         run: |
@@ -171,7 +236,7 @@ jobs:
       - run: |
           sudo apt-get update && sudo apt-get install -y qemu-system-arm \
             gdb-multiarch llvm gcc-arm-none-eabi libnewlib-arm-none-eabi
-      - name: Опыты глав 0, 3, 5 и 6 в QEMU
+      - name: Опыты глав 0, 3, 5, 6, 7, 8 и 9 в QEMU
         run: bash firmware/run-demos.sh
       - name: Задача 2.B на дизассемблере всех прошивок
         run: cargo test -p ch02-solutions -- --ignored own_firmware --nocapture

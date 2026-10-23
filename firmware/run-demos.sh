@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Прогоняет все прошивки глав 0, 3, 5 и 6 в QEMU и сверяет вывод с ожидаемым.
+# Прогоняет все прошивки глав 0, 3, 5, 6, 7, 8 и 9 в QEMU и сверяет вывод с ожидаемым.
 # Запуск: ./run-demos.sh (из каталога firmware). Используется и в CI.
 set -u
 cd "$(dirname "$0")"
@@ -48,6 +48,25 @@ rungdb() {
     fi
 }
 
+# symbols <описание> <есть|нет> <подстрока> <пакет> <бинарник>
+# Ищет подстроку в именах символов прошивки для Cortex-M3 (раздел 7.10).
+symbols() {
+    local what="$1" want="$2" needle="$3" pkg="$4" bin="$5"
+    if ! command -v llvm-nm >/dev/null; then
+        echo "skip  $what: нет llvm-nm"
+        return
+    fi
+    cargo build --release -q -p "$pkg" --bin "$bin" || { fail=1; return; }
+    local elf="${CARGO_TARGET_DIR:-target}/thumbv7m-none-eabi/release/$bin" found=нет
+    if llvm-nm -C "$elf" | grep -qF -- "$needle"; then found=есть; fi
+    if [ "$found" = "$want" ]; then
+        echo "ok    $what"
+    else
+        echo "FAIL  $what: «$needle» ожидалось: $want"
+        fail=1
+    fi
+}
+
 M0=(--target thumbv6m-none-eabi)
 M4F=(--target thumbv7em-none-eabihf)
 
@@ -75,5 +94,30 @@ run "M3: core::fmt с UNALIGN_TRP"          "UFSR.UNALIGNED"             -p ch06
 run "M0: LDR по нечётному адресу"          "HardFault на Cortex-M0"     -p ch06-unaligned --bin ldr "${M0[@]}"
 run "M0: LDRD отсутствует"                 "инструкции LDRD в ARMv6-M нет" -p ch06-unaligned --bin ldrd "${M0[@]}"
 run "M0: UNALIGN_TRP всегда включён"       "UNALIGN_TRP = true"         -p ch06-unaligned --bin trap "${M0[@]}"
+
+run "M3: место паники из PanicInfo"        "паника в ch07-panic/src/lib.rs:24:5" -p ch07-panic --bin report
+run "M3: сообщение паники"                 "index out of bounds: the len is 4 but the index is 4" -p ch07-panic --bin report
+run "M0: сообщение паники"                 "index out of bounds: the len is 4 but the index is 4" -p ch07-panic --bin report "${M0[@]}"
+run "M3: паника без отчёта"                "канал прочитан"             -p ch07-panic --bin silent
+
+run "M3: реакция на ошибку кадра"          "искать маркер со следующего байта" -p ch07-frame --bin quiet
+run "M3: цепочка ошибок кадра"             "  причина: CRC не совпадает: в кадре 0x5555, посчитано 0x9db4" -p ch07-frame --bin verbose
+run "M0: цепочка ошибок кадра"             "ошибка: кадр со смещения 8 отвергнут" -p ch07-frame --bin verbose "${M0[@]}"
+run "M3: причина без dyn Error"            "  причина: CRC не совпадает: в кадре 0x5555, посчитано 0x9db4" -p ch07-frame --bin direct
+symbols "M3: без сообщений нет core::fmt"  нет "core::fmt" ch07-frame quiet
+symbols "M3: без dyn Error нет Debug"      нет "FrameError as core::fmt::Debug" ch07-frame direct
+symbols "M3: dyn Error тянет Debug"        есть "FrameError as core::fmt::Debug" ch07-frame verbose
+
+run "M3: ch08_bump на LDREX/STREX"         "ch08_bump (LDREX/STREX): было 41, стало 42" -p ch08-sections --bin target
+run "M0: ch08_bump с запретом прерываний"  "ch08_bump (запрет прерываний): было 41, стало 42" -p ch08-sections --bin target "${M0[@]}"
+run "M0: cfg! в build.rs — про хост"       "cfg!(target_arch = \"arm\") = false" -p ch08-sections --bin target "${M0[@]}"
+run "M3: таблица из sensors.csv"           "датчик 12 battery    ×2 mV" -p ch08-sections --bin target
+run "M3: .uninit переживает сброс"         "загрузка 2: .uninit 0x2000000c, RUNS = 0" -p ch08-sections --bin boot
+run "M0: .uninit переживает сброс"         "загрузка 2: .uninit 0x2000000c, RUNS = 0" -p ch08-sections --bin boot "${M0[@]}"
+run "M4F: .uninit переживает сброс"        "загрузка 2: .uninit 0x2000000c, RUNS = 0" -p ch08-sections --bin boot "${M4F[@]}"
+
+run "M3: SysTick через трейт Register"     "SysTick: 3 периода по 100000 тактов отсчитаны" -p ch09-systick
+run "M0: SysTick через трейт Register"     "SysTick: 3 периода по 100000 тактов отсчитаны" -p ch09-systick "${M0[@]}"
+run "M4F: SysTick через трейт Register"    "SysTick: 3 периода по 100000 тактов отсчитаны" -p ch09-systick "${M4F[@]}"
 
 exit $fail
