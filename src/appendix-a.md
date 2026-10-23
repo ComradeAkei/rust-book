@@ -50,7 +50,7 @@ C-примеры лежат в `code/appendix-a/c/`. Скрипт собирае
 | битовые поля | сдвиги и маски, типы-обёртки регистров | [6.9](ch06/09-registers.md) |
 | `typedef` | `type` (синоним) или newtype (новый тип) | [6.1](ch06/01-structs.md) |
 | `T data[]` в конце структуры | `struct { len: usize, data: [T] }` | тип динамического размера ([гл. 17](ch17/06-dst.md)) |
-| `const`-объект | `const` (подставляется) или `static` (один адрес) | [гл. 25](ch25.md) |
+| `const`-объект | `const` (подставляется) или `static` (один адрес) | [гл. 25](ch25/01-consts.md) |
 | `volatile` | `read_volatile`, `write_volatile` | volatile — свойство доступа, а не типа ([гл. 17](ch17/05-volatile.md)) |
 | `restrict` | `&mut T` | компилятор знает это без пометок |
 | `_Atomic` | `AtomicU32` и другие | [гл. 21](ch21/01-atomics.md) |
@@ -542,7 +542,7 @@ char boundary`.
 | `__attribute__((noreturn))` | `-> !` | |
 | `...` (переменное число аргументов) | макрос; вызов C-функции с `...` возможен | [гл. 18](ch18/index.md), [23.2](ch23/02-repeat.md) |
 | перегрузка, аргументы по умолчанию | нет; трейты, `Option`, строители | |
-| `static` переменная в функции | `static` с атомиком, `OnceLock`, `LazyLock` | [гл. 14](ch14/06-lazy.md), [гл. 25](ch25.md) |
+| `static` переменная в функции | `static` с атомиком, `OnceLock`, `LazyLock` | [гл. 14](ch14/06-lazy.md), [гл. 25](ch25/04-statics.md) |
 | `__attribute__((constructor))` | нет: до `main` код не выполняется | явная инициализация или `LazyLock` |
 | `qsort(v, n, size, cmp)` | `v.sort_unstable_by(\|a, b\| ...)` | мономорфизация, компаратор встраивается ([гл. 10](ch10/06-inlining.md)) |
 

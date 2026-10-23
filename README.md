@@ -16,7 +16,7 @@
 - Программа курса: глава 0, 31 глава в шести частях, приложения A–E.
 - Готова эталонная глава 6 «Составные типы и раскладка памяти»:
   11 разделов, задачи A–D, первая задача проекта П6 и разборы в
-  приложении E. Остальные главы, кроме 0–24, пока содержат план из
+  приложении E. Остальные главы, кроме 0–25, пока содержат план из
   программы курса.
 - Готовы главы 0–2: окружение и инструменты (rustup, cargo, чтение
   ассемблера, одна программа на x86_64 и Cortex-M, Miri и clippy, QEMU и
@@ -209,6 +209,18 @@
   и `#[entry]`, `#[derive(Bitfield)]` со спанами ошибок, `#[timed]` на
   SysTick и DWT, `include_svd!` по файлу CMSIS-SVD и сравнение со
   svd2rust), прошивки `firmware/ch24-expand` и `firmware/ch24-tasks`.
+- Готова глава 25 «Вычисления при компиляции»: `const` как значение и
+  `static` как объект (образцы, повтор в массиве, продвижение в
+  `'static` и адреса копий), `const fn` с её ограничениями и паникой как
+  E0080 (делитель UART PL011), проверки при компиляции — раскладка
+  `repr(C)`, инвариант таблицы, обобщённые проверки и разница между
+  `cargo check` и `cargo build`; атомики, `static mut` в редакции 2024,
+  `Mutex::new` и `LazyLock` в `static`; таблица обратных вместо деления на
+  Cortex-M0 и `hex!` для байтов кадра; цена в ОЗУ на прошивке
+  `firmware/ch25-flash`. Шаг проекта — таблица CRC-16 при компиляции и
+  наблюдение, что LLVM 22 строит такую таблицу сам при `opt-level = 3`.
+  Задачи A–D (секции шести объявлений, CRC-32 и синус без `build.rs`,
+  `ip!` с ошибкой сборки, бюджет ОЗУ из `memory.x`).
 - Готовы приложения A–D: словарь соответствий C → Rust, edition 2024 для
   системного кода, чек-лист ревью `unsafe` с разбором примера, установка
   окружения и отладка в QEMU. Их код лежит в `code/appendix-*`.
@@ -234,6 +246,7 @@ src/                      текст книги (mdBook)
   ch19/ ch20/ ch21/ ch22/  главы 19–22, по файлу на раздел
   ch23/                   глава 23, по файлу на раздел
   ch24/                   глава 24, по файлу на раздел
+  ch25/                   глава 25, по файлу на раздел
   appendix-e/             разборы задач всех глав
 code/chNN/                примеры главы; листинги попадают в текст через {{#include}}
 code/ch01/c/ … ch15/c/    те же примеры на C и run.sh, который сверяет их вывод с текстом
@@ -270,6 +283,9 @@ code/ch24/tests/          снимки trybuild (ui/), снимки раскры
 code/ch24/expanded/       снимки -Zunpretty=expanded: derive(Describe) и #[interrupt] для UART0
 code/ch24/renamed/        отдельное рабочее пространство: ch24 под именем station и #[describe(crate = ...)]
 code/ch24/svd/            lm3s6965.svd: два UART в формате CMSIS-SVD для include_svd! задачи 24.D
+code/ch25/c/              const_size.c, constexpr.c и divisor.c: C17, C23 и препроцессор; run.sh сверяет сообщения gcc
+code/ch25/fragments/      шесть объявлений задачи 25.A и when.rs: когда rustc вычисляет константу
+code/ch25/tests/          ассемблер Cortex-M0/M3 (деление, CRC), check против build, кадр из hex!
 code/ch07/c-size/         программа задачи 7.C: размер при panic = "unwind" и "abort"
 code/ch07/hir/            во что раскрывается `?`: снимок HIR для раздела 7.1
 code/ch08/typo/ unify/ ffi/  отдельные рабочие пространства для опытов главы 8 с cargo
@@ -355,6 +371,7 @@ $ cargo test -p ch21-exercises            # задачи A–D главы 21 (с
 $ cargo test -p ch22-exercises            # задачи A–D2 главы 22 (C — реактор на epoll, только Linux x86-64)
 $ cargo test -p ch23-exercises            # задачи A–D главы 23 (A сверяется с rustc -Zunpretty=expanded)
 $ cargo test -p ch24-exercises            # задачи A–D главы 24 (ошибки макросов — снимки trybuild)
+$ cargo test -p ch25-exercises            # задачи A–D главы 25 (D берёт бюджет ОЗУ из firmware/memory.x)
 $ cargo test -p project-frame             # задачи П6, П7, П12 и П13
 $ cargo test -p project-frame p7          # только П7
 $ cargo test -p project-frame p12         # только П12
@@ -401,10 +418,11 @@ $ cargo +nightly miri test -p ch21 -- single_thread_fifo
 $ cargo +nightly miri test -p ch22 -p ch22-solutions   # и ещё раз с MIRIFLAGS=-Zmiri-tree-borrows
 $ cargo +nightly miri test -p ch23 -p ch23-solutions   # и ещё раз с MIRIFLAGS=-Zmiri-tree-borrows
 $ cargo +nightly miri test -p ch24 -p ch24-solutions   # и ещё раз с MIRIFLAGS=-Zmiri-tree-borrows
+$ cargo +nightly miri test -p ch25 -p ch25-solutions   # и ещё раз с MIRIFLAGS=-Zmiri-tree-borrows
 $ cargo +nightly test --doc -p ch00 -p ch01 -p ch02 -p ch06 -p ch07 -p ch08 -p ch09 \
       -p ch10 -p ch11 -p ch12 -p ch13 -p ch14 -p ch15 -p ch16 -p ch17 -p ch17-solutions \
-      -p ch18 -p ch19 -p ch20 -p ch22 -p ch23 -p ch23-solutions -p ch24 -p appendix-a \
-      -p appendix-b -p appendix-b-2021 -p appendix-c
+      -p ch18 -p ch19 -p ch20 -p ch22 -p ch23 -p ch23-solutions -p ch24 -p ch25 \
+      -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
 $ cargo +nightly test -p ch11 --features nightly --test nightly   # DynMetadata и -Zretpoline
 $ cargo +nightly test -p ch12 --features nightly --test nightly   # Fn, FnMut и FnOnce вручную
 $ cargo +nightly test -p ch19 --features nightly --lib            # переносимый SIMD core::simd
@@ -447,6 +465,8 @@ $ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch23 -p 
       -- --skip rustc_ --skip observed
 $ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch24 -p ch24-macros \
       -p ch24-solutions -- --skip rustc_ --skip observed
+$ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch25 -p ch25-solutions \
+      -- --skip rustc_ --skip observed
 $ cargo build -p ch06 -p ch07 --no-default-features --target thumbv6m-none-eabi
 $ cargo build -p ch08 -p ch08-solutions --no-default-features --target thumbv6m-none-eabi
 $ cargo build -p ch09 --no-default-features --features alloc --target thumbv6m-none-eabi
@@ -471,10 +491,12 @@ $ cargo build -p ch23 --no-default-features --target thumbv6m-none-eabi   # ко
 $ cargo build -p ch23-solutions -p ch23-exercises --target thumbv6m-none-eabi
 $ cargo build -p ch24 --no-default-features --target thumbv6m-none-eabi   # макрос — для хоста; на трёх целях
 $ cargo build -p ch24-solutions -p ch24-exercises --no-default-features --target thumbv6m-none-eabi
+$ cargo build -p ch25 --no-default-features --target thumbv6m-none-eabi   # таблицы и проверки; на трёх целях
+$ cargo build -p ch25-solutions -p ch25-exercises --target thumbv6m-none-eabi
 $ cargo build -p ch00 -p ch01 -p ch02 -p ch00-solutions -p ch01-solutions --target thumbv6m-none-eabi
 $ cargo build -p ch03 -p ch04 -p ch05 -p ch03-solutions -p ch04-solutions -p ch05-solutions \
       --target thumbv6m-none-eabi
-$ bash firmware/run-demos.sh              # опыты глав 0, 3, 5–13, 15, 22, 23 и 24 в QEMU: 6, 5, 2, 8, 11, 7, 3, 2, 5, 7, 5, 7, 7, 4 и 7
+$ bash firmware/run-demos.sh              # опыты глав 0, 3, 5–13, 15, 22–25 в QEMU: 6, 5, 2, 8, 11, 7, 3, 2, 5, 7, 5, 7, 7, 4, 7 и 4
 $ cargo test -p ch02-solutions -- --ignored own_firmware   # задача 2.B на всех прошивках
 $ bash code/appendix-a/c/run.sh           # C-примеры приложения A под UBSan
 $ bash code/ch01/c/run.sh                 # C-примеры главы 1 на x86_64 и в QEMU
@@ -492,6 +514,7 @@ $ bash code/ch13/c/run.sh                 # loops.c: ошибки на един�
 $ bash code/ch14/c/run.sh                 # kref.c и twice.c: счётчик ссылок вручную из главы 14
 $ bash code/ch15/c/run.sh                 # table.c: самодельная хеш-таблица и висячий указатель из главы 15
 $ bash code/ch23/c/run.sh                 # macros.c: SQUARE, MAX, SWAP, LOG2 и X-macro из главы 23
+$ bash code/ch25/c/run.sh                 # const int, constexpr C23 и делитель UART в #if из главы 25
 $ bash code/ch18/c/run.sh                 # C вызывает Rust: непрозрачный счётчик (раздел 18.4) под ASan
 $ bash solutions/ch18/c/run.sh            # C управляет кольцевым буфером (задача C) под ASan
 $ cargo fmt --all --check --manifest-path code/ch08/ffi/Cargo.toml   # и так каждое вложенное
@@ -520,6 +543,10 @@ $ mdbook build
 которые сами запускают cargo (`rustc_*`), и группа `observed`: пробелы
 в выводе `stringify!` зависят от версии компилятора, а порядок полей
 `repr(Rust)` под случайной раскладкой меняется намеренно, как в главе 6.
+В главе 25 — тесты `rustc_*` (ассемблер, секции объектных файлов, пробы и
+сборка с урезанным бюджетом) и группа `observed`: общие адреса копий
+константы и размеры `LazyLock` и `Mutex` — свойства текущего rustc и `std`,
+а не языка.
 
 ## Лицензия
 
