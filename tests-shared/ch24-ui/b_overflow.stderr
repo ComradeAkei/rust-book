@@ -1,0 +1,5 @@
+error: поле `hi` занимает биты 28..36, а в u32 их 32
+ --> $WORKSPACE/tests-shared/ch24-ui/b_overflow.rs
+  |
+  |     #[bits(8)]
+  |            ^

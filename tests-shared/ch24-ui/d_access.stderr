@@ -1,0 +1,35 @@
+error[E0599]: no method named `write` found for struct `Fr` in the current scope
+ --> $WORKSPACE/tests-shared/ch24-ui/d_access.rs
+  |
+  | tasks_macros::include_svd!("../../../../code/ch24/svd/lm3s6965.svd", "UART0");
+  | ----------------------------------------------------------------------------- method `write` not found for this struct
+...
+  |     uart.fr.write(0);
+  |             ^^^^^ method not found in `Fr`
+  |
+  = help: items from traits can only be used if the trait is implemented and in scope
+  = note: the following traits define an item `write`, perhaps you need to implement one of them:
+          candidate #1: `Hasher`
+          candidate #2: `std::io::Write`
+
+error[E0599]: no method named `read` found for struct `Icr` in the current scope
+ --> $WORKSPACE/tests-shared/ch24-ui/d_access.rs
+  |
+  | tasks_macros::include_svd!("../../../../code/ch24/svd/lm3s6965.svd", "UART0");
+  | ----------------------------------------------------------------------------- method `read` not found for this struct
+...
+  |     let _ = uart.icr.read();
+  |                      ^^^^ method not found in `Icr`
+  |
+  = help: items from traits can only be used if the trait is implemented and in scope
+  = note: the following trait defines an item `read`, perhaps you need to implement it:
+          candidate #1: `std::io::Read`
+
+error[E0599]: no method named `modify` found for struct `Fr` in the current scope
+ --> $WORKSPACE/tests-shared/ch24-ui/d_access.rs
+  |
+  | tasks_macros::include_svd!("../../../../code/ch24/svd/lm3s6965.svd", "UART0");
+  | ----------------------------------------------------------------------------- method `modify` not found for this struct
+...
+  |     uart.fr.modify(|v| v);
+  |             ^^^^^^ method not found in `Fr`

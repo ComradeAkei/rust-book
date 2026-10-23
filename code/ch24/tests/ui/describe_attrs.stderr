@@ -1,0 +1,17 @@
+error: неизвестный ключ: у структуры есть `size = N` и `crate = путь`
+ --> tests/ui/describe_attrs.rs:3:12
+  |
+3 | #[describe(sise = 8)]
+  |            ^^^^
+
+error: expected integer literal
+ --> tests/ui/describe_attrs.rs:4:19
+  |
+4 | #[describe(size = "8")]
+  |                   ^^^
+
+error: неизвестный ключ: у поля есть только `skip`
+ --> tests/ui/describe_attrs.rs:7:22
+  |
+7 |     #[describe(skip, hex)]
+  |                      ^^^

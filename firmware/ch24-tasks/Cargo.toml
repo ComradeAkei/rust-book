@@ -1,0 +1,22 @@
+[package]
+name = "ch24-tasks"
+version = "0.1.0"
+description = "Глава 24, задачи B–D: UART0 lm3s6965evb из файла SVD, LCRH через Bitfield, замер #[timed] по SysTick"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+ch24-solutions = { path = "../../solutions/ch24", default-features = false }
+cortex-m = { workspace = true }
+cortex-m-rt = { workspace = true }
+cortex-m-semihosting = { workspace = true }
+
+[[bin]]
+name = "ch24-tasks"
+test = false
+bench = false

@@ -1,0 +1,17 @@
+error: 9 бит не помещаются в u8
+ --> $WORKSPACE/tests-shared/ch24-ui/b_too_wide.rs
+  |
+  |     #[bits(9)]
+  |            ^
+
+error: поле bool занимает ровно 1 бит
+ --> $WORKSPACE/tests-shared/ch24-ui/b_too_wide.rs
+  |
+  |     #[bits(2)]
+  |            ^
+
+error: ширина поля — от 1 бита
+ --> $WORKSPACE/tests-shared/ch24-ui/b_too_wide.rs
+  |
+  |     #[bits(0)]
+  |            ^

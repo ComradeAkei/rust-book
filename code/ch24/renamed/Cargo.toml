@@ -1,0 +1,16 @@
+# Раздел 24.4: крейт ch24 подключён под другим именем. Отдельное рабочее
+# пространство: корневое его не видит, собирает тест tests/renamed.rs.
+[package]
+name = "ch24-renamed"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[workspace]
+
+[features]
+# Структура без #[describe(crate = ...)]: не компилируется (E0433).
+broken = []
+
+[dependencies]
+station = { package = "ch24", path = "..", default-features = false }

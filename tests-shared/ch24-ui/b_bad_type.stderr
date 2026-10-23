@@ -1,0 +1,11 @@
+error: Bitfield: тип поля — bool, u8, u16 или u32
+ --> $WORKSPACE/tests-shared/ch24-ui/b_bad_type.rs
+  |
+  |     pub level: i8,
+  |                ^^
+
+error: Bitfield: тип поля — bool, u8, u16 или u32
+ --> $WORKSPACE/tests-shared/ch24-ui/b_bad_type.rs
+  |
+  |     pub flags: [bool; 4],
+  |                ^^^^^^^^^

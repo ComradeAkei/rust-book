@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Прогоняет все прошивки глав 0, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 22 и 23 в QEMU и сверяет вывод с ожидаемым.
+# Прогоняет все прошивки глав 0, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 22, 23 и 24 в QEMU и сверяет вывод с ожидаемым.
 # Запуск: ./run-demos.sh (из каталога firmware). Используется и в CI.
 set -u
 cd "$(dirname "$0")"
@@ -182,5 +182,13 @@ run "M3: peripheral! — строка через UART0"   "uart0: hello from per
 run "M3: flags! — CR после сброса"          "CR после сброса: Cr(TXE | RXE)" -p ch23-periph
 run "M3: flags! — CR после включения"       "CR: Cr(UARTEN | TXE | RXE)" -p ch23-periph
 run "M3: flags! — передатчик пуст"         "FR, передатчик: Fr(TXFE)" -p ch23-periph
+
+run "M3: derive(Debug) из задачи 24.A"      "Point { x: 3, y: -4 } Off Blink(2)" -p ch24-expand
+run "M3: static mut в #[entry]"             "BOOTS = 1" -p ch24-expand
+run "M0: static mut в #[entry]"             "BOOTS = 1" -p ch24-expand "${M0[@]}"
+run "M3: include_svd! — строка через UART0" "uart0: hello from include_svd!" -p ch24-tasks
+run "M3: RESET из SVD совпал с устройством" "CTL: 0x300, по SVD 0x300" -p ch24-tasks
+run "M3: Bitfield — LCRH 8N1 с FIFO"        "LCRH = Lcrh { brk: false, pen: false, eps: false, stp2: false, fen: true, wlen: 3, sps: false }" -p ch24-tasks
+run "M3: #[timed] — вызовы и максимум"      "send: вызовов 3, самый долгий не дольше всех: true" -p ch24-tasks
 
 exit $fail

@@ -1,0 +1,21 @@
+[package]
+name = "ch24-expand"
+version = "0.1.0"
+description = "Глава 24, задача A: что генерируют #[derive(Debug)] и #[entry] из cortex-m-rt"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+cortex-m = { workspace = true }
+cortex-m-rt = { workspace = true }
+cortex-m-semihosting = { workspace = true }
+
+[[bin]]
+name = "ch24-expand"
+test = false
+bench = false

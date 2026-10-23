@@ -1,0 +1,11 @@
+error[E0599]: no variant, associated function, or constant named `UART9` found for enum `Interrupt` in the current scope
+ --> tests/ui/interrupt_unknown.rs:5:4
+  |
+5 | fn UART9() {}
+  |    ^^^^^ variant, associated function, or constant not found in `Interrupt`
+  |
+help: there is a variant with a similar name
+  |
+5 - fn UART9() {}
+5 + fn UART0() {}
+  |

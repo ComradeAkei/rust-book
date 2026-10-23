@@ -1,0 +1,14 @@
+error[E0277]: `Opaque` doesn't implement `Debug`
+ --> tests/ui/describe_not_debug_call_site.rs:4:10
+  |
+4 | #[derive(ch24::DescribeCallSite)]
+  |          ^^^^^^^^^^^^^^^^^^^^^^ the trait `Debug` is not implemented for `Opaque`
+  |
+  = note: add `#[derive(Debug)]` to `Opaque` or manually `impl Debug for Opaque`
+  = note: required for the cast from `&Opaque` to `&dyn Debug`
+  = note: this error originates in the derive macro `ch24::DescribeCallSite` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: consider annotating `Opaque` with `#[derive(Debug)]`
+  |
+2 + #[derive(Debug)]
+3 | pub struct Opaque;
+  |

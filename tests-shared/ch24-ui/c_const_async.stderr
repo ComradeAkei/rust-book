@@ -1,0 +1,11 @@
+error: #[timed] на const fn: при вычислении в const часов нет
+ --> $WORKSPACE/tests-shared/ch24-ui/c_const_async.rs
+  |
+  | const fn table() -> u32 {
+  | ^^^^^
+
+error: #[timed] на async fn замерил бы время от первого poll до готовности вместе с ожиданием в .await, а не работу функции
+ --> $WORKSPACE/tests-shared/ch24-ui/c_const_async.rs
+  |
+  | async fn fetch() -> u32 {
+  | ^^^^^

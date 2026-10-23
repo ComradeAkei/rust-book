@@ -1,0 +1,20 @@
+[package]
+name = "ch24-macros"
+version = "0.1.0"
+description = "Глава 24: процедурные макросы примеров — token_tree!, derive(Describe), #[traced], #[interrupt]"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+# Крейт процедурных макросов: компилятор собирает его для хоста, как
+# скрипт сборки, и загружает при компиляции крейтов, которые его используют.
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro2 = "1.0.107"
+quote = "1.0.47"
+# full — разбор функций и операторов (ItemFn, Block, Stmt) для атрибутов;
+# derive хватило бы для одного Describe.
+syn = { version = "3.0.9", features = ["full"] }
