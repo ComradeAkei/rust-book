@@ -258,7 +258,15 @@
 # Часть VI. Без ОС и внутри ОС
 
 - [О части VI](part6.md)
-- [26. no_std: программа без операционной системы](ch26.md)
+- [26. no_std: программа без операционной системы](ch26/index.md)
+    - [26.1. core, alloc и std](ch26/01-layers.md)
+    - [26.2. Программа для Linux без libc](ch26/02-linux.md)
+    - [26.3. Cortex-M без cortex-m-rt](ch26/03-cortex-m.md)
+    - [26.4. .data, .bss и код запуска](ch26/04-startup.md)
+    - [26.5. memcpy без libc](ch26/05-memcpy.md)
+    - [26.6. Тесты no_std-кода на хосте](ch26/06-testing.md)
+    - [26.7. Сквозной проект: станция без cortex-m-rt](ch26/07-project.md)
+    - [26.8. Задачи](ch26/08-tasks.md)
 - [27. Cortex-M на Rust](ch27.md)
 - [28. Системное программирование под Linux](ch28.md)
 - [29. Rust в ядре Linux](ch29.md)
@@ -302,3 +310,4 @@
     - [Глава 23](appendix-e/ch23.md)
     - [Глава 24](appendix-e/ch24.md)
     - [Глава 25](appendix-e/ch25.md)
+    - [Глава 26](appendix-e/ch26.md)

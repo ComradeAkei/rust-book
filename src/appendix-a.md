@@ -722,7 +722,7 @@ appa_clz:                   appa_clz:
 | `-ffunction-sections -Wl,--gc-sections` | по умолчанию | |
 | `-march=native` | `-C target-cpu=native` | |
 | `-mcpu=cortex-m4 -mthumb -mfloat-abi=hard` | `--target thumbv7em-none-eabihf` | |
-| `-ffreestanding -nostdlib` | `#![no_std]`, `#![no_main]` | [гл. 26](ch26.md) |
+| `-ffreestanding -nostdlib` | `#![no_std]`, `#![no_main]` | [гл. 26](ch26/index.md) |
 | `-fno-exceptions` | `panic = "abort"` | [гл. 7](ch07/index.md) |
 | `-ftrapv` | `overflow-checks = true` | |
 | `-fwrapv` | `wrapping_*`, `Wrapping<T>` | |
