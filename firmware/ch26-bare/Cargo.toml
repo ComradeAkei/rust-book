@@ -1,0 +1,32 @@
+[package]
+name = "ch26-bare"
+version = "0.1.0"
+description = "Глава 26: прошивка без cortex-m-rt — своя таблица векторов, Reset, скрипт компоновки и semihosting"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+# Без --bin cargo run запускает основную прошивку, а не mem.
+default-run = "ch26-bare"
+
+[lints]
+workspace = true
+
+[features]
+# Раздел 26.4: изменяемый static с начальным значением в прошивке, скрипт
+# компоновки которой не знает секции .data.
+orphan-data = []
+
+[dependencies]
+# Раздел 26.5: функции, в которых компилятор вставляет вызовы memcpy.
+ch26 = { path = "../../code/ch26", default-features = false }
+
+[[bin]]
+name = "ch26-bare"
+test = false
+bench = false
+
+[[bin]]
+name = "mem"
+test = false
+bench = false

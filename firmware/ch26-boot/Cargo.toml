@@ -1,0 +1,22 @@
+[package]
+name = "ch26-boot"
+version = "0.1.0"
+description = "Глава 26, задача C: свой код запуска без cortex-m-rt — таблица векторов, Reset на ассемблере, .data, .bss и .uninit"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+# Вывод: cortex-m-semihosting не зависит от cortex-m-rt, но держит дескриптор
+# вывода в static — в .bss. Значит, работает он, только если код запуска
+# эту секцию обнулил.
+cortex-m-semihosting = { workspace = true }
+
+[[bin]]
+name = "ch26-boot"
+test = false
+bench = false

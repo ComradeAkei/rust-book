@@ -1,0 +1,38 @@
+# Раздел 26.2: программа для Linux x86-64 без std и без libc. Отдельный
+# крейт со своим workspace: профили здесь свои (panic = "abort"), и они не
+# влияют на остальные крейты книги. Собирает и запускает его тест
+# code/ch26/tests/start.rs.
+[package]
+name = "ch26-start"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[workspace]
+
+# Своя точка входа и свой обработчик паники: тестовая программа с std
+# из этого же исходника не собирается.
+[[bin]]
+name = "ch26-start"
+path = "src/main.rs"
+test = false
+bench = false
+
+[features]
+# Опыт раздела 26.2: _start сдвигает стек на 8 байт перед вызовом Rust.
+misalign = []
+
+# ANCHOR: profile
+# panic = "abort": раскрутки без std нет. lto = true: готовая core для этой
+# цели собрана с раскруткой, и без LTO компоновщик потребует
+# rust_eh_personality (раздел 26.2). opt-level = "s" в dev — чтобы
+# компилятор не звал memset ради каждого обнуления массива.
+[profile.dev]
+panic = "abort"
+lto = true
+opt-level = "s"
+
+[profile.release]
+panic = "abort"
+lto = true
+# ANCHOR_END: profile

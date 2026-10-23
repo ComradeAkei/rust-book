@@ -1,0 +1,17 @@
+[package]
+name = "ch26"
+version = "0.1.0"
+description = "Глава 26: no_std — слои core, alloc и std, _start без libc на x86-64, откуда берутся memcpy и memset"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+# ANCHOR: features
+[features]
+default = ["std"]
+# Отчёт в String (раздел 26.1): нужна куча, но не ОС.
+alloc = []
+# Печать отчёта в stdout: нужна ОС. std включает alloc.
+std = ["alloc"]
+# ANCHOR_END: features

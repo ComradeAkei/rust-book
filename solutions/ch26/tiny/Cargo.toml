@@ -1,0 +1,32 @@
+# Задача 26.B: статический ELF для Linux x86-64 без std и libc. Отдельный
+# крейт со своим workspace: профили здесь свои и не влияют на остальные
+# крейты книги.
+[package]
+name = "tiny"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[workspace]
+
+# Своя точка входа и свой обработчик паники: тестовая программа с std
+# из этого же исходника не собирается.
+[[bin]]
+name = "tiny"
+path = "src/main.rs"
+test = false
+bench = false
+
+# ANCHOR: profile
+[profile.dev]
+panic = "abort"
+lto = true
+opt-level = "z"
+
+[profile.release]
+panic = "abort"
+lto = true
+opt-level = "z"
+codegen-units = 1
+strip = true
+# ANCHOR_END: profile

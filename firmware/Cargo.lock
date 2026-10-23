@@ -328,6 +328,47 @@ dependencies = [
 ]
 
 [[package]]
+name = "ch26"
+version = "0.1.0"
+
+[[package]]
+name = "ch26-bare"
+version = "0.1.0"
+dependencies = [
+ "ch26",
+]
+
+[[package]]
+name = "ch26-boot"
+version = "0.1.0"
+dependencies = [
+ "cortex-m-semihosting",
+]
+
+[[package]]
+name = "ch26-solutions"
+version = "0.1.0"
+
+[[package]]
+name = "ch26-station"
+version = "0.1.0"
+dependencies = [
+ "ch26-bare",
+ "telemetry-frame",
+]
+
+[[package]]
+name = "ch26-tasks"
+version = "0.1.0"
+dependencies = [
+ "ch26",
+ "ch26-solutions",
+ "cortex-m",
+ "cortex-m-rt",
+ "cortex-m-semihosting",
+]
+
+[[package]]
 name = "cortex-m"
 version = "0.7.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"

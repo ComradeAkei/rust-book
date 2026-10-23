@@ -105,8 +105,8 @@ jobs:
             -p ch13-exercises -p ch14-exercises -p ch15-exercises -p ch16-exercises \
             -p ch17-exercises -p ch18-exercises -p ch19-exercises -p ch20-exercises \
             -p ch21-exercises -p ch22-exercises -p ch23-exercises -p ch24-exercises \
-            -p ch25-exercises -p project-frame -p project-store --all-targets
-      # Вложенные рабочие пространства глав 7, 8 и 24 корневой cargo не
+            -p ch25-exercises -p ch26-exercises -p project-frame -p project-store --all-targets
+      # Вложенные рабочие пространства глав 7, 8, 24 и 26 корневой cargo не
       # видит: их собирают тесты, а формат и clippy проверяются здесь. В typo
       # предупреждения о cfg — предмет опыта, в заготовке d-station ошибка
       # сборки — условие задачи 8.D, поэтому clippy их не проверяет. В
@@ -116,12 +116,13 @@ jobs:
         run: |
           for ws in code/ch07/c-size code/ch08/typo code/ch08/unify code/ch08/ffi \
               exercises/ch08/c/station solutions/ch08/c/station \
-              exercises/ch08/d-station solutions/ch08/d-station code/ch24/renamed; do
+              exercises/ch08/d-station solutions/ch08/d-station code/ch24/renamed \
+              code/ch26/start solutions/ch26/tiny exercises/ch26/tiny; do
             cargo fmt --all --check --manifest-path "$ws/Cargo.toml"
           done
           for ws in code/ch07/c-size code/ch08/unify code/ch08/ffi \
               exercises/ch08/c/station solutions/ch08/c/station solutions/ch08/d-station \
-              code/ch24/renamed; do
+              code/ch24/renamed code/ch26/start solutions/ch26/tiny exercises/ch26/tiny; do
             cargo clippy --manifest-path "$ws/Cargo.toml" --all-targets -- -D warnings
           done
 
@@ -264,6 +265,14 @@ jobs:
       - run: cargo +nightly miri test -p ch25 -p ch25-solutions
         env:
           MIRIFLAGS: -Zmiri-tree-borrows
+      # Глава 26: Cursor поверх среза в fmt::Write, функции раздела 26.5 и
+      # свои memcpy, memmove и memset из задачи D на всех выравниваниях и
+      # перекрытиях. Системные вызовы через asm! Miri не выполняет — эти
+      # тесты помечены ignore, как и тесты, которые запускают rustc и cargo.
+      - run: cargo +nightly miri test -p ch26 -p ch26-solutions
+      - run: cargo +nightly miri test -p ch26 -p ch26-solutions
+        env:
+          MIRIFLAGS: -Zmiri-tree-borrows
       - run: cargo +nightly miri test -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
       # Чек-лист приложения C требует проходить Miri в обеих моделях алиасинга.
       - run: cargo +nightly miri test -p appendix-c
@@ -403,6 +412,9 @@ jobs:
       # компилятора, `observed` — общие адреса копий константы и размеры
       # LazyLock и Mutex; остальное от раскладки не зависит.
       - run: cargo +nightly test -p ch25 -p ch25-solutions -- --skip rustc_ --skip observed
+      # Глава 26: `rustc_` — программы без libc, ассемблер и пробы
+      # закреплённого компилятора; остальное от раскладки не зависит.
+      - run: cargo +nightly test -p ch26 -p ch26-solutions -- --skip rustc_
 
   thumb:
     name: Cortex-M и QEMU
@@ -551,6 +563,17 @@ jobs:
             cargo build -p ch25 --no-default-features --target "$t"
             cargo build -p ch25-solutions -p ch25-exercises --target "$t"
           done
+      # Глава 26: слои core и alloc без std, функции раздела 26.5 и свои
+      # memcpy, memmove и memset из задачи D. Модуль системных вызовов —
+      # только для Linux x86-64. Прошивки ch26-* собирают это же без
+      # cortex-m-rt.
+      - name: Глава 26 (без std и libc) без std под три цели Cortex-M
+        run: |
+          for t in thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabihf; do
+            cargo build -p ch26 --no-default-features --target "$t"
+            cargo build -p ch26 --no-default-features --features alloc --target "$t"
+            cargo build -p ch26-solutions -p ch26-exercises --target "$t"
+          done
       - name: Главы 0–2 без std под три цели Cortex-M
         run: |
           for t in thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabihf; do
@@ -578,7 +601,7 @@ jobs:
       - run: |
           sudo apt-get update && sudo apt-get install -y qemu-system-arm \
             gdb-multiarch llvm gcc-arm-none-eabi libnewlib-arm-none-eabi
-      - name: Опыты глав 0, 3, 5–13, 15, 22–25 в QEMU
+      - name: Опыты глав 0, 3, 5–13, 15, 22–26 в QEMU
         run: bash firmware/run-demos.sh
       - name: Задача 2.B на дизассемблере всех прошивок
         run: cargo test -p ch02-solutions -- --ignored own_firmware --nocapture
@@ -588,6 +611,10 @@ jobs:
           bash solutions/ch01/c/run.sh
       - name: C-примеры главы 4 с arm-none-eabi-gcc
         run: bash code/ch04/c/run.sh
+      # Глава 26: snprintf из newlib приносит в прошивку _malloc_r и _sbrk, а
+      # memset циклом при -O2 без -ffreestanding зовёт саму себя.
+      - name: C-примеры главы 26 с arm-none-eabi-gcc и newlib
+        run: bash code/ch26/c/run.sh
 
   book:
     name: mdBook
