@@ -18,8 +18,10 @@ echo "== сборка статической библиотеки ch18-solutions
 # Спрашиваем у rustc при сборке самого крейта, а не зашиваем список:
 # пустой крейт про -lz не знает, а без инкрементальной сборки (как в CI)
 # обёртка над zlib попадает в один объектный файл с экспортом для C, и
-# ссылки на функции zlib остаются неразрешёнными.
-if ! build=$(cargo rustc -p ch18-solutions --lib --quiet -- --print native-static-libs 2>&1); then
+# ссылки на функции zlib остаются неразрешёнными. --color never: при
+# CARGO_TERM_COLOR=always (так в CI) строка кончалась бы кодом цвета, и
+# компоновщик искал бы библиотеку «z\e[0m».
+if ! build=$(cargo rustc --color never -p ch18-solutions --lib --quiet -- --print native-static-libs 2>&1); then
     echo "FAIL  cargo rustc -p ch18-solutions"
     printf '%s\n' "$build" | sed 's/^/      /'
     exit 1
