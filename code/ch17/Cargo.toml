@@ -1,0 +1,20 @@
+[package]
+name = "ch17"
+version = "0.1.0"
+description = "Глава 17: MaybeUninit, операции с указателями, volatile и MMIO, NonNull, transmute, типы динамического размера"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[features]
+default = ["std"]
+# Разбор ELF собственного бинарника и примеры хоста. Без неё библиотека
+# собирается в no_std для Cortex-M.
+std = ["alloc"]
+# Типы динамического размера с хвостовым массивом живут в куче.
+alloc = []
+
+[[test]]
+name = "asm"
+path = "tests/asm.rs"

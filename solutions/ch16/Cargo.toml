@@ -1,0 +1,20 @@
+[package]
+name = "ch16-solutions"
+version = "0.1.0"
+description = "Глава 16: эталонные решения задач A–D"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[[test]]
+name = "ch16"
+path = "tests/ch16.rs"
+
+# Каталог UB (A), висячая ссылка из unsound-API (C) и расхождение моделей
+# алиасинга (D): каждый тест помечен `#[ignore]` и содержит неопределённое
+# поведение либо зависит от модели. Обычный `cargo test` их не выполняет;
+# под Miri их гоняют поодиночке скриптом `miri/run.sh`.
+[[test]]
+name = "ch16-ub"
+path = "tests/ub.rs"

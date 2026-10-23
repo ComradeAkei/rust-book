@@ -34,7 +34,7 @@ C-примеры лежат в `code/appendix-a/c/`. Скрипт собирае
 | `size_t`, `uintptr_t` | `usize` | индексы и длины всегда `usize` ([гл. 1](ch01/01-integers.md)) |
 | `ptrdiff_t`, `intptr_t` | `isize` | |
 | `char` как байт | `u8`, на границе с C `c_char` | `char` в Rust — скалярное значение Unicode, 4 байта |
-| `bool`, `_Bool` | `bool` | 1 байт; значение, отличное от 0 и 1, — UB ([гл. 16](ch16.md)) |
+| `bool`, `_Bool` | `bool` | 1 байт; значение, отличное от 0 и 1, — UB ([гл. 16](ch16/02-invariants.md)) |
 | `float`, `double` | `f32`, `f64` | |
 | `void` в типе возврата | `()` | тип нулевого размера |
 | `void *` | `*mut c_void`, `*mut u8` или обобщённый `T` | обобщения вместо стирания типа ([гл. 10](ch10/index.md)) |
@@ -49,9 +49,9 @@ C-примеры лежат в `code/appendix-a/c/`. Скрипт собирае
 | `enum` | `enum` без данных, на границе с C — целое | ловушка ниже |
 | битовые поля | сдвиги и маски, типы-обёртки регистров | [6.9](ch06/09-registers.md) |
 | `typedef` | `type` (синоним) или newtype (новый тип) | [6.1](ch06/01-structs.md) |
-| `T data[]` в конце структуры | `struct { len: usize, data: [T] }` | тип динамического размера ([гл. 17](ch17.md)) |
+| `T data[]` в конце структуры | `struct { len: usize, data: [T] }` | тип динамического размера ([гл. 17](ch17/06-dst.md)) |
 | `const`-объект | `const` (подставляется) или `static` (один адрес) | [гл. 25](ch25.md) |
-| `volatile` | `read_volatile`, `write_volatile` | volatile — свойство доступа, а не типа ([гл. 17](ch17.md)) |
+| `volatile` | `read_volatile`, `write_volatile` | volatile — свойство доступа, а не типа ([гл. 17](ch17/05-volatile.md)) |
 | `restrict` | `&mut T` | компилятор знает это без пометок |
 | `_Atomic` | `AtomicU32` и другие | [гл. 21](ch21.md) |
 | `_Thread_local` | `thread_local!` | [гл. 20](ch20.md) |
@@ -282,10 +282,10 @@ SIGFPE. Проверка на `-1` сделана без ветвлений: `no
 | `sizeof(T)`, `sizeof x` | `size_of::<T>()`, `size_of_val(&x)` | `const fn`, работают в константах |
 | `_Alignof(T)` | `align_of::<T>()` | |
 | `offsetof(T, f)` | `offset_of!(T, f)` | [6.2](ch06/02-repr-c.md) |
-| `p + i`, `p[i]` | `s[i]`, `s.get(i)`; для сырых указателей `p.add(i)` | `add` — `unsafe` ([гл. 17](ch17.md)) |
+| `p + i`, `p[i]` | `s[i]`, `s.get(i)`; для сырых указателей `p.add(i)` | `add` — `unsafe` ([гл. 17](ch17/02-ptr.md)) |
 | `p - q` | `p.offset_from(q)` | `unsafe` |
-| `(uintptr_t)p`, `(T *)addr` | `p.addr()`, `p.with_addr(a)`, `expose_provenance` | provenance ([гл. 16](ch16.md)) |
-| `*(uint32_t *)buf` | `u32::from_le_bytes(...)`, `read_unaligned` | [6.7](ch06/07-packed.md), [гл. 17](ch17.md) |
+| `(uintptr_t)p`, `(T *)addr` | `p.addr()`, `p.with_addr(a)`, `expose_provenance` | provenance ([гл. 16](ch16/04-provenance.md)) |
+| `*(uint32_t *)buf` | `u32::from_le_bytes(...)`, `read_unaligned` | [6.7](ch06/07-packed.md), [гл. 17](ch17/02-ptr.md) |
 | `container_of` | `ptr.byte_sub(offset_of!(T, f))` | `unsafe`, пример ниже |
 
 Функции `mem*` превращаются в методы срезов, которые знают длины своих
@@ -335,7 +335,7 @@ help: <178040> was created by a SharedReadWrite retag at offsets [0x8..0x10]
 Права указателя `node` покрывают байты 8..16, то есть одно поле, а `id`
 лежит по смещению 0. Miri сам оговаривается, что правила Stacked Borrows
 пока экспериментальные; почему модели алиасинга устроены именно так и чем
-они различаются, разбирается в [главе 16](ch16.md). Безопасный путь
+они различаются, разбирается в [главе 16](ch16/05-models.md). Безопасный путь
 работает в любой из них: указатель на поле получают из указателя на весь
 объект, как в `node_of`.
 
@@ -460,7 +460,7 @@ err_clk:
 | C | Rust | Замечание |
 |---|---|---|
 | `char *` с NUL в конце | `&str` | UTF-8, длина хранится, NUL нет |
-| строка для функции C | `&CStr`, `CString` | [гл. 18](ch18.md) |
+| строка для функции C | `&CStr`, `CString` | [гл. 18](ch18/03-strings.md) |
 | произвольные байты | `&[u8]`, `Vec<u8>` | |
 | `"abc"` | `"abc"`: `&'static str`; `c"abc"`: `&'static CStr`; `b"abc"`: `&[u8; 3]` | |
 | `strlen(s)` | `s.len()` | за O(1); для `&CStr` — `count_bytes()`, считает до NUL |
@@ -537,10 +537,10 @@ char boundary`.
 | `int (*f)(int)` | `fn(i32) -> i32` | никогда не NULL; `Option<fn(...)>` того же размера |
 | колбэк + `void *ctx` | замыкание: `impl FnMut(...)`, `&mut dyn FnMut(...)` | контекст типизирован ([гл. 12](ch12/index.md)) |
 | `static` функция в файле | функция без `pub` | видимость на уровне модуля ([гл. 8](ch08/01-modules.md)) |
-| `extern` объявление | `use`; для C — `unsafe extern "C" { ... }` | [гл. 18](ch18.md), [приложение B](appendix-b.md) |
+| `extern` объявление | `use`; для C — `unsafe extern "C" { ... }` | [гл. 18](ch18/01-abi.md), [приложение B](appendix-b.md) |
 | `inline`, `__attribute__((always_inline))`, `noinline` | `#[inline]`, `#[inline(always)]`, `#[inline(never)]` | |
 | `__attribute__((noreturn))` | `-> !` | |
-| `...` (переменное число аргументов) | макрос; вызов C-функции с `...` возможен | [гл. 18](ch18.md), [гл. 23](ch23.md) |
+| `...` (переменное число аргументов) | макрос; вызов C-функции с `...` возможен | [гл. 18](ch18/index.md), [гл. 23](ch23.md) |
 | перегрузка, аргументы по умолчанию | нет; трейты, `Option`, строители | |
 | `static` переменная в функции | `static` с атомиком, `OnceLock`, `LazyLock` | [гл. 14](ch14/06-lazy.md), [гл. 25](ch25.md) |
 | `__attribute__((constructor))` | нет: до `main` код не выполняется | явная инициализация или `LazyLock` |
@@ -730,7 +730,7 @@ appa_clz:                   appa_clz:
 | `-Wall -Wextra -Werror` | `cargo clippy -- -D warnings` | |
 | `-fsanitize=address`, `thread` | `-Zsanitizer=address`, `thread` (nightly) | для `unsafe` — ещё и Miri ([гл. 31](ch31.md)) |
 | скрипт компоновки `-T` | `memory.x` и `-C link-arg=-Tlink.x` | `firmware/.cargo/config.toml` |
-| `.a`, `.so` | `crate-type = ["staticlib"]`, `["cdylib"]` | [гл. 8](ch08/06-crate-types.md), [гл. 18](ch18.md) |
+| `.a`, `.so` | `crate-type = ["staticlib"]`, `["cdylib"]` | [гл. 8](ch08/06-crate-types.md), [гл. 18](ch18/04-owned.md) |
 | `pkg-config`, `-lfoo` | `build.rs` и `cargo:rustc-link-lib=foo` | |
 | `objdump -d`, `nm` | `cargo asm`, `llvm-objdump`, `nm` | [гл. 0](ch00/03-asm.md) |
 

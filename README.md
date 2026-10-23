@@ -128,6 +128,35 @@
   bump-арена для дерева, своя таблица с открытой адресацией и длиной
   пробы), шаг проекта П15 (хранилище измерений и аллокатор-счётчик),
   прошивка `firmware/ch15-heap`.
+- Готова глава 16 «unsafe и неопределённое поведение»: пять возможностей
+  `unsafe`; инварианты валидности и безопасности и перечень UB; что
+  оптимизатор делает с проверкой границ и `unreachable_unchecked`
+  (ассемблер); provenance и строгий API; модели алиасинга Stacked и Tree
+  Borrows и Miri; как запереть `unsafe` за безопасным API; гигиена и
+  edition 2024. Задачи A–D (каталог UB под Miri, `split_first_mut`
+  вручную, unsound-API с use-after-free, расхождение Stacked и Tree
+  Borrows). Проектного раздела у главы нет.
+- Готова глава 17 «Низкоуровневая работа с памятью»: `MaybeUninit` и сборка
+  значения по частям; операции с сырыми указателями (`read`/`write`,
+  `copy_nonoverlapping`, `swap`, невыровненное чтение); `NonNull` и
+  `PhantomData`; `transmute` и его безопасные замены, `offset_of!`, типы
+  нулевого размера; `volatile` и MMIO с `compiler_fence` (ассемблер
+  подтверждает, что обращения не сливаются); типы динамического размера с
+  хвостовым массивом. Задачи A–D (каталог `transmute`: корректные, UB под
+  Miri, не компилирующиеся; разбор заголовка ELF64 без копирования и через
+  `from_le_bytes`; тегированный указатель со строгим provenance; свой DST
+  против `Box<[T]>`). Проектного раздела у главы нет.
+- Готова глава 18 «FFI с C»: блок `unsafe extern "C"` и соглашение о
+  вызовах; `#[repr(C)]`/`repr(transparent)` и структуры по значению; строки
+  `CStr`/`CString`, литерал `c"..."`, не-UTF-8 из C; владение через границу
+  (`into_raw`/`from_raw`) и экспорт Rust в C непрозрачным описателем;
+  обратные вызовы с переходником и защитой от паники (`catch_unwind`);
+  обёртка над zlib и инструменты (`bindgen`, `cbindgen`, `cc`). То, что C
+  вызывает Rust, проверяет C-программа под AddressSanitizer. Задачи A–D
+  (каталог из шести объявлений libc; `qsort_r` из glibc с замыканием;
+  кольцевой буфер за непрозрачным описателем с драйвером на C; безопасная
+  обёртка над zlib `compress`/`uncompress`). Глава хостовая: под Miri и
+  Cortex-M не идёт.
 - Готовы приложения A–D: словарь соответствий C → Rust, edition 2024 для
   системного кода, чек-лист ревью `unsafe` с разбором примера, установка
   окружения и отладка в QEMU. Их код лежит в `code/appendix-*`.
@@ -148,7 +177,8 @@ src/                      текст книги (mdBook)
   ch06/                   эталонная глава, по файлу на раздел
   ch07/ ch08/ ch09/       главы 7–9, по файлу на раздел
   ch10/ ch11/ ch12/       главы 10–12, по файлу на раздел
-  ch13/ ch14/ ch15/       главы 13–15, по файлу на раздел
+  ch13/ ch14/ ch15/        главы 13–15, по файлу на раздел
+  ch16/ ch17/ ch18/        главы 16–18, по файлу на раздел
   appendix-e/             разборы задач всех глав
 code/chNN/                примеры главы; листинги попадают в текст через {{#include}}
 code/ch01/c/ … ch15/c/    те же примеры на C и run.sh, который сверяет их вывод с текстом
@@ -165,6 +195,13 @@ code/ch14/tests/          ассемблер Rc, Arc и ячеек, обраще
 code/ch14/examples/       Box::new на 16 МиБ, запись через &u32, цена clone и ячеек
 code/ch15/tests/          ассемблер push, VecDeque::get и heapless, блоки SwissTable и BTreeMap
 code/ch15/examples/       рост Vec под strace, раскладка SwissTable, вырождение таблицы, локальность
+code/ch16/tests/          ассемблер проверки границ, get_unchecked и unreachable_unchecked
+code/ch16/ub/             run.sh: каталог UB под Miri, unsound-API и расхождение Stacked/Tree Borrows
+code/ch17/tests/          ассемблер: volatile-чтения не сливаются, обычные — сливаются
+code/ch17/ub/             run.sh: UB-вызовы каталога transmute под Miri (задача A)
+code/ch18/c/              support.c (вызывается из Rust) и run.sh: C вызывает Rust под ASan
+code/ch18/build.rs        компилирует support.c системным cc в статический архив
+solutions/ch18/c/         драйвер кольцевого буфера на C и run.sh под ASan (задача C)
 code/ch07/c-size/         программа задачи 7.C: размер при panic = "unwind" и "abort"
 code/ch07/hir/            во что раскрывается `?`: снимок HIR для раздела 7.1
 code/ch08/typo/ unify/ ffi/  отдельные рабочие пространства для опытов главы 8 с cargo
@@ -236,6 +273,12 @@ $ cargo test -p project-store p15         # шаг проекта П15
 $ cargo run --release -p ch15-solutions --example report       # аллокации решений прошлых глав
 $ cargo run --release -p ch15-solutions --example ast          # дерево на Box против арены
 $ cargo run --release -p ch15-solutions --example probes       # длина пробы и загрузка (задача 15.D)
+$ cargo test -p ch16-exercises            # задачи B и C главы 16
+$ bash code/ch16/ub/run.sh                # каталог UB, unsound-API и расхождение моделей (A, C, D)
+$ cargo test -p ch17-exercises            # задачи B, C и D главы 17
+$ bash code/ch17/ub/run.sh                # UB-вызовы каталога transmute (задача A)
+$ cargo test -p ch18-exercises            # задачи A, B, D и логика FIFO задачи C главы 18
+$ bash solutions/ch18/c/run.sh            # драйвер кольцевого буфера задачи C на C под ASan
 $ cargo test -p project-frame             # задачи П6, П7, П12 и П13
 $ cargo test -p project-frame p7          # только П7
 $ cargo test -p project-frame p12         # только П12
@@ -251,6 +294,7 @@ $ cargo test -p project-frame p13         # только П13
 Те же команды выполняет CI (`.github/workflows/ci.yml`):
 
 ```console
+$ sudo apt-get install -y zlib1g-dev      # глава 18 линкуется с zlib (libz.so)
 $ cargo fmt --all --check && (cd firmware && cargo fmt --all --check)
 $ cargo clippy --workspace --all-targets -- -D warnings
 $ cargo test                              # примеры глав, решения, проект
@@ -269,11 +313,16 @@ $ cargo +nightly miri test -p ch12 -p ch12-solutions
 $ cargo +nightly miri test -p ch13 -p ch13-solutions
 $ cargo +nightly miri test -p ch14 -p ch14-solutions   # и ещё раз с MIRIFLAGS=-Zmiri-tree-borrows
 $ cargo +nightly miri test -p ch15 -p ch15-solutions   # и ещё раз с MIRIFLAGS=-Zmiri-tree-borrows
+$ cargo +nightly miri test -p ch16 -p ch16-solutions   # и ещё раз с MIRIFLAGS=-Zmiri-tree-borrows
+$ bash code/ch16/ub/run.sh                # каталог UB главы 16 под Miri (задачи A, C, D)
+$ cargo +nightly miri test -p ch17 -p ch17-solutions   # и ещё раз с MIRIFLAGS=-Zmiri-tree-borrows
+$ MIRIFLAGS=-Zmiri-strict-provenance cargo +nightly miri test -p ch16 -p ch17 -p ch17-solutions
+$ bash code/ch17/ub/run.sh                # UB-вызовы каталога transmute главы 17 под Miri (задача A)
 $ cargo +nightly miri test -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
 $ MIRIFLAGS=-Zmiri-tree-borrows cargo +nightly miri test -p appendix-c
 $ cargo +nightly test --doc -p ch00 -p ch01 -p ch02 -p ch06 -p ch07 -p ch08 -p ch09 \
-      -p ch10 -p ch11 -p ch12 -p ch13 -p ch14 -p ch15 -p appendix-a -p appendix-b -p appendix-b-2021 \
-      -p appendix-c
+      -p ch10 -p ch11 -p ch12 -p ch13 -p ch14 -p ch15 -p ch16 -p ch17 -p ch17-solutions \
+      -p ch18 -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
 $ cargo +nightly test -p ch11 --features nightly --test nightly   # DynMetadata и -Zretpoline
 $ cargo +nightly test -p ch12 --features nightly --test nightly   # Fn, FnMut и FnOnce вручную
 $ cargo +nightly test --doc -p ch03 -p ch04 -p ch05 -p ch03-solutions -p ch04-solutions \
@@ -303,6 +352,10 @@ $ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch14 -p 
       -- --skip rustc_ --skip cargo_ --skip observed
 $ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch15 -p ch15-solutions \
       -- --skip rustc_ --skip cargo_ --skip observed
+$ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch16 -p ch16-solutions \
+      -- --skip rustc_
+$ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch17 -p ch17-solutions \
+      -- --skip rustc_
 $ cargo build -p ch06 -p ch07 --no-default-features --target thumbv6m-none-eabi
 $ cargo build -p ch08 -p ch08-solutions --no-default-features --target thumbv6m-none-eabi
 $ cargo build -p ch09 --no-default-features --features alloc --target thumbv6m-none-eabi
@@ -319,6 +372,7 @@ $ cargo build -p ch13-solutions -p ch13-exercises --no-default-features --target
 $ cargo build -p ch14 --no-default-features --target thumbv6m-none-eabi   # и с --features alloc
 $ cargo build -p ch14-solutions -p ch14-exercises --no-default-features --target thumbv6m-none-eabi
 $ cargo build -p ch15 --no-default-features --features alloc --target thumbv6m-none-eabi
+$ cargo build -p ch17 --no-default-features --target thumbv6m-none-eabi   # и с --features alloc; на трёх целях Cortex-M
 $ cargo build -p ch00 -p ch01 -p ch02 -p ch00-solutions -p ch01-solutions --target thumbv6m-none-eabi
 $ cargo build -p ch03 -p ch04 -p ch05 -p ch03-solutions -p ch04-solutions -p ch05-solutions \
       --target thumbv6m-none-eabi
@@ -339,6 +393,8 @@ $ bash code/ch12/c/run.sh                 # callback.c и nested.c: void *ctx и
 $ bash code/ch13/c/run.sh                 # loops.c: ошибки на единицу и на знак из главы 13
 $ bash code/ch14/c/run.sh                 # kref.c и twice.c: счётчик ссылок вручную из главы 14
 $ bash code/ch15/c/run.sh                 # table.c: самодельная хеш-таблица и висячий указатель из главы 15
+$ bash code/ch18/c/run.sh                 # C вызывает Rust: непрозрачный счётчик (раздел 18.4) под ASan
+$ bash solutions/ch18/c/run.sh            # C управляет кольцевым буфером (задача C) под ASan
 $ cargo fmt --all --check --manifest-path code/ch08/ffi/Cargo.toml   # и так каждое вложенное
       # рабочее пространство: code/ch07/c-size, code/ch08/{typo,unify,ffi},
       # {exercises,solutions}/ch08/c/station, {exercises,solutions}/ch08/d-station

@@ -310,6 +310,42 @@ dependencies = [
 ]
 
 [[package]]
+name = "ch16"
+version = "0.1.0"
+
+[[package]]
+name = "ch16-exercises"
+version = "0.1.0"
+
+[[package]]
+name = "ch16-solutions"
+version = "0.1.0"
+
+[[package]]
+name = "ch17"
+version = "0.1.0"
+
+[[package]]
+name = "ch17-exercises"
+version = "0.1.0"
+
+[[package]]
+name = "ch17-solutions"
+version = "0.1.0"
+
+[[package]]
+name = "ch18"
+version = "0.1.0"
+
+[[package]]
+name = "ch18-exercises"
+version = "0.1.0"
+
+[[package]]
+name = "ch18-solutions"
+version = "0.1.0"
+
+[[package]]
 name = "embedded-hal"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

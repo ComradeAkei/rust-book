@@ -1,0 +1,18 @@
+[package]
+name = "ch17-solutions"
+version = "0.1.0"
+description = "Глава 17: эталонные решения задач A–D"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[[test]]
+name = "ch17"
+path = "tests/ch17.rs"
+
+# Задача A — каталог transmute: корректные вызовы (обычные тесты) и UB
+# (#[ignore]). UB гоняют под Miri поодиночке скриптом code/ch17/ub/run.sh.
+[[test]]
+name = "ch17-ub"
+path = "tests/ub.rs"
