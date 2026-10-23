@@ -104,6 +104,19 @@
   произведение `i32` и `f32` в ассемблере, адаптер, который ломает
   векторизацию, и аллокации `collect`), четвёртый шаг проекта П13
   (итератор по кадрам в потоке байт), прошивка `firmware/ch13-iter`.
+- Готова глава 14 «Умные указатели и внутренняя изменяемость»: `Box` и
+  его размеры, рекурсивные типы, `leak`, `into_raw` и `from_raw`, большой
+  буфер без стека; `Deref` и `DerefMut` на тени регистров; `Rc` и `Weak`
+  — блок со счётчиками, `clone` и `drop` в ассемблере, подписки на
+  `Weak`, `new_cyclic`, циклы, `make_mut`; `Arc` — `lock inc` на x86-64,
+  `ldrex`/`strex` и барьеры `dmb` на Cortex-M3, отсутствие на Cortex-M0;
+  `UnsafeCell`, `Cell` и `RefCell` и что они меняют в коде; `OnceCell`,
+  `LazyCell`, `OnceLock` и `LazyLock`; `Cow`; ловушки временных значений
+  в `match` и `for`, `Rc<[T]>` против `Rc<Vec<T>>`, срез ячеек,
+  `Arc::into_inner`. Задачи A–D (паника `RefCell` и счётчики `Rc` в
+  двенадцати фрагментах, свой `Rc` со слабыми ссылками под Miri,
+  двусвязный список на `Rc` и на арене, цена `Arc::clone` из многих
+  потоков и ложное разделение). Проектного раздела у главы нет.
 - Готовы приложения A–D: словарь соответствий C → Rust, edition 2024 для
   системного кода, чек-лист ревью `unsafe` с разбором примера, установка
   окружения и отладка в QEMU. Их код лежит в `code/appendix-*`.
@@ -124,10 +137,10 @@ src/                      текст книги (mdBook)
   ch06/                   эталонная глава, по файлу на раздел
   ch07/ ch08/ ch09/       главы 7–9, по файлу на раздел
   ch10/ ch11/ ch12/       главы 10–12, по файлу на раздел
-  ch13/                   глава 13, по файлу на раздел
+  ch13/ ch14/             главы 13 и 14, по файлу на раздел
   appendix-e/             разборы задач всех глав
 code/chNN/                примеры главы; листинги попадают в текст через {{#include}}
-code/ch01/c/ … ch13/c/    те же примеры на C и run.sh, который сверяет их вывод с текстом
+code/ch01/c/ … ch14/c/    те же примеры на C и run.sh, который сверяет их вывод с текстом
 code/ch0[45]/rejected/    программы, которые проверка отвергает; их собирают тесты
 code/ch0[45789]/fragments/  фрагменты к задачам A глав 4, 5, 7, 8 и 9
 code/ch10/fragments/      шесть программ задачи 10.A: сколько копий обобщённой функции
@@ -137,6 +150,8 @@ code/ch12/tests/          ассемблер окружения замыкани
 code/ch12/examples/       калибровка тремя способами: обобщение, &mut dyn FnMut, указатель
 code/ch13/tests/          ассемблер цепочек: chain, проверки границ, SSE2, AVX2, DSP Cortex-M4
 code/ch13/examples/       время на элемент: for и fold, индексы и zip, chunks и chunks_exact
+code/ch14/tests/          ассемблер Rc, Arc и ячеек, обращения к распределителю, UB под Miri
+code/ch14/examples/       Box::new на 16 МиБ, запись через &u32, цена clone и ячеек
 code/ch07/c-size/         программа задачи 7.C: размер при panic = "unwind" и "abort"
 code/ch07/hir/            во что раскрывается `?`: снимок HIR для раздела 7.1
 code/ch08/typo/ unify/ ffi/  отдельные рабочие пространства для опытов главы 8 с cargo
@@ -199,6 +214,9 @@ $ cargo test -p ch11-exercises            # все задачи главы 11
 $ cargo run --release -p ch11-exercises --example c_bench   # время для задачи 11.C
 $ cargo test -p ch12-exercises            # все задачи главы 12
 $ cargo test -p ch13-exercises            # все задачи главы 13
+$ cargo test -p ch14-exercises            # все задачи главы 14
+$ cargo run --release -p ch14-solutions --example lists        # замеры для задачи 14.C
+$ cargo run --release -p ch14-solutions --example arc_threads  # замеры для задачи 14.D
 $ cargo test -p project-frame             # задачи П6, П7, П12 и П13
 $ cargo test -p project-frame p7          # только П7
 $ cargo test -p project-frame p12         # только П12
@@ -230,10 +248,12 @@ $ cargo +nightly miri test -p ch10 -p ch10-solutions
 $ cargo +nightly miri test -p ch11 -p ch11-solutions
 $ cargo +nightly miri test -p ch12 -p ch12-solutions
 $ cargo +nightly miri test -p ch13 -p ch13-solutions
+$ cargo +nightly miri test -p ch14 -p ch14-solutions   # и ещё раз с MIRIFLAGS=-Zmiri-tree-borrows
 $ cargo +nightly miri test -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
 $ MIRIFLAGS=-Zmiri-tree-borrows cargo +nightly miri test -p appendix-c
 $ cargo +nightly test --doc -p ch00 -p ch01 -p ch02 -p ch06 -p ch07 -p ch08 -p ch09 \
-      -p ch10 -p ch11 -p ch12 -p ch13 -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
+      -p ch10 -p ch11 -p ch12 -p ch13 -p ch14 -p appendix-a -p appendix-b -p appendix-b-2021 \
+      -p appendix-c
 $ cargo +nightly test -p ch11 --features nightly --test nightly   # DynMetadata и -Zretpoline
 $ cargo +nightly test -p ch12 --features nightly --test nightly   # Fn, FnMut и FnOnce вручную
 $ cargo +nightly test --doc -p ch03 -p ch04 -p ch05 -p ch03-solutions -p ch04-solutions \
@@ -259,6 +279,8 @@ $ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch12 -p 
       --skip task_d_promise --skip observed
 $ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch13 -p ch13-solutions \
       -- --skip rustc_ --skip observed --skip task_c_vectorized --skip task_d_vectorization
+$ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch14 -p ch14-solutions \
+      -- --skip rustc_ --skip cargo_ --skip observed
 $ cargo build -p ch06 -p ch07 --no-default-features --target thumbv6m-none-eabi
 $ cargo build -p ch08 -p ch08-solutions --no-default-features --target thumbv6m-none-eabi
 $ cargo build -p ch09 --no-default-features --features alloc --target thumbv6m-none-eabi
@@ -272,6 +294,8 @@ $ cargo build -p ch12-solutions -p ch12-exercises --no-default-features --target
 $ cargo build -p ch13 --no-default-features --target thumbv6m-none-eabi   # и с --features alloc
 $ cargo build -p ch13-solutions -p ch13-exercises --no-default-features --target thumbv6m-none-eabi \
       # и с --features alloc
+$ cargo build -p ch14 --no-default-features --target thumbv6m-none-eabi   # и с --features alloc
+$ cargo build -p ch14-solutions -p ch14-exercises --no-default-features --target thumbv6m-none-eabi
 $ cargo build -p ch00 -p ch01 -p ch02 -p ch00-solutions -p ch01-solutions --target thumbv6m-none-eabi
 $ cargo build -p ch03 -p ch04 -p ch05 -p ch03-solutions -p ch04-solutions -p ch05-solutions \
       --target thumbv6m-none-eabi
@@ -290,6 +314,7 @@ $ bash code/ch10/c/run.sh                 # sort.c: qsort против макр�
 $ bash code/ch11/c/run.sh                 # fops.c: таблица, предсказатель и retpoline из главы 11
 $ bash code/ch12/c/run.sh                 # callback.c и nested.c: void *ctx и трамплин из главы 12
 $ bash code/ch13/c/run.sh                 # loops.c: ошибки на единицу и на знак из главы 13
+$ bash code/ch14/c/run.sh                 # kref.c и twice.c: счётчик ссылок вручную из главы 14
 $ cargo fmt --all --check --manifest-path code/ch08/ffi/Cargo.toml   # и так каждое вложенное
       # рабочее пространство: code/ch07/c-size, code/ch08/{typo,unify,ffi},
       # {exercises,solutions}/ch08/c/station, {exercises,solutions}/ch08/d-station

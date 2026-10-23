@@ -60,7 +60,7 @@ error[E0597]: `local` does not live long enough
 
 Это же правило касается всего, через что можно писать по `&`: `Cell<T>`,
 `RefCell<T>`, `Mutex<T>` и всего, что построено на `UnsafeCell<T>`
-(глава [14](../ch14.md)). Сузить время жизни внутри ячейки нельзя:
+(глава [14](../ch14/05-cells.md)). Сузить время жизни внутри ячейки нельзя:
 
 ```text
 error: lifetime may not live long enough
