@@ -1,0 +1,17 @@
+[package]
+name = "ch18-exercises"
+version = "0.1.0"
+description = "Глава 18: заготовки задач A–D для студента"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+# staticlib: как только задача C решена, C-драйвер (по образцу
+# solutions/ch18/c/) слинкуется с этим крейтом.
+[lib]
+crate-type = ["lib", "staticlib"]
+
+[[test]]
+name = "ch18"
+path = "tests/ch18.rs"

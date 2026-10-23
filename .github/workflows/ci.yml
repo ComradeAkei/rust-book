@@ -25,6 +25,9 @@ jobs:
       # Версия, компоненты и цели берутся из rust-toolchain.toml.
       - run: rustup toolchain install
       - uses: Swatinem/rust-cache@v2
+      # Глава 18 линкуется с zlib (crc32, compress); dev-символ libz.so даёт
+      # zlib1g-dev. Ставим до clippy/теста, которые собирают крейты главы 18.
+      - run: sudo apt-get update && sudo apt-get install -y zlib1g-dev
       - run: cargo fmt --all --check
       - run: cargo fmt --all --check
         working-directory: firmware
@@ -79,6 +82,11 @@ jobs:
       # общим хешем теряется после удаления, вырождение на подобранных
       # именах; что видят и чего не видят -fanalyzer и clang --analyze.
       - run: bash code/ch15/c/run.sh
+      # Глава 18, обратная сторона FFI: C линкуется со статической библиотекой
+      # Rust и вызывает её. code/ch18 — непрозрачный счётчик (раздел 18.4),
+      # solutions/ch18 — кольцевой буфер (задача C). Оба под ASan/LeakSanitizer.
+      - run: bash code/ch18/c/run.sh
+      - run: bash solutions/ch18/c/run.sh
       # Заготовки студента не проходят тесты, пока задачи не решены,
       # но обязаны собираться.
       - run: |
@@ -87,7 +95,7 @@ jobs:
             -p ch05-exercises -p ch06-exercises -p ch07-exercises -p ch08-exercises \
             -p ch09-exercises -p ch10-exercises -p ch11-exercises -p ch12-exercises \
             -p ch13-exercises -p ch14-exercises -p ch15-exercises -p ch16-exercises \
-            -p ch17-exercises -p project-frame -p project-store --all-targets
+            -p ch17-exercises -p ch18-exercises -p project-frame -p project-store --all-targets
       # Вложенные рабочие пространства глав 7 и 8 корневой cargo не видит:
       # их собирают тесты, а формат и clippy проверяются здесь. В typo
       # предупреждения о cfg — предмет опыта, в заготовке d-station ошибка
@@ -209,7 +217,7 @@ jobs:
       - run: |
           cargo +nightly test --doc -p ch00 -p ch01 -p ch02 -p ch06 -p ch07 -p ch08 -p ch09 \
             -p ch10 -p ch11 -p ch12 -p ch13 -p ch14 -p ch15 -p ch16 -p ch17 -p ch17-solutions \
-            -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
+            -p ch18 -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
       # Глава 11: DynMetadata и -Zretpoline есть только в nightly.
       - run: cargo +nightly test -p ch11 --features nightly --test nightly
       # Глава 12: ручная реализация Fn через unboxed_closures и fn_traits.
