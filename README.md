@@ -179,7 +179,7 @@ src/                      текст книги (mdBook)
   ch10/ ch11/ ch12/       главы 10–12, по файлу на раздел
   ch13/ ch14/ ch15/        главы 13–15, по файлу на раздел
   ch16/ ch17/ ch18/        главы 16–18, по файлу на раздел
-  ch19/ ch20/             главы 19–20, по файлу на раздел
+  ch19/ ch20/ ch21/        главы 19–21, по файлу на раздел
   appendix-e/             разборы задач всех глав
 code/chNN/                примеры главы; листинги попадают в текст через {{#include}}
 code/ch01/c/ … ch15/c/    те же примеры на C и run.sh, который сверяет их вывод с текстом
@@ -205,6 +205,8 @@ code/ch18/build.rs        компилирует support.c системным cc
 solutions/ch18/c/         драйвер кольцевого буфера на C и run.sh под ASan (задача C)
 code/ch19/tests/          снятый ассемблер: обещанные инструкции (rdtsc, lfence, imul, paddd, vpaddd) эмитятся
 code/ch19/examples/       emit_probe: драйвер для теста кодогенерации, зовёт asm!-примитивы
+code/ch21/tests/          снятый ассемблер: SeqCst-store даёт xchg, атомарный RMW — префикс lock
+code/ch21/examples/       emit_probe: драйвер для теста кодогенерации, зовёт атомарные операции
 code/ch07/c-size/         программа задачи 7.C: размер при panic = "unwind" и "abort"
 code/ch07/hir/            во что раскрывается `?`: снимок HIR для раздела 7.1
 code/ch08/typo/ unify/ ffi/  отдельные рабочие пространства для опытов главы 8 с cargo
@@ -284,6 +286,7 @@ $ cargo test -p ch18-exercises            # задачи A, B, D и логика
 $ bash solutions/ch18/c/run.sh            # драйвер кольцевого буфера задачи C на C под ASan
 $ cargo test -p ch19-exercises            # задачи A–D главы 19
 $ cargo test -p ch20-exercises            # задачи A–D главы 20 (C — свой futex-мьютекс)
+$ cargo test -p ch21-exercises            # задачи A–D главы 21 (спинлок, ticket, store buffering, Трайбер)
 $ cargo test -p project-frame             # задачи П6, П7, П12 и П13
 $ cargo test -p project-frame p7          # только П7
 $ cargo test -p project-frame p12         # только П12
