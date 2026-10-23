@@ -26,15 +26,18 @@ fn a_ok_u32_to_bytes() {
     assert_eq!(u32::from_ne_bytes(b), 0x1234_5678);
 }
 
+// ANCHOR: a_ok
 #[test]
 fn a_ok_f32_bits() {
     // f32 → u32: размеры равны, любой образец валиден для u32.
     let bits: u32 = unsafe { core::mem::transmute(1.0f32) };
     assert_eq!(bits, 1.0f32.to_bits());
 }
+// ANCHOR_END: a_ok
 
 // ----- UB: запускать под Miri поодиночке -----
 
+// ANCHOR: a_ub
 #[test]
 #[ignore = "UB: invalid value (bool); под Miri поодиночке"]
 #[allow(invalid_value)]
@@ -43,6 +46,7 @@ fn a_ub_invalid_bool() {
     let b: bool = unsafe { core::mem::transmute(2u8) };
     black_box(b);
 }
+// ANCHOR_END: a_ub
 
 #[test]
 #[ignore = "UB: invalid value (ниша NonZero); под Miri поодиночке"]
