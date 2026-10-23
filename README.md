@@ -16,7 +16,7 @@
 - Программа курса: глава 0, 31 глава в шести частях, приложения A–E.
 - Готова эталонная глава 6 «Составные типы и раскладка памяти»:
   11 разделов, задачи A–D, первая задача проекта П6 и разборы в
-  приложении E. Остальные главы, кроме 0–23, пока содержат план из
+  приложении E. Остальные главы, кроме 0–24, пока содержат план из
   программы курса.
 - Готовы главы 0–2: окружение и инструменты (rustup, cargo, чтение
   ассемблера, одна программа на x86_64 и Cortex-M, Miri и clippy, QEMU и
@@ -197,6 +197,18 @@
   Задачи A–D (шесть раскрытий, флаги регистра в духе bitflags, описание
   периферии с правами доступа в типах, конечный автомат на TT-muncher и
   его граница с процедурным макросом), прошивка `firmware/ch23-periph`.
+- Готова глава 24 «Процедурные макросы»: крейт `proc-macro` и дерево
+  токенов, `proc_macro` против `proc_macro2`; свой derive на syn и quote
+  с обобщениями и полными путями; спаны, `syn::Error` и все ошибки за
+  одну сборку, const-проверка размера со спаном, гигиена `call_site` и
+  `mixed_site`; атрибуты-помощники и путь к переименованному крейту;
+  `#[interrupt]` в духе cortex-m-rt с проверкой сигнатуры и имени
+  прерывания; модульные тесты, снимки trybuild и раскрытия, Miri; где и
+  почём выполняется макрос (на хосте, время сборки syn, dep-info через
+  `include_bytes!`). Задачи A–D (построчное раскрытие `#[derive(Debug)]`
+  и `#[entry]`, `#[derive(Bitfield)]` со спанами ошибок, `#[timed]` на
+  SysTick и DWT, `include_svd!` по файлу CMSIS-SVD и сравнение со
+  svd2rust), прошивки `firmware/ch24-expand` и `firmware/ch24-tasks`.
 - Готовы приложения A–D: словарь соответствий C → Rust, edition 2024 для
   системного кода, чек-лист ревью `unsafe` с разбором примера, установка
   окружения и отладка в QEMU. Их код лежит в `code/appendix-*`.
@@ -221,6 +233,7 @@ src/                      текст книги (mdBook)
   ch16/ ch17/ ch18/        главы 16–18, по файлу на раздел
   ch19/ ch20/ ch21/ ch22/  главы 19–22, по файлу на раздел
   ch23/                   глава 23, по файлу на раздел
+  ch24/                   глава 24, по файлу на раздел
   appendix-e/             разборы задач всех глав
 code/chNN/                примеры главы; листинги попадают в текст через {{#include}}
 code/ch01/c/ … ch15/c/    те же примеры на C и run.sh, который сверяет их вывод с текстом
@@ -252,6 +265,11 @@ code/ch23/c/              macros.c: ловушки препроцессора и
 code/ch23/expanded/       swap! с контекстами гигиены: исходник и снимок -Zunpretty=expanded,hygiene
 code/ch23/fragments/      шесть вызовов макросов задачи 23.A
 code/ch23/tests/          снимок раскрытия и ассемблер: макросная отправка байта — псевдоним рукописной
+code/ch24-macros/         крейт proc-macro главы 24: Describe, #[interrupt], #[traced], разбор токенов
+code/ch24/tests/          снимки trybuild (ui/), снимки раскрытия, макрос собран для хоста, путь к крейту
+code/ch24/expanded/       снимки -Zunpretty=expanded: derive(Describe) и #[interrupt] для UART0
+code/ch24/renamed/        отдельное рабочее пространство: ch24 под именем station и #[describe(crate = ...)]
+code/ch24/svd/            lm3s6965.svd: два UART в формате CMSIS-SVD для include_svd! задачи 24.D
 code/ch07/c-size/         программа задачи 7.C: размер при panic = "unwind" и "abort"
 code/ch07/hir/            во что раскрывается `?`: снимок HIR для раздела 7.1
 code/ch08/typo/ unify/ ffi/  отдельные рабочие пространства для опытов главы 8 с cargo
@@ -271,7 +289,9 @@ exercises/project-store/  заготовка задачи П15: хранилищ
 solutions/chNN/           эталонные решения
 solutions/ch02-2021/      решение задачи 2.D в edition 2021
 solutions/ch08/c/ d-station/  решения задач 8.C и 8.D
+exercises/ch24-macros/    заготовки макросов задач 24.B–24.D; решения — в solutions/ch24-macros
 tests-shared/             тесты, общие для заготовок и решений
+tests-shared/ch24-ui/     снимки ошибок задач 24.B–24.D для trybuild, общие для заготовок и решений
 project/                  сквозной проект «станция телеметрии»
 firmware/                 прошивки для QEMU (отдельный workspace)
 theme/                    стили врезок: справка, сравнение с C, под капотом, трюк, ловушка
@@ -334,6 +354,7 @@ $ cargo test -p ch20-exercises            # задачи A–D главы 20 (C 
 $ cargo test -p ch21-exercises            # задачи A–D главы 21 (спинлок, ticket, store buffering, Трайбер)
 $ cargo test -p ch22-exercises            # задачи A–D2 главы 22 (C — реактор на epoll, только Linux x86-64)
 $ cargo test -p ch23-exercises            # задачи A–D главы 23 (A сверяется с rustc -Zunpretty=expanded)
+$ cargo test -p ch24-exercises            # задачи A–D главы 24 (ошибки макросов — снимки trybuild)
 $ cargo test -p project-frame             # задачи П6, П7, П12 и П13
 $ cargo test -p project-frame p7          # только П7
 $ cargo test -p project-frame p12         # только П12
@@ -379,10 +400,11 @@ $ cargo +nightly miri test -p ch20 -p ch20-solutions -- shared_pointer a_sendbox
 $ cargo +nightly miri test -p ch21 -- single_thread_fifo
 $ cargo +nightly miri test -p ch22 -p ch22-solutions   # и ещё раз с MIRIFLAGS=-Zmiri-tree-borrows
 $ cargo +nightly miri test -p ch23 -p ch23-solutions   # и ещё раз с MIRIFLAGS=-Zmiri-tree-borrows
+$ cargo +nightly miri test -p ch24 -p ch24-solutions   # и ещё раз с MIRIFLAGS=-Zmiri-tree-borrows
 $ cargo +nightly test --doc -p ch00 -p ch01 -p ch02 -p ch06 -p ch07 -p ch08 -p ch09 \
       -p ch10 -p ch11 -p ch12 -p ch13 -p ch14 -p ch15 -p ch16 -p ch17 -p ch17-solutions \
-      -p ch18 -p ch19 -p ch20 -p ch22 -p ch23 -p ch23-solutions -p appendix-a -p appendix-b \
-      -p appendix-b-2021 -p appendix-c
+      -p ch18 -p ch19 -p ch20 -p ch22 -p ch23 -p ch23-solutions -p ch24 -p appendix-a \
+      -p appendix-b -p appendix-b-2021 -p appendix-c
 $ cargo +nightly test -p ch11 --features nightly --test nightly   # DynMetadata и -Zretpoline
 $ cargo +nightly test -p ch12 --features nightly --test nightly   # Fn, FnMut и FnOnce вручную
 $ cargo +nightly test -p ch19 --features nightly --lib            # переносимый SIMD core::simd
@@ -423,6 +445,8 @@ $ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch22 -p 
       -- --skip observed
 $ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch23 -p ch23-solutions \
       -- --skip rustc_ --skip observed
+$ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch24 -p ch24-macros \
+      -p ch24-solutions -- --skip rustc_ --skip observed
 $ cargo build -p ch06 -p ch07 --no-default-features --target thumbv6m-none-eabi
 $ cargo build -p ch08 -p ch08-solutions --no-default-features --target thumbv6m-none-eabi
 $ cargo build -p ch09 --no-default-features --features alloc --target thumbv6m-none-eabi
@@ -445,10 +469,12 @@ $ cargo build -p ch22 -p ch22-solutions -p ch22-exercises --no-default-features 
       --target thumbv6m-none-eabi       # async без кучи; на трёх целях Cortex-M
 $ cargo build -p ch23 --no-default-features --target thumbv6m-none-eabi   # код из макросов; на трёх целях
 $ cargo build -p ch23-solutions -p ch23-exercises --target thumbv6m-none-eabi
+$ cargo build -p ch24 --no-default-features --target thumbv6m-none-eabi   # макрос — для хоста; на трёх целях
+$ cargo build -p ch24-solutions -p ch24-exercises --no-default-features --target thumbv6m-none-eabi
 $ cargo build -p ch00 -p ch01 -p ch02 -p ch00-solutions -p ch01-solutions --target thumbv6m-none-eabi
 $ cargo build -p ch03 -p ch04 -p ch05 -p ch03-solutions -p ch04-solutions -p ch05-solutions \
       --target thumbv6m-none-eabi
-$ bash firmware/run-demos.sh              # опыты глав 0, 3, 5–13, 15, 22 и 23 в QEMU: 6, 5, 2, 8, 11, 7, 3, 2, 5, 7, 5, 7, 7 и 4
+$ bash firmware/run-demos.sh              # опыты глав 0, 3, 5–13, 15, 22, 23 и 24 в QEMU: 6, 5, 2, 8, 11, 7, 3, 2, 5, 7, 5, 7, 7, 4 и 7
 $ cargo test -p ch02-solutions -- --ignored own_firmware   # задача 2.B на всех прошивках
 $ bash code/appendix-a/c/run.sh           # C-примеры приложения A под UBSan
 $ bash code/ch01/c/run.sh                 # C-примеры главы 1 на x86_64 и в QEMU
@@ -470,7 +496,8 @@ $ bash code/ch18/c/run.sh                 # C вызывает Rust: непро�
 $ bash solutions/ch18/c/run.sh            # C управляет кольцевым буфером (задача C) под ASan
 $ cargo fmt --all --check --manifest-path code/ch08/ffi/Cargo.toml   # и так каждое вложенное
       # рабочее пространство: code/ch07/c-size, code/ch08/{typo,unify,ffi},
-      # {exercises,solutions}/ch08/c/station, {exercises,solutions}/ch08/d-station
+      # {exercises,solutions}/ch08/c/station, {exercises,solutions}/ch08/d-station,
+      # code/ch24/renamed
 $ bash solutions/ch01/c/run.sh            # задача 1.A на C
 $ python3 tools/check-includes.py         # все {{#include}} указывают на существующие якоря, ссылки — на страницы
 $ mdbook build
@@ -489,6 +516,10 @@ $ mdbook build
 снимки раскрытия, ассемблер и тексты `stringify!`: к раскладке они не
 относятся, а в этом задании установлен только nightly. Их проверяет
 основное задание.
+В главе 24 так же пропускаются снимки trybuild и раскрытия и тесты,
+которые сами запускают cargo (`rustc_*`), и группа `observed`: пробелы
+в выводе `stringify!` зависят от версии компилятора, а порядок полей
+`repr(Rust)` под случайной раскладкой меняется намеренно, как в главе 6.
 
 ## Лицензия
 
