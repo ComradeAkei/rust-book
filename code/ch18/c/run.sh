@@ -14,8 +14,15 @@ CC=${CC:-cc}
 fail=0
 
 echo "== сборка статической библиотеки ch18 =="
-if ! cargo build -p ch18 --quiet; then
-    echo "FAIL  cargo build -p ch18"
+# Системные библиотеки, которых требует статическая библиотека: те, что
+# нужны libstd, и те, что крейт сам просит через #[link] (zlib, раздел 18.6).
+# Спрашиваем у rustc при сборке самого крейта, а не зашиваем список:
+# пустой крейт про -lz не знает, а без инкрементальной сборки (как в CI)
+# обёртка над zlib попадает в один объектный файл с экспортом для C, и
+# ссылки на функции zlib остаются неразрешёнными.
+if ! build=$(cargo rustc -p ch18 --lib --quiet -- --print native-static-libs 2>&1); then
+    echo "FAIL  cargo rustc -p ch18"
+    printf '%s\n' "$build" | sed 's/^/      /'
     exit 1
 fi
 lib="$root/target/debug/libch18.a"
@@ -24,12 +31,8 @@ if [ ! -f "$lib" ]; then
     exit 1
 fi
 
-# Системные библиотеки, которых требует статически слинкованная libstd:
-# спрашиваем у самого rustc, а не зашиваем список.
-native=$(printf '' | rustc --edition 2024 --crate-type staticlib \
-    --print native-static-libs -o /dev/null - 2>&1 |
-    sed -n 's/.*native-static-libs: //p')
-[ -n "$native" ] || native="-lgcc_s -lutil -lrt -lpthread -lm -ldl -lc"
+native=$(printf '%s\n' "$build" | sed -n 's/.*native-static-libs: //p' | tail -n 1)
+[ -n "$native" ] || native="-lgcc_s -lutil -lrt -lpthread -lm -ldl -lc -lz"
 
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
