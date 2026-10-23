@@ -87,7 +87,7 @@ jobs:
             -p ch05-exercises -p ch06-exercises -p ch07-exercises -p ch08-exercises \
             -p ch09-exercises -p ch10-exercises -p ch11-exercises -p ch12-exercises \
             -p ch13-exercises -p ch14-exercises -p ch15-exercises -p ch16-exercises \
-            -p project-frame -p project-store --all-targets
+            -p ch17-exercises -p project-frame -p project-store --all-targets
       # Вложенные рабочие пространства глав 7 и 8 корневой cargo не видит:
       # их собирают тесты, а формат и clippy проверяются здесь. В typo
       # предупреждения о cfg — предмет опыта, в заготовке d-station ошибка
@@ -184,6 +184,21 @@ jobs:
           MIRIFLAGS: -Zmiri-tree-borrows
       - name: Каталог UB главы 16 и расхождение моделей алиасинга
         run: bash code/ch16/ub/run.sh
+      # Глава 17: MaybeUninit, операции с указателями, volatile, NonNull,
+      # transmute и типы динамического размера. Ручное выделение DST
+      # (задача D) и решения обязаны проходить обе модели. Каталог transmute
+      # (задача A) — отдельным скриптом.
+      - run: cargo +nightly miri test -p ch17 -p ch17-solutions
+      - run: cargo +nightly miri test -p ch17 -p ch17-solutions
+        env:
+          MIRIFLAGS: -Zmiri-tree-borrows
+      # Строгий provenance: тегированные указатели глав 16 и 17 не
+      # восстанавливают право на память из голого числа.
+      - run: cargo +nightly miri test -p ch16 -p ch17 -p ch17-solutions
+        env:
+          MIRIFLAGS: -Zmiri-strict-provenance
+      - name: Каталог transmute главы 17
+        run: bash code/ch17/ub/run.sh
       - run: cargo +nightly miri test -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
       # Чек-лист приложения C требует проходить Miri в обеих моделях алиасинга.
       - run: cargo +nightly miri test -p appendix-c
@@ -193,8 +208,8 @@ jobs:
       # nightly, stable проверяет лишь то, что пример не компилируется.
       - run: |
           cargo +nightly test --doc -p ch00 -p ch01 -p ch02 -p ch06 -p ch07 -p ch08 -p ch09 \
-            -p ch10 -p ch11 -p ch12 -p ch13 -p ch14 -p ch15 -p ch16 -p appendix-a -p appendix-b \
-            -p appendix-b-2021 -p appendix-c
+            -p ch10 -p ch11 -p ch12 -p ch13 -p ch14 -p ch15 -p ch16 -p ch17 -p ch17-solutions \
+            -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
       # Глава 11: DynMetadata и -Zretpoline есть только в nightly.
       - run: cargo +nightly test -p ch11 --features nightly --test nightly
       # Глава 12: ручная реализация Fn через unboxed_closures и fn_traits.
@@ -295,6 +310,9 @@ jobs:
       # Глава 16: unsafe и UB. Тесты asm (rustc_) собирают закреплённым cargo
       # и к раскладке repr(Rust) не относятся; каталог UB помечен ignore.
       - run: cargo +nightly test -p ch16 -p ch16-solutions -- --skip rustc_
+      # Глава 17: низкоуровневая работа с памятью. asm-тест (rustc_) собирает
+      # закреплённым cargo; каталог transmute (задача A) помечен ignore.
+      - run: cargo +nightly test -p ch17 -p ch17-solutions -- --skip rustc_
 
   thumb:
     name: Cortex-M и QEMU
@@ -379,6 +397,16 @@ jobs:
         run: |
           for t in thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabihf; do
             cargo build -p ch15 --no-default-features --features alloc --target "$t"
+          done
+      # Глава 17: без std остаются MaybeUninit, операции с указателями,
+      # volatile и NonNull; с alloc — ещё типы динамического размера с
+      # хвостовым массивом. Решения и задачи главы хостовые (разбор ELF,
+      # Miri), под Cortex-M не идут.
+      - name: Глава 17 без std под три цели Cortex-M
+        run: |
+          for t in thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabihf; do
+            cargo build -p ch17 --no-default-features --target "$t"
+            cargo build -p ch17 --no-default-features --features alloc --target "$t"
           done
       - name: Главы 0–2 без std под три цели Cortex-M
         run: |
