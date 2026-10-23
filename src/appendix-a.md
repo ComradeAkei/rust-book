@@ -273,7 +273,7 @@ SIGFPE. Проверка на `-1` сделана без ветвлений: `no
 | `malloc` + инициализация | `Box::new(x)` | память выделяется уже с значением ([гл. 14](ch14/01-box.md)) |
 | `free(p)` | ничего: `drop` в конце области видимости | явно — `drop(p)` |
 | `calloc(n, size)` | `vec![0; n]` | просит у аллокатора обнулённую память, как `calloc` |
-| `realloc` | `Vec::reserve`, `Vec::resize` | [гл. 15](ch15.md) |
+| `realloc` | `Vec::reserve`, `Vec::resize` | [гл. 15](ch15/01-vec.md) |
 | `alloca`, VLA | нет | массивы фиксированного размера или куча |
 | `memcpy(d, s, n)` | `d.copy_from_slice(s)` | длины должны совпадать, иначе паника |
 | `memmove` | `buf.copy_within(from.., to)` | области могут перекрываться |

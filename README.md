@@ -343,7 +343,7 @@ $ cargo fmt --all --check --manifest-path code/ch08/ffi/Cargo.toml   # и так
       # рабочее пространство: code/ch07/c-size, code/ch08/{typo,unify,ffi},
       # {exercises,solutions}/ch08/c/station, {exercises,solutions}/ch08/d-station
 $ bash solutions/ch01/c/run.sh            # задача 1.A на C
-$ python3 tools/check-includes.py         # все {{#include}} указывают на существующие якоря
+$ python3 tools/check-includes.py         # все {{#include}} указывают на существующие якоря, ссылки — на страницы
 $ mdbook build
 ```
 
