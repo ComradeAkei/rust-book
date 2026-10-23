@@ -157,6 +157,28 @@
   кольцевой буфер за непрозрачным описателем с драйвером на C; безопасная
   обёртка над zlib `compress`/`uncompress`). Глава хостовая: под Miri и
   Cortex-M не идёт.
+- Готова глава 19 «Встроенный ассемблер, интринсики и SIMD»: `asm!` с
+  операндами и опциями; `global_asm!` и naked-функции; интринсики
+  `core::arch` и `#[target_feature]`; выбор реализации во время выполнения;
+  переносимый SIMD (`core::simd`, nightly); инструкции управления ядром
+  Cortex-M. Обещанные инструкции закреплены тестом снятого ассемблера.
+  Задачи A–D (три примитива на `asm!`, функция целиком в `global_asm!`,
+  поиск байта на SIMD с диспетчеризацией, кооперативная сопрограмма).
+  Глава в основном хостовая (x86-64); модуль управления ядром собирается
+  под три цели Cortex-M.
+- Готова глава 20 «Потоки, Send и Sync»: `spawn`, `join` и `move`; `Send` и
+  `Sync` как свойства типов; общее состояние через `Arc`, `Mutex` и
+  `RwLock`; области потоков `thread::scope`; каналы и ожидание; цена
+  ложного разделения кэш-линии. Задачи A–D (`SendBox` с ручным `unsafe impl
+  Send`, параллельный подсчёт слов, мьютекс на трёх состояниях поверх
+  `futex`, перевод между счетами без взаимной блокировки). Глава хостовая.
+- Готова глава 21 «Атомики и модель памяти»: атомарные типы и
+  `compare_exchange(_weak)`; happens-before через Release/Acquire;
+  `SeqCst`, заборы и буфер записи; во что порядки компилируются на x86 и
+  ARM; lock-free очередь SPSC на атомарных индексах (собирается и для
+  Cortex-M0); спинлок, ticket lock и конвой, ABA и тегированный указатель.
+  Задачи A–D (спинлок, справедливый ticket lock, проба на буфер записи,
+  стек Трайбера против ABA).
 - Готовы приложения A–D: словарь соответствий C → Rust, edition 2024 для
   системного кода, чек-лист ревью `unsafe` с разбором примера, установка
   окружения и отладка в QEMU. Их код лежит в `code/appendix-*`.
@@ -179,6 +201,7 @@ src/                      текст книги (mdBook)
   ch10/ ch11/ ch12/       главы 10–12, по файлу на раздел
   ch13/ ch14/ ch15/        главы 13–15, по файлу на раздел
   ch16/ ch17/ ch18/        главы 16–18, по файлу на раздел
+  ch19/ ch20/ ch21/        главы 19–21, по файлу на раздел
   appendix-e/             разборы задач всех глав
 code/chNN/                примеры главы; листинги попадают в текст через {{#include}}
 code/ch01/c/ … ch15/c/    те же примеры на C и run.sh, который сверяет их вывод с текстом
@@ -202,6 +225,10 @@ code/ch17/ub/             run.sh: UB-вызовы каталога transmute п�
 code/ch18/c/              support.c (вызывается из Rust) и run.sh: C вызывает Rust под ASan
 code/ch18/build.rs        компилирует support.c системным cc в статический архив
 solutions/ch18/c/         драйвер кольцевого буфера на C и run.sh под ASan (задача C)
+code/ch19/tests/          снятый ассемблер: обещанные инструкции (rdtsc, lfence, imul, paddd, vpaddd) эмитятся
+code/ch19/examples/       emit_probe: драйвер для теста кодогенерации, зовёт asm!-примитивы
+code/ch21/tests/          снятый ассемблер: SeqCst-store даёт xchg, атомарный RMW — префикс lock
+code/ch21/examples/       emit_probe: драйвер для теста кодогенерации, зовёт атомарные операции
 code/ch07/c-size/         программа задачи 7.C: размер при panic = "unwind" и "abort"
 code/ch07/hir/            во что раскрывается `?`: снимок HIR для раздела 7.1
 code/ch08/typo/ unify/ ffi/  отдельные рабочие пространства для опытов главы 8 с cargo
@@ -279,6 +306,9 @@ $ cargo test -p ch17-exercises            # задачи B, C и D главы 17
 $ bash code/ch17/ub/run.sh                # UB-вызовы каталога transmute (задача A)
 $ cargo test -p ch18-exercises            # задачи A, B, D и логика FIFO задачи C главы 18
 $ bash solutions/ch18/c/run.sh            # драйвер кольцевого буфера задачи C на C под ASan
+$ cargo test -p ch19-exercises            # задачи A–D главы 19
+$ cargo test -p ch20-exercises            # задачи A–D главы 20 (C — свой futex-мьютекс)
+$ cargo test -p ch21-exercises            # задачи A–D главы 21 (спинлок, ticket, store buffering, Трайбер)
 $ cargo test -p project-frame             # задачи П6, П7, П12 и П13
 $ cargo test -p project-frame p7          # только П7
 $ cargo test -p project-frame p12         # только П12
@@ -320,11 +350,14 @@ $ MIRIFLAGS=-Zmiri-strict-provenance cargo +nightly miri test -p ch16 -p ch17 -p
 $ bash code/ch17/ub/run.sh                # UB-вызовы каталога transmute главы 17 под Miri (задача A)
 $ cargo +nightly miri test -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
 $ MIRIFLAGS=-Zmiri-tree-borrows cargo +nightly miri test -p appendix-c
+$ cargo +nightly miri test -p ch20 -p ch20-solutions -- shared_pointer a_sendbox
+$ cargo +nightly miri test -p ch21 -- single_thread_fifo
 $ cargo +nightly test --doc -p ch00 -p ch01 -p ch02 -p ch06 -p ch07 -p ch08 -p ch09 \
       -p ch10 -p ch11 -p ch12 -p ch13 -p ch14 -p ch15 -p ch16 -p ch17 -p ch17-solutions \
-      -p ch18 -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
+      -p ch18 -p ch19 -p ch20 -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
 $ cargo +nightly test -p ch11 --features nightly --test nightly   # DynMetadata и -Zretpoline
 $ cargo +nightly test -p ch12 --features nightly --test nightly   # Fn, FnMut и FnOnce вручную
+$ cargo +nightly test -p ch19 --features nightly --lib            # переносимый SIMD core::simd
 $ cargo +nightly test --doc -p ch03 -p ch04 -p ch05 -p ch03-solutions -p ch04-solutions \
       -p ch05-solutions
 $ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch06-solutions
@@ -356,6 +389,8 @@ $ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch16 -p 
       -- --skip rustc_
 $ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch17 -p ch17-solutions \
       -- --skip rustc_
+$ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch19 -p ch19-solutions \
+      -- --skip chapter_instructions
 $ cargo build -p ch06 -p ch07 --no-default-features --target thumbv6m-none-eabi
 $ cargo build -p ch08 -p ch08-solutions --no-default-features --target thumbv6m-none-eabi
 $ cargo build -p ch09 --no-default-features --features alloc --target thumbv6m-none-eabi
@@ -373,6 +408,7 @@ $ cargo build -p ch14 --no-default-features --target thumbv6m-none-eabi   # и �
 $ cargo build -p ch14-solutions -p ch14-exercises --no-default-features --target thumbv6m-none-eabi
 $ cargo build -p ch15 --no-default-features --features alloc --target thumbv6m-none-eabi
 $ cargo build -p ch17 --no-default-features --target thumbv6m-none-eabi   # и с --features alloc; на трёх целях Cortex-M
+$ cargo build -p ch19 -p ch21 --no-default-features --target thumbv6m-none-eabi   # wfi/PRIMASK и SPSC
 $ cargo build -p ch00 -p ch01 -p ch02 -p ch00-solutions -p ch01-solutions --target thumbv6m-none-eabi
 $ cargo build -p ch03 -p ch04 -p ch05 -p ch03-solutions -p ch04-solutions -p ch05-solutions \
       --target thumbv6m-none-eabi

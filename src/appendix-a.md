@@ -53,8 +53,8 @@ C-примеры лежат в `code/appendix-a/c/`. Скрипт собирае
 | `const`-объект | `const` (подставляется) или `static` (один адрес) | [гл. 25](ch25.md) |
 | `volatile` | `read_volatile`, `write_volatile` | volatile — свойство доступа, а не типа ([гл. 17](ch17/05-volatile.md)) |
 | `restrict` | `&mut T` | компилятор знает это без пометок |
-| `_Atomic` | `AtomicU32` и другие | [гл. 21](ch21.md) |
-| `_Thread_local` | `thread_local!` | [гл. 20](ch20.md) |
+| `_Atomic` | `AtomicU32` и другие | [гл. 21](ch21/01-atomics.md) |
+| `_Thread_local` | `thread_local!` | [гл. 20](ch20/index.md) |
 
 Размеры из таблицы проверяет тест `types::tests::sizes`. Отдельно о
 массивах: в C имя массива в аргументе функции превращается в указатель, и
@@ -603,7 +603,7 @@ overflow: 2147483647 - -1 cannot be represented in type 'int'`, а без
 | `__builtin_bswap32`, `htonl`, `ntohl` | `swap_bytes`, `to_be`, `u32::from_be_bytes` | |
 | `__builtin_add_overflow` | `checked_add`, `overflowing_add` | |
 | `__builtin_prefetch` | `core::arch::x86_64::_mm_prefetch` | |
-| `asm volatile("" ::: "memory")` | `compiler_fence(Ordering::SeqCst)` | смысл не совпадает полностью ([гл. 21](ch21.md)) |
+| `asm volatile("" ::: "memory")` | `compiler_fence(Ordering::SeqCst)` | смысл не совпадает полностью ([гл. 21](ch21/03-fences.md)) |
 | `__sync_synchronize()` | `fence(Ordering::SeqCst)` | |
 
 <div class="box trap">
@@ -678,15 +678,15 @@ appa_clz:                   appa_clz:
 
 | C (POSIX) | Rust | Замечание |
 |---|---|---|
-| `pthread_create`, `pthread_join` | `thread::spawn`, `JoinHandle::join` | `thread::scope` для заимствования данных со стека ([гл. 20](ch20.md)) |
+| `pthread_create`, `pthread_join` | `thread::spawn`, `JoinHandle::join` | `thread::scope` для заимствования данных со стека ([гл. 20](ch20/04-scoped.md)) |
 | `pthread_mutex_t` рядом с данными | `Mutex<T>` с данными внутри | доступ только через guard |
 | `pthread_rwlock_t` | `RwLock<T>` | |
 | `pthread_cond_t` | `Condvar` | |
 | `pthread_once` | `Once`, `OnceLock`, `LazyLock` | |
-| `_Atomic`, `atomic_fetch_add_explicit` | `AtomicU64::fetch_add(v, Ordering)` | порядок памяти обязателен ([гл. 21](ch21.md)) |
+| `_Atomic`, `atomic_fetch_add_explicit` | `AtomicU64::fetch_add(v, Ordering)` | порядок памяти обязателен ([гл. 21](ch21/02-ordering.md)) |
 | `volatile int flag` между потоками | `AtomicBool` | `volatile` не синхронизирует ни в C, ни в Rust |
 | `__thread`, `_Thread_local` | `thread_local!` | |
-| гонка данных | ошибка компиляции | `Send` и `Sync` ([гл. 20](ch20.md)) |
+| гонка данных | ошибка компиляции | `Send` и `Sync` ([гл. 20](ch20/02-marker.md)) |
 | `signal`, `sigaction` | нет в std; `libc::sigaction`, крейт `signal-hook` | [гл. 28](ch28.md) |
 | `fork` | `std::process::Command`; сам `fork` — через libc и `unsafe` | [гл. 28](ch28.md) |
 
