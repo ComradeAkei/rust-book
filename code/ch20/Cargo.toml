@@ -1,0 +1,12 @@
+[package]
+name = "ch20"
+version = "0.1.0"
+description = "Глава 20: потоки, Send и Sync — spawn, scope, Arc/Mutex, каналы, ложное разделение"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+# Глава хостовая: потоки операционной системы, Mutex, каналы. В no_std
+# потоков нет (их роль на Cortex-M играют прерывания, глава 21), поэтому под
+# Cortex-M крейт не собирается. Miri исполняет потоки и ловит гонки данных.

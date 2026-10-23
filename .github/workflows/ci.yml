@@ -95,7 +95,7 @@ jobs:
             -p ch05-exercises -p ch06-exercises -p ch07-exercises -p ch08-exercises \
             -p ch09-exercises -p ch10-exercises -p ch11-exercises -p ch12-exercises \
             -p ch13-exercises -p ch14-exercises -p ch15-exercises -p ch16-exercises \
-            -p ch17-exercises -p ch18-exercises -p ch19-exercises \
+            -p ch17-exercises -p ch18-exercises -p ch19-exercises -p ch20-exercises \
             -p project-frame -p project-store --all-targets
       # Вложенные рабочие пространства глав 7 и 8 корневой cargo не видит:
       # их собирают тесты, а формат и clippy проверяются здесь. В typo
@@ -208,6 +208,11 @@ jobs:
           MIRIFLAGS: -Zmiri-strict-provenance
       - name: Каталог transmute главы 17
         run: bash code/ch17/ub/run.sh
+      # Глава 20: безопасность от гонок данных — свойство типов (Send/Sync),
+      # а не Miri; тяжёлые потоковые тесты под Miri непрактичны и проверяются
+      # заданием host. Под Miri гоняем только unsafe-обёртки (Shared, SendBox)
+      # на отсутствие UB и утечек; задача C (futex через syscall) — ignore.
+      - run: cargo +nightly miri test -p ch20 -p ch20-solutions -- shared_pointer a_sendbox
       - run: cargo +nightly miri test -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
       # Чек-лист приложения C требует проходить Miri в обеих моделях алиасинга.
       - run: cargo +nightly miri test -p appendix-c
@@ -218,7 +223,7 @@ jobs:
       - run: |
           cargo +nightly test --doc -p ch00 -p ch01 -p ch02 -p ch06 -p ch07 -p ch08 -p ch09 \
             -p ch10 -p ch11 -p ch12 -p ch13 -p ch14 -p ch15 -p ch16 -p ch17 -p ch17-solutions \
-            -p ch18 -p ch19 -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
+            -p ch18 -p ch19 -p ch20 -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
       # Глава 11: DynMetadata и -Zretpoline есть только в nightly.
       - run: cargo +nightly test -p ch11 --features nightly --test nightly
       # Глава 12: ручная реализация Fn через unboxed_closures и fn_traits.
