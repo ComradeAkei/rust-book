@@ -95,7 +95,8 @@ jobs:
             -p ch05-exercises -p ch06-exercises -p ch07-exercises -p ch08-exercises \
             -p ch09-exercises -p ch10-exercises -p ch11-exercises -p ch12-exercises \
             -p ch13-exercises -p ch14-exercises -p ch15-exercises -p ch16-exercises \
-            -p ch17-exercises -p ch18-exercises -p project-frame -p project-store --all-targets
+            -p ch17-exercises -p ch18-exercises -p ch19-exercises \
+            -p project-frame -p project-store --all-targets
       # Вложенные рабочие пространства глав 7 и 8 корневой cargo не видит:
       # их собирают тесты, а формат и clippy проверяются здесь. В typo
       # предупреждения о cfg — предмет опыта, в заготовке d-station ошибка
@@ -217,11 +218,15 @@ jobs:
       - run: |
           cargo +nightly test --doc -p ch00 -p ch01 -p ch02 -p ch06 -p ch07 -p ch08 -p ch09 \
             -p ch10 -p ch11 -p ch12 -p ch13 -p ch14 -p ch15 -p ch16 -p ch17 -p ch17-solutions \
-            -p ch18 -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
+            -p ch18 -p ch19 -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
       # Глава 11: DynMetadata и -Zretpoline есть только в nightly.
       - run: cargo +nightly test -p ch11 --features nightly --test nightly
       # Глава 12: ручная реализация Fn через unboxed_closures и fn_traits.
       - run: cargo +nightly test -p ch12 --features nightly --test nightly
+      # Глава 19: переносимый SIMD (core::simd) собирается только на nightly
+      # под feature="nightly". Интеграционный тест asm запускает свой cargo,
+      # поэтому здесь только --lib.
+      - run: cargo +nightly test -p ch19 --features nightly --lib
       - run: |
           cargo +nightly test --doc -p ch03 -p ch04 -p ch05 -p ch03-solutions \
             -p ch04-solutions -p ch05-solutions
@@ -321,6 +326,10 @@ jobs:
       # Глава 17: низкоуровневая работа с памятью. asm-тест (rustc_) собирает
       # закреплённым cargo; каталог transmute (задача A) помечен ignore.
       - run: cargo +nightly test -p ch17 -p ch17-solutions -- --skip rustc_
+      # Глава 19: встроенный ассемблер и интринсики. Тест chapter_instructions
+      # собирает ассемблер закреплённым cargo и к раскладке repr(Rust) не
+      # относится; остальное — регистры и SIMD, от раскладки не зависят.
+      - run: cargo +nightly test -p ch19 -p ch19-solutions -- --skip chapter_instructions
 
   thumb:
     name: Cortex-M и QEMU
@@ -415,6 +424,14 @@ jobs:
           for t in thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabihf; do
             cargo build -p ch17 --no-default-features --target "$t"
             cargo build -p ch17 --no-default-features --features alloc --target "$t"
+          done
+      # Глава 19: на хосте — встроенный ассемблер и интринсики x86-64 (их
+      # проверяет задание host), а под Cortex-M остаётся модуль управления
+      # ядром (wfi, критическая секция через PRIMASK).
+      - name: Глава 19 (управление ядром) без std под три цели Cortex-M
+        run: |
+          for t in thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabihf; do
+            cargo build -p ch19 --no-default-features --target "$t"
           done
       - name: Главы 0–2 без std под три цели Cortex-M
         run: |

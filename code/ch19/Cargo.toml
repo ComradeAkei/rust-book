@@ -1,0 +1,20 @@
+[package]
+name = "ch19"
+version = "0.1.0"
+description = "Глава 19: встроенный ассемблер asm!, naked-функции, интринсики core::arch и SIMD"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[features]
+default = ["std"]
+# Выбор реализации по фичам процессора (is_x86_feature_detected!) требует std.
+# Без std остаётся ядро на core::arch и инструкции Cortex-M.
+std = []
+# Переносимый SIMD (core::simd) есть только на nightly.
+nightly = []
+
+[[test]]
+name = "asm"
+path = "tests/asm.rs"
