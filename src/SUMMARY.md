@@ -217,7 +217,14 @@
     - [21.5. Lock-free: кольцевой буфер SPSC](ch21/05-spsc.md)
     - [21.6. Замки и проблема ABA](ch21/06-locks.md)
     - [21.7. Задачи](ch21/07-tasks.md)
-- [22. Асинхронность изнутри](ch22.md)
+- [22. Асинхронность изнутри](ch22/index.md)
+    - [22.1. Future, poll и Waker](ch22/01-future.md)
+    - [22.2. async fn как конечный автомат](ch22/02-state.md)
+    - [22.3. Pin и Unpin](ch22/03-pin.md)
+    - [22.4. Исполнитель и реактор](ch22/04-executor.md)
+    - [22.5. select, join и отмена](ch22/05-cancel.md)
+    - [22.6. Async на микроконтроллере](ch22/06-bare.md)
+    - [22.7. Задачи](ch22/07-tasks.md)
 
 # Часть V. Метапрограммирование
 
@@ -269,3 +276,4 @@
     - [Глава 19](appendix-e/ch19.md)
     - [Глава 20](appendix-e/ch20.md)
     - [Глава 21](appendix-e/ch21.md)
+    - [Глава 22](appendix-e/ch22.md)

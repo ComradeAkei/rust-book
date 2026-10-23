@@ -179,6 +179,15 @@
   Cortex-M0); спинлок, ticket lock и конвой, ABA и тегированный указатель.
   Задачи A–D (спинлок, справедливый ticket lock, проба на буфер записи,
   стек Трайбера против ABA).
+- Готова глава 22 «Асинхронность изнутри»: `Future`, `poll` и `Waker`
+  вручную; `async fn` как конечный автомат и его размер; `Pin`, `Unpin` и
+  самоссылки; исполнитель с очередью, реактор на `epoll` и модель
+  завершения io_uring; `select`, `join` и отмена через `drop`, отменобезопасность;
+  `async` на Cortex-M со сном в `wfi`. Задачи A–D2 (размеры шести
+  автоматов, исполнитель с таймерами на `BinaryHeap`, реактор на `epoll`
+  и эхо-сервер на тысячу соединений, исполнитель без кучи для Cortex-M,
+  отменобезопасное чтение кадров), прошивки `firmware/ch22-async` и
+  `firmware/ch22-tasks`.
 - Готовы приложения A–D: словарь соответствий C → Rust, edition 2024 для
   системного кода, чек-лист ревью `unsafe` с разбором примера, установка
   окружения и отладка в QEMU. Их код лежит в `code/appendix-*`.
@@ -201,7 +210,7 @@ src/                      текст книги (mdBook)
   ch10/ ch11/ ch12/       главы 10–12, по файлу на раздел
   ch13/ ch14/ ch15/        главы 13–15, по файлу на раздел
   ch16/ ch17/ ch18/        главы 16–18, по файлу на раздел
-  ch19/ ch20/ ch21/        главы 19–21, по файлу на раздел
+  ch19/ ch20/ ch21/ ch22/  главы 19–22, по файлу на раздел
   appendix-e/             разборы задач всех глав
 code/chNN/                примеры главы; листинги попадают в текст через {{#include}}
 code/ch01/c/ … ch15/c/    те же примеры на C и run.sh, который сверяет их вывод с текстом
@@ -309,6 +318,7 @@ $ bash solutions/ch18/c/run.sh            # драйвер кольцевого 
 $ cargo test -p ch19-exercises            # задачи A–D главы 19
 $ cargo test -p ch20-exercises            # задачи A–D главы 20 (C — свой futex-мьютекс)
 $ cargo test -p ch21-exercises            # задачи A–D главы 21 (спинлок, ticket, store buffering, Трайбер)
+$ cargo test -p ch22-exercises            # задачи A–D2 главы 22 (C — реактор на epoll, только Linux x86-64)
 $ cargo test -p project-frame             # задачи П6, П7, П12 и П13
 $ cargo test -p project-frame p7          # только П7
 $ cargo test -p project-frame p12         # только П12
@@ -352,9 +362,10 @@ $ cargo +nightly miri test -p appendix-a -p appendix-b -p appendix-b-2021 -p app
 $ MIRIFLAGS=-Zmiri-tree-borrows cargo +nightly miri test -p appendix-c
 $ cargo +nightly miri test -p ch20 -p ch20-solutions -- shared_pointer a_sendbox
 $ cargo +nightly miri test -p ch21 -- single_thread_fifo
+$ cargo +nightly miri test -p ch22 -p ch22-solutions   # и ещё раз с MIRIFLAGS=-Zmiri-tree-borrows
 $ cargo +nightly test --doc -p ch00 -p ch01 -p ch02 -p ch06 -p ch07 -p ch08 -p ch09 \
       -p ch10 -p ch11 -p ch12 -p ch13 -p ch14 -p ch15 -p ch16 -p ch17 -p ch17-solutions \
-      -p ch18 -p ch19 -p ch20 -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
+      -p ch18 -p ch19 -p ch20 -p ch22 -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
 $ cargo +nightly test -p ch11 --features nightly --test nightly   # DynMetadata и -Zretpoline
 $ cargo +nightly test -p ch12 --features nightly --test nightly   # Fn, FnMut и FnOnce вручную
 $ cargo +nightly test -p ch19 --features nightly --lib            # переносимый SIMD core::simd
@@ -391,6 +402,8 @@ $ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch17 -p 
       -- --skip rustc_
 $ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch19 -p ch19-solutions \
       -- --skip chapter_instructions
+$ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch22 -p ch22-solutions \
+      -- --skip observed
 $ cargo build -p ch06 -p ch07 --no-default-features --target thumbv6m-none-eabi
 $ cargo build -p ch08 -p ch08-solutions --no-default-features --target thumbv6m-none-eabi
 $ cargo build -p ch09 --no-default-features --features alloc --target thumbv6m-none-eabi
@@ -409,10 +422,12 @@ $ cargo build -p ch14-solutions -p ch14-exercises --no-default-features --target
 $ cargo build -p ch15 --no-default-features --features alloc --target thumbv6m-none-eabi
 $ cargo build -p ch17 --no-default-features --target thumbv6m-none-eabi   # и с --features alloc; на трёх целях Cortex-M
 $ cargo build -p ch19 -p ch21 --no-default-features --target thumbv6m-none-eabi   # wfi/PRIMASK и SPSC
+$ cargo build -p ch22 -p ch22-solutions -p ch22-exercises --no-default-features \
+      --target thumbv6m-none-eabi       # async без кучи; на трёх целях Cortex-M
 $ cargo build -p ch00 -p ch01 -p ch02 -p ch00-solutions -p ch01-solutions --target thumbv6m-none-eabi
 $ cargo build -p ch03 -p ch04 -p ch05 -p ch03-solutions -p ch04-solutions -p ch05-solutions \
       --target thumbv6m-none-eabi
-$ bash firmware/run-demos.sh              # опыты глав 0, 3, 5–13 и 15 в QEMU: 6, 5, 2, 8, 11, 7, 3, 2, 5, 7, 5 и 7
+$ bash firmware/run-demos.sh              # опыты глав 0, 3, 5–13, 15 и 22 в QEMU: 6, 5, 2, 8, 11, 7, 3, 2, 5, 7, 5, 7 и 7
 $ cargo test -p ch02-solutions -- --ignored own_firmware   # задача 2.B на всех прошивках
 $ bash code/appendix-a/c/run.sh           # C-примеры приложения A под UBSan
 $ bash code/ch01/c/run.sh                 # C-примеры главы 1 на x86_64 и в QEMU
