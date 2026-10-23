@@ -334,6 +334,20 @@ mod task_b {
         assert!(checked > 700, "в корпусе мало инструкций подмножества: {checked}");
     }
 
+    /// Прошивки главы 27 — только для Cortex-M3 и старше (BASEPRI, CFSR,
+    /// MPU ARMv7-M, RTIC); тот же список исключает clippy для Cortex-M0 в
+    /// `.github/workflows/ci.yml`.
+    const M3_ONLY: [&str; 8] = [
+        "ch27-core",
+        "ch27-nvic",
+        "ch27-periph",
+        "ch27-irq",
+        "ch27-fault",
+        "ch27-rtic",
+        "ch27-station",
+        "ch27-tasks",
+    ];
+
     /// Собирает все прошивки из `firmware/` под Cortex-M0 и сверяет
     /// декодер с их дизассемблером.
     #[test]
@@ -341,11 +355,11 @@ mod task_b {
     fn own_firmware() {
         let target = "thumbv6m-none-eabi";
         let dir = tool::scratch("firmware");
-        tool::cargo(
-            &["build", "--release", "--target", target],
-            &tool::workspace_root().join("firmware"),
-            &dir,
-        );
+        let mut args = vec!["build", "--release", "--target", target, "--workspace"];
+        for name in M3_ONLY {
+            args.extend(["--exclude", name]);
+        }
+        tool::cargo(&args, &tool::workspace_root().join("firmware"), &dir);
         let objdump = tool::llvm_objdump();
         let mut lines = Vec::new();
         let mut elves = Vec::new();

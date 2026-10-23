@@ -1,0 +1,36 @@
+[package]
+name = "ch27-tasks"
+version = "0.1.0"
+description = "Глава 27, задачи C, D1 и D2: команды по UART с приёмом по прерыванию, переключатель задач на PendSV, разбор и обход сбоев"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+ch21 = { path = "../../code/ch21", default-features = false }
+ch27 = { path = "../../code/ch27" }
+ch27-hal = { path = "../../code/ch27-hal" }
+ch27-pac = { path = "../../code/ch27-pac", features = ["rt", "critical-section"] }
+ch27-solutions = { path = "../../solutions/ch27" }
+cortex-m = { workspace = true, features = ["critical-section-single-core"] }
+cortex-m-rt = { workspace = true }
+cortex-m-semihosting = { workspace = true }
+
+[[bin]]
+name = "c_uart"
+test = false
+bench = false
+
+[[bin]]
+name = "d1_switch"
+test = false
+bench = false
+
+[[bin]]
+name = "d2_faults"
+test = false
+bench = false

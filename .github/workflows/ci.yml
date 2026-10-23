@@ -105,7 +105,8 @@ jobs:
             -p ch13-exercises -p ch14-exercises -p ch15-exercises -p ch16-exercises \
             -p ch17-exercises -p ch18-exercises -p ch19-exercises -p ch20-exercises \
             -p ch21-exercises -p ch22-exercises -p ch23-exercises -p ch24-exercises \
-            -p ch25-exercises -p ch26-exercises -p project-frame -p project-store --all-targets
+            -p ch25-exercises -p ch26-exercises -p ch27-exercises -p project-frame -p project-store \
+            --all-targets
       # Вложенные рабочие пространства глав 7, 8, 24 и 26 корневой cargo не
       # видит: их собирают тесты, а формат и clippy проверяются здесь. В typo
       # предупреждения о cfg — предмет опыта, в заготовке d-station ошибка
@@ -273,6 +274,14 @@ jobs:
       - run: cargo +nightly miri test -p ch26 -p ch26-solutions
         env:
           MIRIFLAGS: -Zmiri-tree-borrows
+      # Глава 27: EXC_RETURN, приоритеты, bit-band, регистры MPU, драйвер
+      # 74HC595 на модели выводов, адреса и делители HAL, редактор строки,
+      # кадр стека задачи и разбор CFSR. Тесты, которые запускают cargo,
+      # rustc и QEMU, помечены ignore.
+      - run: cargo +nightly miri test -p ch27 -p ch27-hal -p ch27-solutions
+      - run: cargo +nightly miri test -p ch27 -p ch27-hal -p ch27-solutions
+        env:
+          MIRIFLAGS: -Zmiri-tree-borrows
       - run: cargo +nightly miri test -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
       # Чек-лист приложения C требует проходить Miri в обеих моделях алиасинга.
       - run: cargo +nightly miri test -p appendix-c
@@ -415,6 +424,10 @@ jobs:
       # Глава 26: `rustc_` — программы без libc, ассемблер и пробы
       # закреплённого компилятора; остальное от раскладки не зависит.
       - run: cargo +nightly test -p ch26 -p ch26-solutions -- --skip rustc_
+      # Глава 27: `rustc_` — ассемблер HAL и задачи B, пробы типов, ELF
+      # прошивки; остальное от раскладки не зависит, кадры исключений —
+      # #[repr(C)]. Тест станции с QEMU помечен ignore.
+      - run: cargo +nightly test -p ch27 -p ch27-hal -p ch27-solutions -- --skip rustc_
 
   thumb:
     name: Cortex-M и QEMU
@@ -574,6 +587,13 @@ jobs:
             cargo build -p ch26 --no-default-features --features alloc --target "$t"
             cargo build -p ch26-solutions -p ch26-exercises --target "$t"
           done
+      # Глава 27: разбор исключений, приоритетов и MPU, PAC и HAL, решения
+      # задач. Прошивки ch27-* — только для Cortex-M3, их собирает clippy.
+      - name: Глава 27 (Cortex-M) под три цели Cortex-M
+        run: |
+          for t in thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabihf; do
+            cargo build -p ch27 -p ch27-pac -p ch27-hal -p ch27-solutions -p ch27-exercises --target "$t"
+          done
       - name: Главы 0–2 без std под три цели Cortex-M
         run: |
           for t in thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabihf; do
@@ -590,19 +610,47 @@ jobs:
           for t in thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabihf; do
             cargo build -p appendix-a --no-default-features --target "$t"
           done
+      # Прошивки главы 27 — только для Cortex-M3 и старше: BASEPRI, CFSR,
+      # MPU ARMv7-M, RTIC с thumbv7-backend и атомарный fetch_add, которых
+      # у Cortex-M0 нет. Под thumbv6m они исключены; тот же список — в
+      # задаче 2.B (tests-shared/ch02.rs, M3_ONLY).
       - name: clippy для прошивок
         working-directory: firmware
         run: |
-          for t in thumbv7m-none-eabi thumbv6m-none-eabi thumbv7em-none-eabihf; do
+          m3only=(--exclude ch27-core --exclude ch27-nvic --exclude ch27-periph \
+            --exclude ch27-irq --exclude ch27-fault --exclude ch27-rtic \
+            --exclude ch27-station --exclude ch27-tasks)
+          for t in thumbv7m-none-eabi thumbv7em-none-eabihf; do
             cargo clippy --workspace --target "$t" -- -D warnings
           done
+          cargo clippy --workspace "${m3only[@]}" --target thumbv6m-none-eabi -- -D warnings
+      # Глава 27: code/ch27-pac — вывод svd2rust 0.37.1 по
+      # code/ch27/svd/lm3s6965.svd после rustfmt. Повторная генерация не
+      # должна ничего менять.
+      - name: PAC главы 27 совпадает с выводом svd2rust
+        run: |
+          curl -sSL https://github.com/rust-embedded/svd2rust/releases/download/v0.37.1/svd2rust-x86_64-unknown-linux-gnu.gz \
+            | gunzip > "$HOME/.cargo/bin/svd2rust"
+          chmod +x "$HOME/.cargo/bin/svd2rust"
+          bash code/ch27/svd/gen-pac.sh
+          git diff --exit-code code/ch27-pac
+      # flip-link нужен опыту раздела 27.7 в run-demos.sh: стек под .data и
+      # .bss. Без него опыт пропускается.
+      - name: Установить flip-link 0.1.12
+        run: |
+          curl -sSL https://github.com/knurling-rs/flip-link/releases/download/v0.1.12/flip-link-x86_64-unknown-linux-gnu.tar.xz \
+            | tar -xJ --strip-components=1 -C "$HOME/.cargo/bin" flip-link-x86_64-unknown-linux-gnu/flip-link
       # gdb-multiarch нужен задаче 0.D в run-demos.sh, llvm — задаче 2.B,
       # arm-none-eabi-gcc с newlib — C-примерам главы 1 на Cortex-M.
       - run: |
           sudo apt-get update && sudo apt-get install -y qemu-system-arm \
             gdb-multiarch llvm gcc-arm-none-eabi libnewlib-arm-none-eabi
-      - name: Опыты глав 0, 3, 5–13, 15, 22–26 в QEMU
+      - name: Опыты глав 0, 3, 5–13, 15, 22–27 в QEMU
         run: bash firmware/run-demos.sh
+      # Станция главы 27 шлёт двоичные кадры в UART0: тест запускает её в
+      # QEMU с UART0 в файл и разбирает файл крейтом telemetry-frame.
+      - name: Станция главы 27 в QEMU, кадры разбирает хост
+        run: cargo test -p ch27 --test station -- --ignored
       - name: Задача 2.B на дизассемблере всех прошивок
         run: cargo test -p ch02-solutions -- --ignored own_firmware --nocapture
       - name: C-примеры главы 1 на Cortex-M3 и Cortex-M4F в QEMU

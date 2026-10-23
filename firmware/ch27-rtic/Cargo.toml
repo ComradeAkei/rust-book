@@ -1,0 +1,24 @@
+[package]
+name = "ch27-rtic"
+version = "0.1.0"
+description = "Глава 27, раздел 27.8: та же схема, что в 27.6, на RTIC 2 — аппаратная и программная задачи, общий ресурс и lock через BASEPRI"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+ch27-hal = { path = "../../code/ch27-hal" }
+ch27-pac = { path = "../../code/ch27-pac", features = ["rt", "critical-section"] }
+cortex-m = { workspace = true, features = ["critical-section-single-core"] }
+cortex-m-rt = { workspace = true }
+cortex-m-semihosting = { workspace = true }
+rtic = { version = "2.4.0", features = ["thumbv7-backend"] }
+
+[[bin]]
+name = "ch27-rtic"
+test = false
+bench = false

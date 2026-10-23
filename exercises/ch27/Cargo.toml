@@ -1,0 +1,20 @@
+[package]
+name = "ch27-exercises"
+version = "0.1.0"
+description = "Глава 27: заготовки задач A–D для студента; прошивки задач C, D1 и D2 — ваши, образец — firmware/ch27-tasks"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+# Библиотека — no_std: разбор строк задачи C, кадры стека задачи D1 и
+# разбор CFSR задачи D2 зовёт прошивка firmware/ch27-tasks, а тесты
+# проверяют их на хосте.
+[dependencies]
+ch27 = { path = "../../code/ch27" }
+ch27-hal = { path = "../../code/ch27-hal" }
+embedded-io = "0.7.1"
+
+[[test]]
+name = "ch27"
+path = "tests/ch27.rs"

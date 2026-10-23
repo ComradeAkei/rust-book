@@ -1,0 +1,24 @@
+[package]
+name = "ch27-nvic"
+version = "0.1.0"
+description = "Глава 27, раздел 27.2: приоритеты NVIC — вытеснение, ожидание, BASEPRI и svc под маской"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+ch27 = { path = "../../code/ch27" }
+# rt: таблица векторов прерываний LM3S6965 и атрибут #[interrupt].
+ch27-pac = { path = "../../code/ch27-pac", features = ["rt"] }
+cortex-m = { workspace = true }
+cortex-m-rt = { workspace = true }
+cortex-m-semihosting = { workspace = true }
+
+[[bin]]
+name = "ch27-nvic"
+test = false
+bench = false

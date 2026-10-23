@@ -1,0 +1,21 @@
+[package]
+name = "ch27-hal"
+version = "0.1.0"
+description = "Глава 27: маленький HAL LM3S6965 поверх ch27-pac — выводы с режимом в типе, UART, таймер, АЦП, задержка; трейты embedded-hal 1.0 и embedded-io"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+ch25 = { path = "../ch25", default-features = false }
+ch27 = { path = "../ch27" }
+ch27-pac = { path = "../ch27-pac" }
+cortex-m = "0.7.7"
+embedded-hal = "1.0.0"
+embedded-io = "0.7.1"
+
+[features]
+# Функции с неискажёнными именами для tests/asm.rs: по ним тест находит
+# тела в ассемблере. В прошивки не попадают.
+probe = []

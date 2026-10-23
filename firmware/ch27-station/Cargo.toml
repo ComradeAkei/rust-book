@@ -1,0 +1,27 @@
+[package]
+name = "ch27-station"
+version = "0.1.0"
+description = "Глава 27, сквозной проект: станция на HAL — таймер запускает АЦП, отсчёты идут через SPSC-очередь в main, кадры telemetry-frame — в UART0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+ch21 = { path = "../../code/ch21", default-features = false }
+ch25 = { path = "../../code/ch25", default-features = false }
+ch27-hal = { path = "../../code/ch27-hal" }
+ch27-pac = { path = "../../code/ch27-pac", features = ["rt", "critical-section"] }
+cortex-m = { workspace = true, features = ["critical-section-single-core"] }
+cortex-m-rt = { workspace = true }
+cortex-m-semihosting = { workspace = true }
+critical-section = "1.2.0"
+telemetry-frame = { path = "../../project/telemetry-frame" }
+
+[[bin]]
+name = "ch27-station"
+test = false
+bench = false

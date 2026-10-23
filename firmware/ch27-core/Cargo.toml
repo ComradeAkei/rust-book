@@ -1,0 +1,22 @@
+[package]
+name = "ch27-core"
+version = "0.1.0"
+description = "Глава 27, раздел 27.1: режимы Thread и Handler, MSP и PSP, SVCall как системный вызов, EXC_RETURN и кадр исключения"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+ch27 = { path = "../../code/ch27" }
+cortex-m = { workspace = true }
+cortex-m-rt = { workspace = true }
+cortex-m-semihosting = { workspace = true }
+
+[[bin]]
+name = "ch27-core"
+test = false
+bench = false

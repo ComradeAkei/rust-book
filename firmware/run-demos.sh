@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Прогоняет все прошивки глав 0, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 22, 23, 24, 25 и 26 в QEMU и сверяет вывод с ожидаемым.
+# Прогоняет все прошивки глав 0, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 22, 23, 24, 25, 26 и 27 в QEMU и сверяет вывод с ожидаемым.
 # Запуск: ./run-demos.sh (из каталога firmware). Используется и в CI.
 set -u
 cd "$(dirname "$0")"
@@ -101,6 +101,32 @@ buildfail() {
     else
         echo "FAIL  $what: нет строки «$expect»"
         echo "$out" | sed 's/^/      /'
+        fail=1
+    fi
+}
+
+# fliplink <описание> <пакет>
+# Собирает прошивку компоновщиком flip-link (раздел 27.7) и проверяет
+# раскладку ОЗУ: вершина стека — под .data и .bss, а не в конце ОЗУ.
+# Что будет при переполнении, здесь не проверяется: в QEMU обращения ниже
+# 0x2000_0000 не дают сбоя (раздел 27.7).
+fliplink() {
+    local what="$1" pkg="$2"
+    if [ -z "$(command -v flip-link)" ] || [ -z "$(command -v llvm-nm)" ]; then
+        echo "skip  $what: нет flip-link или llvm-nm"
+        return
+    fi
+    local dir="${CARGO_TARGET_DIR:-target}/flip-link"
+    RUSTFLAGS="-C linker=flip-link -C link-arg=-Tlink.x" \
+        cargo build --release -q -p "$pkg" --target-dir "$dir" || { fail=1; return; }
+    local nm top data
+    nm=$(llvm-nm "$dir/thumbv7m-none-eabi/release/$pkg")
+    top=$(awk '$3 == "_stack_start" { print $1 }' <<<"$nm")
+    data=$(awk '$3 == "__sdata" { print $1 }' <<<"$nm")
+    if [ -n "$top" ] && [ -n "$data" ] && (( 16#$top <= 16#$data )); then
+        echo "ok    $what"
+    else
+        echo "FAIL  $what: вершина стека 0x$top, .data с 0x$data"
         fail=1
     fi
 }
@@ -232,5 +258,30 @@ run "M3: свои memcpy, memmove, memset"       "вызовы пришли в �
 run "M0: свои memcpy, memmove, memset"       "вызовы пришли в наши функции: 5 из 5" -p ch26-tasks "${M0[@]}"
 run "M4F: свои memcpy, memmove, memset"      "вызовы пришли в наши функции: 5 из 5" -p ch26-tasks "${M4F[@]}"
 symbols "M3: наш __aeabi_memcpy — глобальный" есть "T __aeabi_memcpy" ch26-tasks ch26-tasks
+
+run "M3: SVC и EXC_RETURN на MSP"            "EXC_RETURN 0xfffffff9 = ExcReturn { to_thread: true, psp: false, fpu_frame: false }" -p ch27-core
+run "M3: SVC и EXC_RETURN на PSP"            "EXC_RETURN 0xfffffffd = ExcReturn { to_thread: true, psp: true, fpu_frame: false }" -p ch27-core
+run "M3: вытеснение по приоритетам NVIC"     "вытеснение: m A B a C M" -p ch27-nvic
+run "M3: BASEPRI откладывает прерывания"     "ждали под BASEPRI: A true, B false, C true" -p ch27-nvic
+run "M3: svc под BASEPRI — HardFault FORCED" "HardFault: HFSR 0x40000000, FORCED 1" -p ch27-nvic
+run "M3: делитель UART0 для 12 МГц"          "UART0: 115200 бод при 12 МГц, IBRD 6, FBRD 33" -p ch27-periph
+run "M3: Peripherals::take() один раз"       "Peripherals::take() второй раз: None" -p ch27-periph
+run "M3: 74HC595 на embedded-hal"            "74HC595 <- 0xa5; выводы PB2..PB0 после write: 001" -p ch27-periph
+run "M3: таймер в Mutex<RefCell<Option>>"    "TIMER0: 10 тиков по 10 мс, main спал в wfi" -p ch27-irq
+run "M3: несброшенный запрос прерывания"     "обработчик вошёл 1000 раз; запрос всё ещё висит: true" -p ch27-irq
+run "M3: длинная критическая секция"         "SysTick: 5 периодов в критической секции, обработчик вошёл 1 раз" -p ch27-irq
+buildfail "M3: опечатка в имени прерывания"   "no variant, associated function, or constant named `TIMER0X`" -p ch27-irq --features typo
+run "M3: переход по чётному адресу"          "CFSR 0x00020000, HFSR 0x40000000" -p ch27-fault --bin badptr
+run "M3: сторож стека на MPU"                "MemManage: CFSR 0x00000092, MMFAR 0x20000070" -p ch27-fault --bin guard
+run "M3: RTIC, lock через BASEPRI"           "в lock: BASEPRI 0xc0, тиков до 5 и после 5, TIMER0A ждал" -p ch27-rtic
+fliplink "M3: flip-link кладёт стек под .data" ch27-irq
+runin "M3: команды по UART0 с эхом"          "период 50 мс, идёт" $'status\rperiod 50\rperiod 5\rbogus\rstart\rstatus\rthis line is far too long for the editor\rquit\r' -p ch27-tasks --bin c_uart
+runin "M3: приём по прерыванию без потерь"   "строк 7, потеряно байт 0" $'status\rperiod 50\rperiod 5\rbogus\rstart\rstatus\rthis line is far too long for the editor\rquit\r' -p ch27-tasks --bin c_uart
+run "M3: переключатель задач на PendSV"      "журнал: [ A0| B0 A1 B1 A2 B2 A* B" -p ch27-tasks --bin d1_switch
+run "M3: SysTick вытесняет задачу"           "переключений 8, A крутилась без yield: true" -p ch27-tasks --bin d1_switch
+run "M3: три сбоя UsageFault и продолжение"  "три сбоя пройдены" -p ch27-tasks --bin d2_faults
+# Станцию главы 27 (ch27-station) здесь не запускаем: её UART0 выдаёт
+# двоичные кадры. Её запускает и разбирает на хосте тест
+# code/ch27/tests/station.rs.
 
 exit $fail
