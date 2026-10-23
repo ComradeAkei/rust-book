@@ -235,6 +235,20 @@
   элементов, ELF на 376 байт, свой код запуска с `.data`, `.bss`,
   `.uninit` и FPU в `firmware/ch26-boot`, свои `memcpy` и родня с
   `#![no_builtins]` и прошивкой `firmware/ch26-tasks`).
+- Готова глава 27 «Cortex-M на Rust»: режимы Thread и Handler, MSP и
+  PSP, кадр исключения и EXC_RETURN на SVCall; NVIC — байт приоритета,
+  вытеснение, BASEPRI и HardFault FORCED от `svc` под маской; PAC из
+  SVD через svd2rust 0.37.1 с проверкой в CI, безопасные и `unsafe`
+  поля; владение периферией и typestate выводов, bit-band;
+  embedded-hal 1.0 и embedded-io — драйвер 74HC595, UART, таймер, АЦП и
+  ассемблер без вызовов; прерывания с `Mutex<RefCell<Option>>`,
+  несброшенный запрос и долгая критическая секция; HardFault по
+  испорченному указателю, сторож стека на MPU и flip-link; RTIC 2 с
+  потолками BASEPRI. Шаг проекта — станция на HAL с АЦП по таймеру,
+  кадры которой из UART0 разбирает тест на хосте (`firmware/ch27-station`).
+  Задачи A–D2 (таблица векторов из ELF, байт в UART0 тремя способами,
+  консоль команд с эхом, переключатель задач на PendSV, разбор CFSR и
+  HFSR с продолжением после сбоя; прошивки — `firmware/ch27-tasks`).
 - Готовы приложения A–D: словарь соответствий C → Rust, edition 2024 для
   системного кода, чек-лист ревью `unsafe` с разбором примера, установка
   окружения и отладка в QEMU. Их код лежит в `code/appendix-*`.
@@ -262,6 +276,7 @@ src/                      текст книги (mdBook)
   ch24/                   глава 24, по файлу на раздел
   ch25/                   глава 25, по файлу на раздел
   ch26/                   глава 26, по файлу на раздел
+  ch27/                   глава 27, по файлу на раздел
   appendix-e/             разборы задач всех глав
 code/chNN/                примеры главы; листинги попадают в текст через {{#include}}
 code/ch01/c/ … ch15/c/    те же примеры на C и run.sh, который сверяет их вывод с текстом
@@ -305,6 +320,10 @@ code/ch26/c/              snprintf.c и memset.c: что приносит newlib
 code/ch26/fragments/      программы, которые no_std отвергает: Vec без alloc, std на M0, Arc и fetch_add на M0
 code/ch26/start/          отдельное рабочее пространство: процесс Linux x86-64 без libc со своим _start
 code/ch26/tests/          _start под ядром, ассемблер вызовов memcpy на трёх целях, тексты ошибок no_std
+code/ch27/svd/            lm3s6965.svd (SYSCTL, GPIO, UART, таймеры, АЦП) и gen-pac.sh для svd2rust 0.37.1
+code/ch27/tests/          станция в QEMU: кадры из UART0 в файл, разбор крейтом telemetry-frame
+code/ch27-pac/            PAC главы 27, вывод svd2rust; CI сверяет его с повторной генерацией
+code/ch27-hal/            HAL главы 27: GPIO с typestate, UART, таймер, АЦП; tests/ — ассемблер и ошибки типов
 code/ch07/c-size/         программа задачи 7.C: размер при panic = "unwind" и "abort"
 code/ch07/hir/            во что раскрывается `?`: снимок HIR для раздела 7.1
 code/ch08/typo/ unify/ ffi/  отдельные рабочие пространства для опытов главы 8 с cargo
@@ -348,7 +367,9 @@ tools/                    вспомогательные проверки для
 - `gdb-multiarch` для задачи 0.D, `llvm` (`llvm-objdump`, `llvm-nm`) для
   задачи 2.B, GCC и clang для C-примеров; `arm-none-eabi-gcc` с newlib
   нужен только для проверки C-примеров глав 1, 4 и 26 на Cortex-M;
-- mdBook 0.5.4 и `cargo-show-asm`.
+- mdBook 0.5.4 и `cargo-show-asm`;
+- для главы 27 — svd2rust 0.37.1 (повторная генерация PAC) и flip-link
+  0.1.12 (опыт раздела 27.7; без него `run-demos.sh` его пропускает).
 
 ## Задачи
 
@@ -393,6 +414,7 @@ $ cargo test -p ch23-exercises            # задачи A–D главы 23 (A 
 $ cargo test -p ch24-exercises            # задачи A–D главы 24 (ошибки макросов — снимки trybuild)
 $ cargo test -p ch25-exercises            # задачи A–D главы 25 (D берёт бюджет ОЗУ из firmware/memory.x)
 $ cargo test -p ch26-exercises            # задачи A, B и D главы 26 (C — прошивка, эталон firmware/ch26-boot)
+$ cargo test -p ch27-exercises            # задачи A–D2 главы 27 (прошивки C, D1, D2 — образец firmware/ch27-tasks)
 $ cargo test -p project-frame             # задачи П6, П7, П12 и П13
 $ cargo test -p project-frame p7          # только П7
 $ cargo test -p project-frame p12         # только П12
@@ -441,6 +463,7 @@ $ cargo +nightly miri test -p ch23 -p ch23-solutions   # и ещё раз с MIR
 $ cargo +nightly miri test -p ch24 -p ch24-solutions   # и ещё раз с MIRIFLAGS=-Zmiri-tree-borrows
 $ cargo +nightly miri test -p ch25 -p ch25-solutions   # и ещё раз с MIRIFLAGS=-Zmiri-tree-borrows
 $ cargo +nightly miri test -p ch26 -p ch26-solutions   # и ещё раз с MIRIFLAGS=-Zmiri-tree-borrows
+$ cargo +nightly miri test -p ch27 -p ch27-hal -p ch27-solutions   # и ещё раз с MIRIFLAGS=-Zmiri-tree-borrows
 $ cargo +nightly test --doc -p ch00 -p ch01 -p ch02 -p ch06 -p ch07 -p ch08 -p ch09 \
       -p ch10 -p ch11 -p ch12 -p ch13 -p ch14 -p ch15 -p ch16 -p ch17 -p ch17-solutions \
       -p ch18 -p ch19 -p ch20 -p ch22 -p ch23 -p ch23-solutions -p ch24 -p ch25 \
@@ -491,6 +514,8 @@ $ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch25 -p 
       -- --skip rustc_ --skip observed
 $ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch26 -p ch26-solutions \
       -- --skip rustc_
+$ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch27 -p ch27-hal \
+      -p ch27-solutions -- --skip rustc_
 $ cargo build -p ch06 -p ch07 --no-default-features --target thumbv6m-none-eabi
 $ cargo build -p ch08 -p ch08-solutions --no-default-features --target thumbv6m-none-eabi
 $ cargo build -p ch09 --no-default-features --features alloc --target thumbv6m-none-eabi
@@ -519,10 +544,16 @@ $ cargo build -p ch25 --no-default-features --target thumbv6m-none-eabi   # та
 $ cargo build -p ch25-solutions -p ch25-exercises --target thumbv6m-none-eabi
 $ cargo build -p ch26 --no-default-features --target thumbv6m-none-eabi   # и с --features alloc; на трёх целях
 $ cargo build -p ch26-solutions -p ch26-exercises --target thumbv6m-none-eabi
+$ cargo build -p ch27 -p ch27-pac -p ch27-hal -p ch27-solutions -p ch27-exercises \
+      --target thumbv6m-none-eabi       # на трёх целях; прошивки ch27-* — только Cortex-M3
+$ (cd firmware && cargo clippy --workspace --target thumbv7m-none-eabi -- -D warnings)   # и под thumbv7em;
+      # под thumbv6m — с --exclude для каждой прошивки ch27-*
+$ bash code/ch27/svd/gen-pac.sh && git diff --exit-code code/ch27-pac   # PAC совпадает с выводом svd2rust
 $ cargo build -p ch00 -p ch01 -p ch02 -p ch00-solutions -p ch01-solutions --target thumbv6m-none-eabi
 $ cargo build -p ch03 -p ch04 -p ch05 -p ch03-solutions -p ch04-solutions -p ch05-solutions \
       --target thumbv6m-none-eabi
-$ bash firmware/run-demos.sh              # опыты глав 0, 3, 5–13, 15, 22–26 в QEMU: 6, 5, 2, 8, 11, 7, 3, 2, 5, 7, 5, 7, 7, 4, 7, 4 и 18
+$ bash firmware/run-demos.sh              # опыты глав 0, 3, 5–13, 15, 22–27 в QEMU: 6, 5, 2, 8, 11, 7, 3, 2, 5, 7, 5, 7, 7, 4, 7, 4, 18 и 21
+$ cargo test -p ch27 --test station -- --ignored   # станция главы 27 в QEMU, кадры разбирает хост
 $ cargo test -p ch02-solutions -- --ignored own_firmware   # задача 2.B на всех прошивках
 $ bash code/appendix-a/c/run.sh           # C-примеры приложения A под UBSan
 $ bash code/ch01/c/run.sh                 # C-примеры главы 1 на x86_64 и в QEMU
