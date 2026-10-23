@@ -347,7 +347,7 @@ help: <178040> was created by a SharedReadWrite retag at offsets [0x8..0x10]
 |---|---|---|
 | `switch` | `match` | проверка полноты, без провала в следующую ветку, `\|` для нескольких значений ([гл. 2](ch02/03-match.md)) |
 | `cond ? a : b` | `if cond { a } else { b }` | `if` — выражение |
-| `for (i = 0; i < n; i++)` | `for i in 0..n` | чаще итератор по самой коллекции ([гл. 13](ch13.md)) |
+| `for (i = 0; i < n; i++)` | `for i in 0..n` | чаще итератор по самой коллекции ([гл. 13](ch13/index.md)) |
 | `for (;;)`, `while (1)` | `loop` | `break значение` возвращает результат |
 | `do { } while (c)` | `loop { ...; if !c { break } }` | пример ниже |
 | `goto` на выход из вложенных циклов | метки `'outer:` и `break 'outer` | |

@@ -27,3 +27,4 @@
 | 10. Обобщения и мономорфизация | [разбор](ch10.md), код в `solutions/ch10` |
 | 11. Динамическая диспетчеризация | [разбор](ch11.md), код в `solutions/ch11` |
 | 12. Замыкания | [разбор](ch12.md), код в `solutions/ch12`, проект в `project/telemetry-frame` |
+| 13. Итераторы | [разбор](ch13.md), код в `solutions/ch13`, проект в `project/telemetry-frame` |
