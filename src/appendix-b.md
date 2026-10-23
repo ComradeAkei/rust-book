@@ -134,7 +134,7 @@ rustdoc сверяет только на nightly, поэтому вторая к
 
 На Cortex-M0 нет атомарного `fetch_add` (ARMv6-M без
 `LDREX`/`STREX`), и там счётчик держат в `critical_section::Mutex`
-([гл. 21](ch21.md), [гл. 27](ch27.md)).
+([гл. 21](ch21/04-hardware.md), [гл. 27](ch27.md)).
 
 ### set_var и remove_var
 
