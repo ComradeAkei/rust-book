@@ -16,7 +16,7 @@
 - Программа курса: глава 0, 31 глава в шести частях, приложения A–E.
 - Готова эталонная глава 6 «Составные типы и раскладка памяти»:
   11 разделов, задачи A–D, первая задача проекта П6 и разборы в
-  приложении E. Остальные главы, кроме 0–11, пока содержат план из
+  приложении E. Остальные главы, кроме 0–12, пока содержат план из
   программы курса.
 - Готовы главы 0–2: окружение и инструменты (rustup, cargo, чтение
   ассемблера, одна программа на x86_64 и Cortex-M, Miri и clippy, QEMU и
@@ -76,6 +76,19 @@
   retpoline, перечисление вместо `dyn`. Задачи A–D (размеры указателей,
   таблица методов вручную, `dyn` против перечисления и обобщений на 2, 8
   и 64 типах, размер из таблицы под Miri), прошивка `firmware/ch11-dyn`.
+- Готова глава 12 «Замыкания»: реестр обработчиков с `void *ctx` на C и
+  его беды под ASan, три способа захвата и точный захват полей,
+  замыкание как структура и его размер, `Fn`, `FnMut`, `FnOnce` и
+  пересылка через `&mut F`, типы функций и указатели на них, таблица
+  обработчиков во flash и бит Thumb, трамплин для `qsort_r` и паника в
+  нём, вложенные функции GCC и исполняемый стек, `impl Fn` и `use<>` в
+  результате, окружение в регистрах и встраивание против `&mut dyn
+  FnMut` в ассемблере, `Box<dyn FnOnce>`, автотрейты замыканий и их
+  утечка через `impl Trait`, асинхронные замыкания. Задачи A–D (размеры
+  восьми замыканий, реестр обработчиков без кучи двумя способами,
+  комбинаторы парсеров для ответов AT-команд без косвенных вызовов,
+  ошибка `Send` далеко от причины), третий шаг проекта П12 (разбор кадра
+  комбинаторами), прошивка `firmware/ch12-closures`.
 - Готовы приложения A–D: словарь соответствий C → Rust, edition 2024 для
   системного кода, чек-лист ревью `unsafe` с разбором примера, установка
   окружения и отладка в QEMU. Их код лежит в `code/appendix-*`.
@@ -95,15 +108,17 @@ src/                      текст книги (mdBook)
   ch03/ ch04/ ch05/       главы 3–5, по файлу на раздел
   ch06/                   эталонная глава, по файлу на раздел
   ch07/ ch08/ ch09/       главы 7–9, по файлу на раздел
-  ch10/ ch11/             главы 10 и 11, по файлу на раздел
+  ch10/ ch11/ ch12/       главы 10–12, по файлу на раздел
   appendix-e/             разборы задач всех глав
 code/chNN/                примеры главы; листинги попадают в текст через {{#include}}
-code/ch01/c/ … ch11/c/    те же примеры на C и run.sh, который сверяет их вывод с текстом
+code/ch01/c/ … ch12/c/    те же примеры на C и run.sh, который сверяет их вывод с текстом
 code/ch0[45]/rejected/    программы, которые проверка отвергает; их собирают тесты
 code/ch0[45789]/fragments/  фрагменты к задачам A глав 4, 5, 7, 8 и 9
 code/ch10/fragments/      шесть программ задачи 10.A: сколько копий обобщённой функции
 code/ch10/tests/          замеры кода для Cortex-M3: typestate и внутренняя функция
 code/ch11/tests/          ассемблер вызовов через таблицу; на nightly — DynMetadata и retpoline
+code/ch12/tests/          ассемблер окружения замыканий и вызовов через dyn; на nightly — Fn вручную
+code/ch12/examples/       калибровка тремя способами: обобщение, &mut dyn FnMut, указатель
 code/ch07/c-size/         программа задачи 7.C: размер при panic = "unwind" и "abort"
 code/ch07/hir/            во что раскрывается `?`: снимок HIR для раздела 7.1
 code/ch08/typo/ unify/ ffi/  отдельные рабочие пространства для опытов главы 8 с cargo
@@ -118,7 +133,7 @@ exercises/chNN/           заготовки задач
 exercises/ch02-2021/      задача 2.D в edition 2021: тот же файл, что в exercises/ch02
 exercises/ch08/c/         задача 8.C: программа на C, Makefile и крейт station
 exercises/ch08/d-station/ задача 8.D: рабочее пространство с неаддитивными возможностями
-exercises/project-frame/  заготовка задач П6 и П7
+exercises/project-frame/  заготовка задач П6, П7 и П12
 solutions/chNN/           эталонные решения
 solutions/ch02-2021/      решение задачи 2.D в edition 2021
 solutions/ch08/c/ d-station/  решения задач 8.C и 8.D
@@ -164,8 +179,10 @@ $ cargo test -p ch10-exercises            # все задачи главы 10
 $ cargo run --release -p ch10-exercises --example b_bench   # время для задачи 10.B
 $ cargo test -p ch11-exercises            # все задачи главы 11
 $ cargo run --release -p ch11-exercises --example c_bench   # время для задачи 11.C
-$ cargo test -p project-frame             # задачи П6 и П7
+$ cargo test -p ch12-exercises            # все задачи главы 12
+$ cargo test -p project-frame             # задачи П6, П7 и П12
 $ cargo test -p project-frame p7          # только П7
+$ cargo test -p project-frame p12         # только П12
 ```
 
 Пока функции не реализованы, тесты падают на `todo!()`. Тесты общие для
@@ -191,11 +208,13 @@ $ cargo +nightly miri test -p ch08 -p ch08-solutions
 $ cargo +nightly miri test -p ch09 -p ch09-solutions
 $ cargo +nightly miri test -p ch10 -p ch10-solutions
 $ cargo +nightly miri test -p ch11 -p ch11-solutions
+$ cargo +nightly miri test -p ch12 -p ch12-solutions
 $ cargo +nightly miri test -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
 $ MIRIFLAGS=-Zmiri-tree-borrows cargo +nightly miri test -p appendix-c
 $ cargo +nightly test --doc -p ch00 -p ch01 -p ch02 -p ch06 -p ch07 -p ch08 -p ch09 \
-      -p ch10 -p ch11 -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
+      -p ch10 -p ch11 -p ch12 -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
 $ cargo +nightly test -p ch11 --features nightly --test nightly   # DynMetadata и -Zretpoline
+$ cargo +nightly test -p ch12 --features nightly --test nightly   # Fn, FnMut и FnOnce вручную
 $ cargo +nightly test --doc -p ch03 -p ch04 -p ch05 -p ch03-solutions -p ch04-solutions \
       -p ch05-solutions
 $ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch06-solutions
@@ -214,6 +233,9 @@ $ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch10 -p 
       --skip task_d_types
 $ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch11 -p ch11-solutions \
       -- --skip rustc_ --skip task_a_thumb --skip task_b_same_code --skip task_c_calls
+$ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch12 -p ch12-solutions \
+      -- --skip rustc_ --skip task_a_thumb --skip task_c_no_indirect_calls --skip task_d_far_away \
+      --skip task_d_promise --skip observed
 $ cargo build -p ch06 -p ch07 --no-default-features --target thumbv6m-none-eabi
 $ cargo build -p ch08 -p ch08-solutions --no-default-features --target thumbv6m-none-eabi
 $ cargo build -p ch09 --no-default-features --features alloc --target thumbv6m-none-eabi
@@ -222,10 +244,12 @@ $ cargo build -p ch10 --no-default-features --target thumbv6m-none-eabi   # и �
 $ cargo build -p ch10-solutions -p ch10-exercises --target thumbv6m-none-eabi
 $ cargo build -p ch11 --no-default-features --target thumbv6m-none-eabi   # и с --features alloc
 $ cargo build -p ch11-solutions -p ch11-exercises --target thumbv6m-none-eabi
+$ cargo build -p ch12 --no-default-features --target thumbv6m-none-eabi   # и с --features alloc
+$ cargo build -p ch12-solutions -p ch12-exercises --no-default-features --target thumbv6m-none-eabi
 $ cargo build -p ch00 -p ch01 -p ch02 -p ch00-solutions -p ch01-solutions --target thumbv6m-none-eabi
 $ cargo build -p ch03 -p ch04 -p ch05 -p ch03-solutions -p ch04-solutions -p ch05-solutions \
       --target thumbv6m-none-eabi
-$ bash firmware/run-demos.sh              # опыты глав 0, 3, 5–11 в QEMU: 6, 5, 2, 8, 11, 7, 3, 2 и 5
+$ bash firmware/run-demos.sh              # опыты глав 0, 3, 5–12 в QEMU: 6, 5, 2, 8, 11, 7, 3, 2, 5 и 7
 $ cargo test -p ch02-solutions -- --ignored own_firmware   # задача 2.B на всех прошивках
 $ bash code/appendix-a/c/run.sh           # C-примеры приложения A под UBSan
 $ bash code/ch01/c/run.sh                 # C-примеры главы 1 на x86_64 и в QEMU
@@ -238,6 +262,7 @@ $ bash code/ch08/c/run.sh                 # ifdef.c и столкновение 
 $ bash code/ch09/c/run.sh                 # ops.c: таблица указателей на функции из главы 9
 $ bash code/ch10/c/run.sh                 # sort.c: qsort против макроса из главы 10
 $ bash code/ch11/c/run.sh                 # fops.c: таблица, предсказатель и retpoline из главы 11
+$ bash code/ch12/c/run.sh                 # callback.c и nested.c: void *ctx и трамплин из главы 12
 $ cargo fmt --all --check --manifest-path code/ch08/ffi/Cargo.toml   # и так каждое вложенное
       # рабочее пространство: code/ch07/c-size, code/ch08/{typo,unify,ffi},
       # {exercises,solutions}/ch08/c/station, {exercises,solutions}/ch08/d-station
@@ -254,7 +279,7 @@ $ mdbook build
 закреплённый rustc или сверяют ассемблер с ответом (Polonius, задачи 3.C,
 4.A и 4.B), в главе 7 — задачи 7.A и 7.C, в главе 8 — опыты с cargo и
 задачи, которые запускают rustc, cargo или `make`, в главе 9 — снимок
-`derive` и пробы задач 9.A, 9.B и 9.C, в главах 10 и 11 — замеры кода и задачи,
+`derive` и пробы задач 9.A, 9.B и 9.C, в главах 10–12 — замеры кода и задачи,
 которые собирают пробы или крейт закреплённым тулчейном: к раскладке они
 не относятся, а в этом задании установлен только nightly. Их проверяет
 основное задание.
