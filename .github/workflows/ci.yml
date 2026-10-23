@@ -96,7 +96,7 @@ jobs:
             -p ch09-exercises -p ch10-exercises -p ch11-exercises -p ch12-exercises \
             -p ch13-exercises -p ch14-exercises -p ch15-exercises -p ch16-exercises \
             -p ch17-exercises -p ch18-exercises -p ch19-exercises -p ch20-exercises \
-            -p ch21-exercises -p project-frame -p project-store --all-targets
+            -p ch21-exercises -p ch22-exercises -p project-frame -p project-store --all-targets
       # Вложенные рабочие пространства глав 7 и 8 корневой cargo не видит:
       # их собирают тесты, а формат и clippy проверяются здесь. В typo
       # предупреждения о cfg — предмет опыта, в заготовке d-station ошибка
@@ -219,6 +219,14 @@ jobs:
       # работу с UnsafeCell<MaybeUninit<T>> (нет чтения неинициализированного,
       # нет нарушения алиасинга). Миллионный прогон помечен ignore.
       - run: cargo +nightly miri test -p ch21 -- single_thread_fifo
+      # Глава 22: автоматы async, Pin, исполнители, RawWaker без кучи и
+      # таймеры — всё однопоточное и под Miri проходит целиком, в обеих
+      # моделях алиасинга (самоссылки и get_unchecked_mut — их предмет).
+      # Задача C (epoll через syscall и сеть) помечена ignore.
+      - run: cargo +nightly miri test -p ch22 -p ch22-solutions
+      - run: cargo +nightly miri test -p ch22 -p ch22-solutions
+        env:
+          MIRIFLAGS: -Zmiri-tree-borrows
       - run: cargo +nightly miri test -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
       # Чек-лист приложения C требует проходить Miri в обеих моделях алиасинга.
       - run: cargo +nightly miri test -p appendix-c
@@ -229,7 +237,8 @@ jobs:
       - run: |
           cargo +nightly test --doc -p ch00 -p ch01 -p ch02 -p ch06 -p ch07 -p ch08 -p ch09 \
             -p ch10 -p ch11 -p ch12 -p ch13 -p ch14 -p ch15 -p ch16 -p ch17 -p ch17-solutions \
-            -p ch18 -p ch19 -p ch20 -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
+            -p ch18 -p ch19 -p ch20 -p ch22 -p appendix-a -p appendix-b -p appendix-b-2021 \
+            -p appendix-c
       # Глава 11: DynMetadata и -Zretpoline есть только в nightly.
       - run: cargo +nightly test -p ch11 --features nightly --test nightly
       # Глава 12: ручная реализация Fn через unboxed_closures и fn_traits.
@@ -341,6 +350,10 @@ jobs:
       # собирает ассемблер закреплённым cargo и к раскладке repr(Rust) не
       # относится; остальное — регистры и SIMD, от раскладки не зависят.
       - run: cargo +nightly test -p ch19 -p ch19-solutions -- --skip chapter_instructions
+      # Глава 22: группа `observed` фиксирует размеры автоматов async fn у
+      # rustc 1.97 (раскладка автоматов не стабилизирована); остальное от
+      # раскладки repr(Rust) не зависит.
+      - run: cargo +nightly test -p ch22 -p ch22-solutions -- --skip observed
 
   thumb:
     name: Cortex-M и QEMU
@@ -452,6 +465,17 @@ jobs:
           for t in thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabihf; do
             cargo build -p ch21 --no-default-features --target "$t"
           done
+      # Глава 22: без std остаются future, автоматы, Pin, select/join и
+      # исполнитель без кучи на RawWaker (только load/store — годится и для
+      # Cortex-M0); исполнитель с очередью на Arc и потоки — только на хосте.
+      # Задачи A и D1 (арена, исполнитель на флагах, очередь из прерывания)
+      # тоже без std; их же собирает прошивка ch22-tasks.
+      - name: Глава 22 (async без кучи) без std под три цели Cortex-M
+        run: |
+          for t in thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabihf; do
+            cargo build -p ch22 --no-default-features --target "$t"
+            cargo build -p ch22-solutions -p ch22-exercises --no-default-features --target "$t"
+          done
       - name: Главы 0–2 без std под три цели Cortex-M
         run: |
           for t in thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabihf; do
@@ -479,7 +503,7 @@ jobs:
       - run: |
           sudo apt-get update && sudo apt-get install -y qemu-system-arm \
             gdb-multiarch llvm gcc-arm-none-eabi libnewlib-arm-none-eabi
-      - name: Опыты глав 0, 3, 5–13 и 15 в QEMU
+      - name: Опыты глав 0, 3, 5–13, 15 и 22 в QEMU
         run: bash firmware/run-demos.sh
       - name: Задача 2.B на дизассемблере всех прошивок
         run: cargo test -p ch02-solutions -- --ignored own_firmware --nocapture

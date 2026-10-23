@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Прогоняет все прошивки глав 0, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13 и 15 в QEMU и сверяет вывод с ожидаемым.
+# Прогоняет все прошивки глав 0, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15 и 22 в QEMU и сверяет вывод с ожидаемым.
 # Запуск: ./run-demos.sh (из каталога firmware). Используется и в CI.
 set -u
 cd "$(dirname "$0")"
@@ -11,6 +11,25 @@ run() {
     shift 2
     local out
     out=$(timeout 60 cargo run --release -q "$@" 2>&1 | grep -v 'Timer with period zero')
+    if grep -qF -- "$expect" <<<"$out"; then
+        echo "ok    $what"
+    else
+        echo "FAIL  $what: нет строки «$expect»"
+        echo "$out" | sed 's/^/      /'
+        fail=1
+    fi
+}
+
+# runin <описание> <ожидаемая подстрока> <ввод для UART0> <аргументы cargo run...>
+# Как run, но со строкой на стандартном вводе: QEMU отдаёт её в UART0
+# lm3s6965evb. Ввод приходит через секунду после старта — прошивка успевает
+# уснуть и ждёт байты по прерыванию (задача 22.D1).
+runin() {
+    local what="$1" expect="$2" input="$3"
+    shift 3
+    cargo build --release -q "$@" || { fail=1; return; }
+    local out
+    out=$( (sleep 1; printf '%s' "$input") | timeout 60 cargo run --release -q "$@" 2>&1 | grep -v 'Timer with period zero')
     if grep -qF -- "$expect" <<<"$out"; then
         echo "ok    $what"
     else
@@ -150,5 +169,13 @@ run "M0: соседние участки слились"         "после о�
 run "M4F: heapless без кучи"               "heapless: датчиков 2, не поместился 9, строка «s7=-42», в очереди 4 из 5, куча не тронута: true" -p ch15-heap "${M4F[@]}"
 run "M3: размеры коллекций heapless"       "размеры: Vec<u8, 16> 20, Vec<u8, 16, u8> 17, String<16> 20, Deque<[u8; 18], 4> 84, FnvIndexMap<u16, i32, 8> 100, alloc::vec::Vec<u8> 12" -p ch15-heap
 run "M3: vec! без памяти — паника"         "паника: memory allocation of 5000 bytes failed" -p ch15-heap
+
+run "M3: async на SysTick, сон в wfi"       "async на SysTick: тиков 3, опросов 4, снов в wfi 3" -p ch22-async
+run "M0: async на SysTick, сон в wfi"       "async на SysTick: тиков 3, опросов 4, снов в wfi 3" -p ch22-async "${M0[@]}"
+run "M4F: async на SysTick, сон в wfi"      "async на SysTick: тиков 3, опросов 4, снов в wfi 3" -p ch22-async "${M4F[@]}"
+run "M3: автомат задачи без кучи"          "автомат задачи: 28 байт, куча не нужна" -p ch22-async
+runin "M3: задачи в арене, байты UART0"      "uart: «ping»" $'ping\n' -p ch22-tasks
+runin "M3: SysTick будит только свою задачу" "задачи завершены: опросов [4, " $'ping\n' -p ch22-tasks
+runin "M3: очередь приёма без потерь"        "потеряно байт 0" $'ping\n' -p ch22-tasks
 
 exit $fail

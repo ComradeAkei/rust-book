@@ -233,6 +233,34 @@ dependencies = [
 ]
 
 [[package]]
+name = "ch22"
+version = "0.1.0"
+
+[[package]]
+name = "ch22-async"
+version = "0.1.0"
+dependencies = [
+ "ch22",
+ "cortex-m",
+ "cortex-m-rt",
+ "cortex-m-semihosting",
+]
+
+[[package]]
+name = "ch22-solutions"
+version = "0.1.0"
+
+[[package]]
+name = "ch22-tasks"
+version = "0.1.0"
+dependencies = [
+ "ch22-solutions",
+ "cortex-m",
+ "cortex-m-rt",
+ "cortex-m-semihosting",
+]
+
+[[package]]
 name = "cortex-m"
 version = "0.7.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"

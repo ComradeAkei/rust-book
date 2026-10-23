@@ -1,0 +1,22 @@
+[package]
+name = "ch22-async"
+version = "0.1.0"
+description = "Глава 22: async без кучи и ОС — задача ждёт тиков SysTick, ядро спит в wfi"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+ch22 = { path = "../../code/ch22", default-features = false }
+cortex-m = { workspace = true }
+cortex-m-rt = { workspace = true }
+cortex-m-semihosting = { workspace = true }
+
+[[bin]]
+name = "ch22-async"
+test = false
+bench = false
