@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Прогоняет все прошивки глав 0, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 22, 23 и 24 в QEMU и сверяет вывод с ожидаемым.
+# Прогоняет все прошивки глав 0, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 22, 23, 24 и 25 в QEMU и сверяет вывод с ожидаемым.
 # Запуск: ./run-demos.sh (из каталога firmware). Используется и в CI.
 set -u
 cd "$(dirname "$0")"
@@ -190,5 +190,9 @@ run "M3: include_svd! — строка через UART0" "uart0: hello from incl
 run "M3: RESET из SVD совпал с устройством" "CTL: 0x300, по SVD 0x300" -p ch24-tasks
 run "M3: Bitfield — LCRH 8N1 с FIFO"        "LCRH = Lcrh { brk: false, pen: false, eps: false, stp2: false, fen: true, wlen: 3, sps: false }" -p ch24-tasks
 run "M3: #[timed] — вызовы и максимум"      "send: вызовов 3, самый долгий не дольше всех: true" -p ch24-tasks
+run "M3: таблицы во flash, в .data 4 байта"  ".data: 4 байт в ОЗУ с 0x20000000" -p ch25-flash
+run "M3: делитель UART0 из const fn"         "UART0 при 16 МГц, 115200 бод: IBRD = 8, FBRD = 44, ошибка -799 ppm" -p ch25-flash
+run "M3: таблица в static mut — в .data"     ".data: 1028 байт в ОЗУ с 0x20000000" -p ch25-flash --features ram-table
+run "M0: таблица обратных против деления"    "таблица и деление совпали: 4 из 4" -p ch25-flash "${M0[@]}"
 
 exit $fail

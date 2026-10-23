@@ -1,0 +1,20 @@
+[package]
+name = "ch25"
+version = "0.1.0"
+description = "Глава 25: вычисления при компиляции — const и static, const fn, проверки, таблицы, разбор литералов"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[features]
+default = ["std"]
+# const fn, таблицы, разбор литералов и проверки при компиляции — no_std:
+# без этой возможности библиотека собирается для Cortex-M, и её таблицы
+# использует прошивка ch25-flash. LazyLock и Mutex из раздела 25.4 требуют
+# std.
+std = []
+
+[dependencies]
+# Шаг сквозного проекта (раздел 25.7): CRC кадра по таблице и побитово.
+telemetry-frame = { path = "../../project/telemetry-frame" }

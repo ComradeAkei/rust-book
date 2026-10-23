@@ -311,6 +311,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "ch25"
+version = "0.1.0"
+dependencies = [
+ "telemetry-frame",
+]
+
+[[package]]
+name = "ch25-flash"
+version = "0.1.0"
+dependencies = [
+ "ch25",
+ "cortex-m",
+ "cortex-m-rt",
+ "cortex-m-semihosting",
+]
+
+[[package]]
 name = "cortex-m"
 version = "0.7.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"

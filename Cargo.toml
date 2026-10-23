@@ -28,6 +28,7 @@ members = [
     "code/ch23",
     "code/ch24",
     "code/ch24-macros",
+    "code/ch25",
     "code/appendix-a",
     "code/appendix-b",
     "code/appendix-b-2021",
@@ -59,6 +60,7 @@ members = [
     "exercises/ch23",
     "exercises/ch24",
     "exercises/ch24-macros",
+    "exercises/ch25",
     "exercises/project-frame",
     "project/telemetry-frame",
     "project/telemetry-store",
@@ -90,6 +92,7 @@ members = [
     "solutions/ch23",
     "solutions/ch24",
     "solutions/ch24-macros",
+    "solutions/ch25",
 ]
 # Заготовки задач не компилируются в рабочее состояние, пока студент их не решит,
 # поэтому `cargo test` в корне проверяет примеры глав и эталонные решения.
@@ -121,6 +124,7 @@ default-members = [
     "code/ch23",
     "code/ch24",
     "code/ch24-macros",
+    "code/ch25",
     "code/appendix-a",
     "code/appendix-b",
     "code/appendix-b-2021",
@@ -154,6 +158,7 @@ default-members = [
     "solutions/ch23",
     "solutions/ch24",
     "solutions/ch24-macros",
+    "solutions/ch25",
 ]
 # Прошивки собираются под thumbv7m-none-eabi и живут в отдельном workspace.
 exclude = ["firmware"]

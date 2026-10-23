@@ -91,6 +91,10 @@ jobs:
       # SWAP с захватом имени tmp и LOG2 под if; X-macro. Что из этого видят
       # GCC -Wall, -Wshadow и clang.
       - run: bash code/ch23/c/run.sh
+      # C-примеры главы 25: `const int` в размере массива (C17), constexpr
+      # из C23 без функций, делитель UART препроцессором и #error. Нужен
+      # gcc 13 — он в образе ubuntu-24.04.
+      - run: bash code/ch25/c/run.sh
       # Заготовки студента не проходят тесты, пока задачи не решены,
       # но обязаны собираться.
       - run: |
@@ -101,7 +105,7 @@ jobs:
             -p ch13-exercises -p ch14-exercises -p ch15-exercises -p ch16-exercises \
             -p ch17-exercises -p ch18-exercises -p ch19-exercises -p ch20-exercises \
             -p ch21-exercises -p ch22-exercises -p ch23-exercises -p ch24-exercises \
-            -p project-frame -p project-store --all-targets
+            -p ch25-exercises -p project-frame -p project-store --all-targets
       # Вложенные рабочие пространства глав 7, 8 и 24 корневой cargo не
       # видит: их собирают тесты, а формат и clippy проверяются здесь. В typo
       # предупреждения о cfg — предмет опыта, в заготовке d-station ошибка
@@ -252,6 +256,14 @@ jobs:
       - run: cargo +nightly miri test -p ch24 -p ch24-solutions
         env:
           MIRIFLAGS: -Zmiri-tree-borrows
+      # Глава 25: static mut через &raw mut, атомики, compare_exchange из
+      # восьми потоков, Mutex и LazyLock в static. Наблюдение об общих
+      # адресах копий константы под Miri неверно — тест помечен ignore, как
+      # и тесты, которые запускают rustc и cargo.
+      - run: cargo +nightly miri test -p ch25 -p ch25-solutions
+      - run: cargo +nightly miri test -p ch25 -p ch25-solutions
+        env:
+          MIRIFLAGS: -Zmiri-tree-borrows
       - run: cargo +nightly miri test -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
       # Чек-лист приложения C требует проходить Miri в обеих моделях алиасинга.
       - run: cargo +nightly miri test -p appendix-c
@@ -262,8 +274,8 @@ jobs:
       - run: |
           cargo +nightly test --doc -p ch00 -p ch01 -p ch02 -p ch06 -p ch07 -p ch08 -p ch09 \
             -p ch10 -p ch11 -p ch12 -p ch13 -p ch14 -p ch15 -p ch16 -p ch17 -p ch17-solutions \
-            -p ch18 -p ch19 -p ch20 -p ch22 -p ch23 -p ch23-solutions -p ch24 -p appendix-a \
-            -p appendix-b -p appendix-b-2021 -p appendix-c
+            -p ch18 -p ch19 -p ch20 -p ch22 -p ch23 -p ch23-solutions -p ch24 -p ch25 \
+            -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
       # Глава 11: DynMetadata и -Zretpoline есть только в nightly.
       - run: cargo +nightly test -p ch11 --features nightly --test nightly
       # Глава 12: ручная реализация Fn через unboxed_closures и fn_traits.
@@ -387,6 +399,10 @@ jobs:
       # компилятора, `observed` — пробелы stringify! и раскладка repr(Rust)
       # без #[repr(C)]; остальное от раскладки не зависит.
       - run: cargo +nightly test -p ch24 -p ch24-macros -p ch24-solutions -- --skip rustc_ --skip observed
+      # Глава 25: `rustc_` — ассемблер, секции и пробы закреплённого
+      # компилятора, `observed` — общие адреса копий константы и размеры
+      # LazyLock и Mutex; остальное от раскладки не зависит.
+      - run: cargo +nightly test -p ch25 -p ch25-solutions -- --skip rustc_ --skip observed
 
   thumb:
     name: Cortex-M и QEMU
@@ -526,6 +542,15 @@ jobs:
             cargo build -p ch24 --no-default-features --target "$t"
             cargo build -p ch24-solutions -p ch24-exercises --no-default-features --target "$t"
           done
+      # Глава 25: таблицы и проверки при компиляции — no_std; Mutex и
+      # LazyLock — за возможностью std. Таблицы использует прошивка
+      # ch25-flash; fetch_add и compare_exchange на ARMv6-M нет.
+      - name: Глава 25 (вычисления при компиляции) без std под три цели Cortex-M
+        run: |
+          for t in thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabihf; do
+            cargo build -p ch25 --no-default-features --target "$t"
+            cargo build -p ch25-solutions -p ch25-exercises --target "$t"
+          done
       - name: Главы 0–2 без std под три цели Cortex-M
         run: |
           for t in thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabihf; do
@@ -553,7 +578,7 @@ jobs:
       - run: |
           sudo apt-get update && sudo apt-get install -y qemu-system-arm \
             gdb-multiarch llvm gcc-arm-none-eabi libnewlib-arm-none-eabi
-      - name: Опыты глав 0, 3, 5–13, 15, 22, 23 и 24 в QEMU
+      - name: Опыты глав 0, 3, 5–13, 15, 22–25 в QEMU
         run: bash firmware/run-demos.sh
       - name: Задача 2.B на дизассемблере всех прошивок
         run: cargo test -p ch02-solutions -- --ignored own_firmware --nocapture

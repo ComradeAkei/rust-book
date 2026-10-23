@@ -2,7 +2,7 @@
 # (thumbv7m-none-eabi), свой скрипт компоновки и свой раннер.
 [workspace]
 resolver = "3"
-members = ["ch00-hello", "ch00-reset", "ch03-irq", "ch03-stack", "ch05-addr", "ch06-uart", "ch06-unaligned", "ch07-panic", "ch07-frame", "ch08-sections", "ch09-systick", "ch10-typestate", "ch11-dyn", "ch12-closures", "ch13-iter", "ch15-heap", "ch22-async", "ch22-tasks", "ch23-periph", "ch24-expand", "ch24-tasks"]
+members = ["ch00-hello", "ch00-reset", "ch03-irq", "ch03-stack", "ch05-addr", "ch06-uart", "ch06-unaligned", "ch07-panic", "ch07-frame", "ch08-sections", "ch09-systick", "ch10-typestate", "ch11-dyn", "ch12-closures", "ch13-iter", "ch15-heap", "ch22-async", "ch22-tasks", "ch23-periph", "ch24-expand", "ch24-tasks", "ch25-flash"]
 
 [workspace.package]
 edition = "2024"
