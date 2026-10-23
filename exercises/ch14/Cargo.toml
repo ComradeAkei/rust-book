@@ -1,0 +1,18 @@
+[package]
+name = "ch14-exercises"
+version = "0.1.0"
+description = "Глава 14: заготовки задач A–D для студента"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[features]
+default = ["std"]
+# Задача D (потоки). Без этой возможности библиотека собирается в no_std
+# для Cortex-M с кучей: остаются задачи A, B и C.
+std = []
+
+[[test]]
+name = "ch14"
+path = "tests/ch14.rs"
