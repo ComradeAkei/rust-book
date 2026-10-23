@@ -1,0 +1,18 @@
+[package]
+name = "ch15-exercises"
+version = "0.1.0"
+description = "Глава 15: заготовки задач A–C для студента"
+edition.workspace = true
+rust-version = "1.87"
+license.workspace = true
+publish.workspace = true
+
+[[test]]
+name = "ch15"
+path = "tests/ch15.rs"
+
+# Задача B ставит свой распределитель на весь тестовый процесс: отдельный
+# бинарник, чтобы остальные тесты не зависели от него.
+[[test]]
+name = "ch15-count"
+path = "tests/ch15_count.rs"

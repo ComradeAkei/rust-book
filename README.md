@@ -16,7 +16,7 @@
 - Программа курса: глава 0, 31 глава в шести частях, приложения A–E.
 - Готова эталонная глава 6 «Составные типы и раскладка памяти»:
   11 разделов, задачи A–D, первая задача проекта П6 и разборы в
-  приложении E. Остальные главы, кроме 0–12, пока содержат план из
+  приложении E. Остальные главы, кроме 0–13, пока содержат план из
   программы курса.
 - Готовы главы 0–2: окружение и инструменты (rustup, cargo, чтение
   ассемблера, одна программа на x86_64 и Cortex-M, Miri и clippy, QEMU и
@@ -89,6 +89,45 @@
   комбинаторы парсеров для ответов AT-команд без косвенных вызовов,
   ошибка `Send` далеко от причины), третий шаг проекта П12 (разбор кадра
   комбинаторами), прошивка `firmware/ch12-closures`.
+- Готова глава 13 «Итераторы»: циклы по индексам на C с ошибками на
+  единицу и на знак, `Iterator` и `next`, три формы `for` и
+  `IntoIterator`, итератор среза в ассемблере, `by_ref` и диапазоны,
+  ленивость и адаптеры, поиск с ранним выходом, `try_fold` и
+  `ControlFlow`, `collect` в разные коллекции и в `Result`, свой
+  итератор по кольцевому буферу с `DoubleEndedIterator`,
+  `ExactSizeIterator` и своей свёрткой, `size_hint`, `from_fn` и
+  `successors`, внешняя и внутренняя итерация по `chain` в ассемблере,
+  проверки границ и `assert!` перед циклом, SSE2, AVX2 с выбором во время
+  работы и DSP-инструкции Cortex-M4, `chunks_exact`, ловушки `rev` и
+  `enumerate`, `take_while`, `zip` и `sum`. Задачи A–D (ленивость восьми
+  цепочек, итераторы по битам, простым числам и кадрам SLIP, скалярное
+  произведение `i32` и `f32` в ассемблере, адаптер, который ломает
+  векторизацию, и аллокации `collect`), четвёртый шаг проекта П13
+  (итератор по кадрам в потоке байт), прошивка `firmware/ch13-iter`.
+- Готова глава 14 «Умные указатели и внутренняя изменяемость»: `Box` и
+  его размеры, рекурсивные типы, `leak`, `into_raw` и `from_raw`, большой
+  буфер без стека; `Deref` и `DerefMut` на тени регистров; `Rc` и `Weak`
+  — блок со счётчиками, `clone` и `drop` в ассемблере, подписки на
+  `Weak`, `new_cyclic`, циклы, `make_mut`; `Arc` — `lock inc` на x86-64,
+  `ldrex`/`strex` и барьеры `dmb` на Cortex-M3, отсутствие на Cortex-M0;
+  `UnsafeCell`, `Cell` и `RefCell` и что они меняют в коде; `OnceCell`,
+  `LazyCell`, `OnceLock` и `LazyLock`; `Cow`; ловушки временных значений
+  в `match` и `for`, `Rc<[T]>` против `Rc<Vec<T>>`, срез ячеек,
+  `Arc::into_inner`. Задачи A–D (паника `RefCell` и счётчики `Rc` в
+  двенадцати фрагментах, свой `Rc` со слабыми ссылками под Miri,
+  двусвязный список на `Rc` и на арене, цена `Arc::clone` из многих
+  потоков и ложное разделение). Проектного раздела у главы нет.
+- Готова глава 15 «Коллекции и аллокация»: `Vec` как (ptr, cap, len),
+  стратегия роста и `try_reserve`; `String` и `&str`, почему строка не
+  индексируется; `HashMap` — SwissTable, SipHash и защита от HashDoS,
+  быстрые хешеры; `BTreeMap`, `VecDeque`, `BinaryHeap` и отсортированный
+  `Vec`; локальность `Vec<T>` против `Vec<Box<T>>` и `LinkedList`;
+  `#[global_allocator]`, `Layout`, арены; переход `malloc` на `mmap` под
+  `strace`; коллекции `heapless` и фрагментация кучи на Cortex-M; `retain`,
+  `drain`, `entry`. Задачи A–D (предсказать рост `Vec`, аллокатор-счётчик,
+  bump-арена для дерева, своя таблица с открытой адресацией и длиной
+  пробы), шаг проекта П15 (хранилище измерений и аллокатор-счётчик),
+  прошивка `firmware/ch15-heap`.
 - Готовы приложения A–D: словарь соответствий C → Rust, edition 2024 для
   системного кода, чек-лист ревью `unsafe` с разбором примера, установка
   окружения и отладка в QEMU. Их код лежит в `code/appendix-*`.
@@ -109,9 +148,10 @@ src/                      текст книги (mdBook)
   ch06/                   эталонная глава, по файлу на раздел
   ch07/ ch08/ ch09/       главы 7–9, по файлу на раздел
   ch10/ ch11/ ch12/       главы 10–12, по файлу на раздел
+  ch13/ ch14/ ch15/       главы 13–15, по файлу на раздел
   appendix-e/             разборы задач всех глав
 code/chNN/                примеры главы; листинги попадают в текст через {{#include}}
-code/ch01/c/ … ch12/c/    те же примеры на C и run.sh, который сверяет их вывод с текстом
+code/ch01/c/ … ch15/c/    те же примеры на C и run.sh, который сверяет их вывод с текстом
 code/ch0[45]/rejected/    программы, которые проверка отвергает; их собирают тесты
 code/ch0[45789]/fragments/  фрагменты к задачам A глав 4, 5, 7, 8 и 9
 code/ch10/fragments/      шесть программ задачи 10.A: сколько копий обобщённой функции
@@ -119,6 +159,12 @@ code/ch10/tests/          замеры кода для Cortex-M3: typestate и �
 code/ch11/tests/          ассемблер вызовов через таблицу; на nightly — DynMetadata и retpoline
 code/ch12/tests/          ассемблер окружения замыканий и вызовов через dyn; на nightly — Fn вручную
 code/ch12/examples/       калибровка тремя способами: обобщение, &mut dyn FnMut, указатель
+code/ch13/tests/          ассемблер цепочек: chain, проверки границ, SSE2, AVX2, DSP Cortex-M4
+code/ch13/examples/       время на элемент: for и fold, индексы и zip, chunks и chunks_exact
+code/ch14/tests/          ассемблер Rc, Arc и ячеек, обращения к распределителю, UB под Miri
+code/ch14/examples/       Box::new на 16 МиБ, запись через &u32, цена clone и ячеек
+code/ch15/tests/          ассемблер push, VecDeque::get и heapless, блоки SwissTable и BTreeMap
+code/ch15/examples/       рост Vec под strace, раскладка SwissTable, вырождение таблицы, локальность
 code/ch07/c-size/         программа задачи 7.C: размер при panic = "unwind" и "abort"
 code/ch07/hir/            во что раскрывается `?`: снимок HIR для раздела 7.1
 code/ch08/typo/ unify/ ffi/  отдельные рабочие пространства для опытов главы 8 с cargo
@@ -133,7 +179,8 @@ exercises/chNN/           заготовки задач
 exercises/ch02-2021/      задача 2.D в edition 2021: тот же файл, что в exercises/ch02
 exercises/ch08/c/         задача 8.C: программа на C, Makefile и крейт station
 exercises/ch08/d-station/ задача 8.D: рабочее пространство с неаддитивными возможностями
-exercises/project-frame/  заготовка задач П6, П7 и П12
+exercises/project-frame/  заготовка задач П6, П7, П12 и П13
+exercises/project-store/  заготовка задачи П15: хранилище измерений
 solutions/chNN/           эталонные решения
 solutions/ch02-2021/      решение задачи 2.D в edition 2021
 solutions/ch08/c/ d-station/  решения задач 8.C и 8.D
@@ -180,9 +227,19 @@ $ cargo run --release -p ch10-exercises --example b_bench   # время для 
 $ cargo test -p ch11-exercises            # все задачи главы 11
 $ cargo run --release -p ch11-exercises --example c_bench   # время для задачи 11.C
 $ cargo test -p ch12-exercises            # все задачи главы 12
-$ cargo test -p project-frame             # задачи П6, П7 и П12
+$ cargo test -p ch13-exercises            # все задачи главы 13
+$ cargo test -p ch14-exercises            # все задачи главы 14
+$ cargo run --release -p ch14-solutions --example lists        # замеры для задачи 14.C
+$ cargo run --release -p ch14-solutions --example arc_threads  # замеры для задачи 14.D
+$ cargo test -p ch15-exercises            # все задачи главы 15
+$ cargo test -p project-store p15         # шаг проекта П15
+$ cargo run --release -p ch15-solutions --example report       # аллокации решений прошлых глав
+$ cargo run --release -p ch15-solutions --example ast          # дерево на Box против арены
+$ cargo run --release -p ch15-solutions --example probes       # длина пробы и загрузка (задача 15.D)
+$ cargo test -p project-frame             # задачи П6, П7, П12 и П13
 $ cargo test -p project-frame p7          # только П7
 $ cargo test -p project-frame p12         # только П12
+$ cargo test -p project-frame p13         # только П13
 ```
 
 Пока функции не реализованы, тесты падают на `todo!()`. Тесты общие для
@@ -209,10 +266,14 @@ $ cargo +nightly miri test -p ch09 -p ch09-solutions
 $ cargo +nightly miri test -p ch10 -p ch10-solutions
 $ cargo +nightly miri test -p ch11 -p ch11-solutions
 $ cargo +nightly miri test -p ch12 -p ch12-solutions
+$ cargo +nightly miri test -p ch13 -p ch13-solutions
+$ cargo +nightly miri test -p ch14 -p ch14-solutions   # и ещё раз с MIRIFLAGS=-Zmiri-tree-borrows
+$ cargo +nightly miri test -p ch15 -p ch15-solutions   # и ещё раз с MIRIFLAGS=-Zmiri-tree-borrows
 $ cargo +nightly miri test -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
 $ MIRIFLAGS=-Zmiri-tree-borrows cargo +nightly miri test -p appendix-c
 $ cargo +nightly test --doc -p ch00 -p ch01 -p ch02 -p ch06 -p ch07 -p ch08 -p ch09 \
-      -p ch10 -p ch11 -p ch12 -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
+      -p ch10 -p ch11 -p ch12 -p ch13 -p ch14 -p ch15 -p appendix-a -p appendix-b -p appendix-b-2021 \
+      -p appendix-c
 $ cargo +nightly test -p ch11 --features nightly --test nightly   # DynMetadata и -Zretpoline
 $ cargo +nightly test -p ch12 --features nightly --test nightly   # Fn, FnMut и FnOnce вручную
 $ cargo +nightly test --doc -p ch03 -p ch04 -p ch05 -p ch03-solutions -p ch04-solutions \
@@ -236,6 +297,12 @@ $ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch11 -p 
 $ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch12 -p ch12-solutions \
       -- --skip rustc_ --skip task_a_thumb --skip task_c_no_indirect_calls --skip task_d_far_away \
       --skip task_d_promise --skip observed
+$ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch13 -p ch13-solutions \
+      -- --skip rustc_ --skip observed --skip task_c_vectorized --skip task_d_vectorization
+$ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch14 -p ch14-solutions \
+      -- --skip rustc_ --skip cargo_ --skip observed
+$ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch15 -p ch15-solutions \
+      -- --skip rustc_ --skip cargo_ --skip observed
 $ cargo build -p ch06 -p ch07 --no-default-features --target thumbv6m-none-eabi
 $ cargo build -p ch08 -p ch08-solutions --no-default-features --target thumbv6m-none-eabi
 $ cargo build -p ch09 --no-default-features --features alloc --target thumbv6m-none-eabi
@@ -246,10 +313,16 @@ $ cargo build -p ch11 --no-default-features --target thumbv6m-none-eabi   # и �
 $ cargo build -p ch11-solutions -p ch11-exercises --target thumbv6m-none-eabi
 $ cargo build -p ch12 --no-default-features --target thumbv6m-none-eabi   # и с --features alloc
 $ cargo build -p ch12-solutions -p ch12-exercises --no-default-features --target thumbv6m-none-eabi
+$ cargo build -p ch13 --no-default-features --target thumbv6m-none-eabi   # и с --features alloc
+$ cargo build -p ch13-solutions -p ch13-exercises --no-default-features --target thumbv6m-none-eabi \
+      # и с --features alloc
+$ cargo build -p ch14 --no-default-features --target thumbv6m-none-eabi   # и с --features alloc
+$ cargo build -p ch14-solutions -p ch14-exercises --no-default-features --target thumbv6m-none-eabi
+$ cargo build -p ch15 --no-default-features --features alloc --target thumbv6m-none-eabi
 $ cargo build -p ch00 -p ch01 -p ch02 -p ch00-solutions -p ch01-solutions --target thumbv6m-none-eabi
 $ cargo build -p ch03 -p ch04 -p ch05 -p ch03-solutions -p ch04-solutions -p ch05-solutions \
       --target thumbv6m-none-eabi
-$ bash firmware/run-demos.sh              # опыты глав 0, 3, 5–12 в QEMU: 6, 5, 2, 8, 11, 7, 3, 2, 5 и 7
+$ bash firmware/run-demos.sh              # опыты глав 0, 3, 5–13 и 15 в QEMU: 6, 5, 2, 8, 11, 7, 3, 2, 5, 7, 5 и 7
 $ cargo test -p ch02-solutions -- --ignored own_firmware   # задача 2.B на всех прошивках
 $ bash code/appendix-a/c/run.sh           # C-примеры приложения A под UBSan
 $ bash code/ch01/c/run.sh                 # C-примеры главы 1 на x86_64 и в QEMU
@@ -263,11 +336,14 @@ $ bash code/ch09/c/run.sh                 # ops.c: таблица указате
 $ bash code/ch10/c/run.sh                 # sort.c: qsort против макроса из главы 10
 $ bash code/ch11/c/run.sh                 # fops.c: таблица, предсказатель и retpoline из главы 11
 $ bash code/ch12/c/run.sh                 # callback.c и nested.c: void *ctx и трамплин из главы 12
+$ bash code/ch13/c/run.sh                 # loops.c: ошибки на единицу и на знак из главы 13
+$ bash code/ch14/c/run.sh                 # kref.c и twice.c: счётчик ссылок вручную из главы 14
+$ bash code/ch15/c/run.sh                 # table.c: самодельная хеш-таблица и висячий указатель из главы 15
 $ cargo fmt --all --check --manifest-path code/ch08/ffi/Cargo.toml   # и так каждое вложенное
       # рабочее пространство: code/ch07/c-size, code/ch08/{typo,unify,ffi},
       # {exercises,solutions}/ch08/c/station, {exercises,solutions}/ch08/d-station
 $ bash solutions/ch01/c/run.sh            # задача 1.A на C
-$ python3 tools/check-includes.py         # все {{#include}} указывают на существующие якоря
+$ python3 tools/check-includes.py         # все {{#include}} указывают на существующие якоря, ссылки — на страницы
 $ mdbook build
 ```
 
@@ -279,7 +355,7 @@ $ mdbook build
 закреплённый rustc или сверяют ассемблер с ответом (Polonius, задачи 3.C,
 4.A и 4.B), в главе 7 — задачи 7.A и 7.C, в главе 8 — опыты с cargo и
 задачи, которые запускают rustc, cargo или `make`, в главе 9 — снимок
-`derive` и пробы задач 9.A, 9.B и 9.C, в главах 10–12 — замеры кода и задачи,
+`derive` и пробы задач 9.A, 9.B и 9.C, в главах 10–13 — замеры кода и задачи,
 которые собирают пробы или крейт закреплённым тулчейном: к раскладке они
 не относятся, а в этом задании установлен только nightly. Их проверяет
 основное задание.

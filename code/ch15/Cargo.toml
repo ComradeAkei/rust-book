@@ -1,0 +1,52 @@
+[package]
+name = "ch15"
+version = "0.1.0"
+description = "Глава 15: Vec, String, HashMap, BTreeMap, VecDeque, BinaryHeap, распределители памяти, коллекции без кучи"
+edition.workspace = true
+# Vec::extract_if (раздел 15.9) стабилен с 1.87.
+rust-version = "1.87"
+license.workspace = true
+publish.workspace = true
+
+[features]
+default = ["std"]
+# HashMap и HashSet, распределитель-трассировщик, примеры и бенчмарки. Без
+# этой возможности библиотека собирается в no_std для Cortex-M.
+std = ["alloc"]
+# Vec, String, BTreeMap, VecDeque, BinaryHeap. Без кучи остаются коллекции
+# heapless.
+alloc = []
+
+[dependencies]
+# Коллекции фиксированной ёмкости без кучи (раздел 15.8).
+heapless = "0.9"
+
+[dev-dependencies]
+# Быстрые хешеры для сравнения с SipHash в разделе 15.3.
+foldhash = "0.2"
+rustc-hash = "2"
+
+[[example]]
+name = "growth"
+path = "examples/growth.rs"
+required-features = ["std"]
+
+[[example]]
+name = "swiss"
+path = "examples/swiss.rs"
+required-features = ["std"]
+
+[[example]]
+name = "registry"
+path = "examples/registry.rs"
+required-features = ["std"]
+
+[[example]]
+name = "bench"
+path = "examples/bench.rs"
+required-features = ["std"]
+
+[[example]]
+name = "trace"
+path = "examples/trace.rs"
+required-features = ["std"]
