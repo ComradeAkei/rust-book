@@ -86,7 +86,7 @@ jobs:
             -p ch02-exercises-2021 -p ch03-exercises -p ch04-exercises \
             -p ch05-exercises -p ch06-exercises -p ch07-exercises -p ch08-exercises \
             -p ch09-exercises -p ch10-exercises -p ch11-exercises -p ch12-exercises \
-            -p ch13-exercises -p ch14-exercises -p ch15-exercises \
+            -p ch13-exercises -p ch14-exercises -p ch15-exercises -p ch16-exercises \
             -p project-frame -p project-store --all-targets
       # Вложенные рабочие пространства глав 7 и 8 корневой cargo не видит:
       # их собирают тесты, а формат и clippy проверяются здесь. В typo
@@ -173,6 +173,17 @@ jobs:
           cargo +nightly miri test -p ch15-solutions --test ch15-count
         env:
           MIRIFLAGS: -Zmiri-tree-borrows
+      # Глава 16: пять возможностей unsafe, инварианты, provenance и решения
+      # (split_first_mut задачи B через сырые указатели обязан проходить обе
+      # модели). Каталог UB (A), висячая ссылка из unsound-API (C) и
+      # расхождение SB/TB (D) помечены ignore и проверяются отдельным
+      # скриптом. Тесты asm запускают cargo — под Miri они ignore.
+      - run: cargo +nightly miri test -p ch16 -p ch16-solutions
+      - run: cargo +nightly miri test -p ch16 -p ch16-solutions
+        env:
+          MIRIFLAGS: -Zmiri-tree-borrows
+      - name: Каталог UB главы 16 и расхождение моделей алиасинга
+        run: bash code/ch16/ub/run.sh
       - run: cargo +nightly miri test -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
       # Чек-лист приложения C требует проходить Miri в обеих моделях алиасинга.
       - run: cargo +nightly miri test -p appendix-c
@@ -182,7 +193,7 @@ jobs:
       # nightly, stable проверяет лишь то, что пример не компилируется.
       - run: |
           cargo +nightly test --doc -p ch00 -p ch01 -p ch02 -p ch06 -p ch07 -p ch08 -p ch09 \
-            -p ch10 -p ch11 -p ch12 -p ch13 -p ch14 -p ch15 -p appendix-a -p appendix-b \
+            -p ch10 -p ch11 -p ch12 -p ch13 -p ch14 -p ch15 -p ch16 -p appendix-a -p appendix-b \
             -p appendix-b-2021 -p appendix-c
       # Глава 11: DynMetadata и -Zretpoline есть только в nightly.
       - run: cargo +nightly test -p ch11 --features nightly --test nightly
@@ -281,6 +292,9 @@ jobs:
       - run: |
           cargo +nightly test -p ch15 -p ch15-solutions -- --skip rustc_ --skip cargo_ \
             --skip observed
+      # Глава 16: unsafe и UB. Тесты asm (rustc_) собирают закреплённым cargo
+      # и к раскладке repr(Rust) не относятся; каталог UB помечен ignore.
+      - run: cargo +nightly test -p ch16 -p ch16-solutions -- --skip rustc_
 
   thumb:
     name: Cortex-M и QEMU

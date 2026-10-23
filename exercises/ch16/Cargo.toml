@@ -1,0 +1,12 @@
+[package]
+name = "ch16-exercises"
+version = "0.1.0"
+description = "Глава 16: заготовки задач B–C для студента"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[[test]]
+name = "ch16"
+path = "tests/ch16.rs"
