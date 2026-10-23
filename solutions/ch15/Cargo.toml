@@ -1,0 +1,37 @@
+[package]
+name = "ch15-solutions"
+version = "0.1.0"
+description = "Глава 15: эталонные решения задач A–C"
+edition.workspace = true
+rust-version = "1.87"
+license.workspace = true
+publish.workspace = true
+
+[[test]]
+name = "ch15"
+path = "tests/ch15.rs"
+
+# Задача B ставит свой распределитель на весь тестовый процесс: отдельный
+# бинарник, чтобы остальные тесты не зависели от него.
+[[test]]
+name = "ch15-count"
+path = "tests/ch15_count.rs"
+
+[[example]]
+name = "report"
+path = "examples/report.rs"
+
+[[example]]
+name = "ast"
+path = "examples/ast.rs"
+
+[[example]]
+name = "probes"
+path = "examples/probes.rs"
+
+[dev-dependencies]
+# Задача B меряет решения прошлых глав.
+ch11-solutions = { path = "../ch11" }
+ch12-solutions = { path = "../ch12" }
+ch13-solutions = { path = "../ch13" }
+ch14-solutions = { path = "../ch14" }

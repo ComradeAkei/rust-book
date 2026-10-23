@@ -1,0 +1,26 @@
+[package]
+name = "ch15-heap"
+version = "0.1.0"
+description = "Глава 15: куча на статическом массиве, фрагментация, try_reserve и коллекции heapless"
+edition.workspace = true
+rust-version = "1.87"
+license.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+ch15 = { path = "../../code/ch15", default-features = false, features = ["alloc"] }
+# Распределитель embedded-alloc берёт блокировку через critical-section:
+# на одном ядре её даёт cortex-m, запрещая прерывания.
+cortex-m = { workspace = true, features = ["critical-section-single-core"] }
+cortex-m-rt = { workspace = true }
+cortex-m-semihosting = { workspace = true }
+embedded-alloc = { version = "0.7", default-features = false, features = ["llff"] }
+heapless = "0.9"
+
+[[bin]]
+name = "ch15-heap"
+test = false
+bench = false

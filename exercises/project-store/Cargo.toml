@@ -1,0 +1,15 @@
+[package]
+name = "project-store"
+version = "0.1.0"
+description = "Станция телеметрии: хранилище измерений и аллокатор-счётчик (заготовка шага главы 15)"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+telemetry-frame = { path = "../../project/telemetry-frame" }
+
+[[test]]
+name = "store"
+path = "tests/store.rs"
