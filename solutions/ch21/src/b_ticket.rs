@@ -24,6 +24,9 @@ pub struct Guard<'a, T> {
     lock: &'a TicketLock<T>,
 }
 
+/// Сколько холостых витков крутиться, прежде чем уступать квант.
+const SPINS_BEFORE_YIELD: u32 = 100;
+
 impl<T> TicketLock<T> {
     pub const fn new(value: T) -> Self {
         TicketLock {
@@ -37,10 +40,21 @@ impl<T> TicketLock<T> {
     /// номер неделимо (Relaxed — важна только атомарность выдачи). Вход —
     /// Acquire-чтение `serving`: синхронизируется с Release-выдачей
     /// предыдущего держателя, поэтому его записи видны нам.
+    ///
+    /// Очередь строго по номерам, поэтому вытесненный планировщиком
+    /// обладатель следующего номера держит всех: остальные крутятся впустую
+    /// до конца его кванта (конвой). Покрутившись недолго, уступаем
+    /// процессор — тогда вытесненный успеет войти и позвать следующего.
     pub fn lock(&self) -> Guard<'_, T> {
         let ticket = self.next.fetch_add(1, Ordering::Relaxed);
+        let mut spins = 0u32;
         while self.serving.load(Ordering::Acquire) != ticket {
-            std::hint::spin_loop();
+            if spins < SPINS_BEFORE_YIELD {
+                spins += 1;
+                std::hint::spin_loop();
+            } else {
+                std::thread::yield_now();
+            }
         }
         Guard { lock: self }
     }

@@ -28,7 +28,9 @@ impl<T> TicketLock<T> {
     }
 
     /// Взять номерок `next.fetch_add(1, Relaxed)` и ждать, пока
-    /// `serving.load(Acquire)` сравняется с ним (`spin_loop` в цикле).
+    /// `serving.load(Acquire)` сравняется с ним (`spin_loop` в цикле, а
+    /// после сотни холостых витков — `std::thread::yield_now`: иначе потоков
+    /// больше, чем ядер, и вытесненный «следующий» задержит всех).
     pub fn lock(&self) -> Guard<'_, T> {
         todo!("раздел 21.7, задача B")
     }
