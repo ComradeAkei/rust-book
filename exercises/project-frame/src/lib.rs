@@ -1,8 +1,11 @@
 //! Сквозной проект «станция телеметрии», шаг главы 6: формат кадра.
 //! Шаг главы 7 (задача П7): сообщения и классификация ошибок протокола.
+//! Шаг главы 12 (задача П12): модуль [`parse`], тот же разбор на
+//! комбинаторах.
 //! ЗАГОТОВКА: реализуйте функции, помеченные `todo!()`, по спецификации
 //! ниже и проверьте себя тестами `cargo test -p project-frame` (только П7:
-//! `cargo test -p project-frame p7`).
+//! `cargo test -p project-frame p7`, только П12: `cargo test -p
+//! project-frame p12`).
 //!
 //! Крейт `no_std` и без аллокаций: его подключают и прошивка на Cortex-M,
 //! и хост на Linux. Кадр на проводе (все многобайтовые поля little-endian):
@@ -24,6 +27,8 @@
 use core::fmt;
 use core::mem::{align_of, offset_of, size_of};
 use core::num::NonZeroU16;
+
+pub mod parse;
 
 pub const MAGIC: u8 = 0xA5;
 pub const VERSION: u8 = 1;

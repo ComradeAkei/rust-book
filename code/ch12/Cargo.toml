@@ -1,0 +1,26 @@
+[package]
+name = "ch12"
+version = "0.1.0"
+description = "Глава 12: замыкания, способы захвата, Fn, FnMut и FnOnce, указатели на функции, возврат замыканий, auto traits и асинхронные замыкания"
+edition.workspace = true
+# Асинхронные замыкания и AsyncFn (раздел 12.6) стабильны с 1.85.
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[features]
+default = ["std"]
+# Примеры с std: потоки, qsort_r из glibc. Без этой возможности библиотека
+# собирается в no_std для Cortex-M.
+std = ["alloc"]
+# Примеры с Box<dyn Fn>. Прошивке, у которой нет распределителя памяти,
+# они не нужны.
+alloc = []
+# Тест tests/nightly.rs: ручная реализация Fn через unboxed_closures и
+# fn_traits. Только для `cargo +nightly test -p ch12 --features nightly --test nightly`.
+nightly = []
+
+[[example]]
+name = "bench"
+path = "examples/bench.rs"
+required-features = ["std"]

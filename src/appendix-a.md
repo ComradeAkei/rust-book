@@ -37,7 +37,7 @@ C-примеры лежат в `code/appendix-a/c/`. Скрипт собирае
 | `bool`, `_Bool` | `bool` | 1 байт; значение, отличное от 0 и 1, — UB ([гл. 16](ch16.md)) |
 | `float`, `double` | `f32`, `f64` | |
 | `void` в типе возврата | `()` | тип нулевого размера |
-| `void *` | `*mut c_void`, `*mut u8` или обобщённый `T` | обобщения вместо стирания типа ([гл. 10](ch10.md)) |
+| `void *` | `*mut c_void`, `*mut u8` или обобщённый `T` | обобщения вместо стирания типа ([гл. 10](ch10/index.md)) |
 | `T *`, не NULL, на один объект | `&T`, `&mut T` | `&mut T` означает единственный доступ ([гл. 4](ch04/index.md)) |
 | `T *`, может быть NULL | `Option<&T>`, `Option<NonNull<T>>` | размер тот же, NULL кодирует `None` ([6.4](ch06/04-niches.md)) |
 | `T *p, size_t n` | `&[T]`, `&mut [T]` | указатель и длина в одном значении, индекс проверяется |
@@ -535,7 +535,7 @@ char boundary`.
 | C | Rust | Замечание |
 |---|---|---|
 | `int (*f)(int)` | `fn(i32) -> i32` | никогда не NULL; `Option<fn(...)>` того же размера |
-| колбэк + `void *ctx` | замыкание: `impl FnMut(...)`, `&mut dyn FnMut(...)` | контекст типизирован ([гл. 12](ch12.md)) |
+| колбэк + `void *ctx` | замыкание: `impl FnMut(...)`, `&mut dyn FnMut(...)` | контекст типизирован ([гл. 12](ch12/index.md)) |
 | `static` функция в файле | функция без `pub` | видимость на уровне модуля ([гл. 8](ch08/01-modules.md)) |
 | `extern` объявление | `use`; для C — `unsafe extern "C" { ... }` | [гл. 18](ch18.md), [приложение B](appendix-b.md) |
 | `inline`, `__attribute__((always_inline))`, `noinline` | `#[inline]`, `#[inline(always)]`, `#[inline(never)]` | |
@@ -544,7 +544,7 @@ char boundary`.
 | перегрузка, аргументы по умолчанию | нет; трейты, `Option`, строители | |
 | `static` переменная в функции | `static` с атомиком, `OnceLock`, `LazyLock` | [гл. 14](ch14.md), [гл. 25](ch25.md) |
 | `__attribute__((constructor))` | нет: до `main` код не выполняется | явная инициализация или `LazyLock` |
-| `qsort(v, n, size, cmp)` | `v.sort_unstable_by(\|a, b\| ...)` | мономорфизация, компаратор встраивается ([гл. 10](ch10.md)) |
+| `qsort(v, n, size, cmp)` | `v.sort_unstable_by(\|a, b\| ...)` | мономорфизация, компаратор встраивается ([гл. 10](ch10/06-inlining.md)) |
 
 ```rust
 {{#include ../code/appendix-a/src/funcs.rs:callback}}

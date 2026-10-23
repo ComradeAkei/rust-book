@@ -1,0 +1,19 @@
+[package]
+name = "ch10-exercises"
+version = "0.1.0"
+description = "Глава 10: заготовки задач A–D для студента"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+embedded-hal = "1.0.0"
+
+[[test]]
+name = "ch10"
+path = "tests/ch10.rs"
+
+[[example]]
+name = "b_bench"
+path = "examples/b_bench.rs"

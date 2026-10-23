@@ -56,13 +56,25 @@ jobs:
       # C-пример главы 9: таблица указателей на функции вместо трейта, где
       # забытый указатель компиляторы пропускают, а программа падает.
       - run: bash code/ch09/c/run.sh
+      # C-пример главы 10: qsort с компаратором через указатель против
+      # сортировки, размноженной макросом.
+      - run: bash code/ch10/c/run.sh
+      # C-пример главы 11: struct file_operations, указатель на таблицу в
+      # каждом объекте, промахи предсказателя по модели valgrind и вызов
+      # через переходник retpoline.
+      - run: sudo apt-get update && sudo apt-get install -y valgrind
+      - run: bash code/ch11/c/run.sh
+      # C-пример главы 12: обработчик с void *ctx, чужой контекст и контекст
+      # на мёртвом стеке под ASan, вызов через указатель против своей копии.
+      - run: bash code/ch12/c/run.sh
       # Заготовки студента не проходят тесты, пока задачи не решены,
       # но обязаны собираться.
       - run: |
           cargo build -p ch00-exercises -p ch01-exercises -p ch02-exercises \
             -p ch02-exercises-2021 -p ch03-exercises -p ch04-exercises \
             -p ch05-exercises -p ch06-exercises -p ch07-exercises -p ch08-exercises \
-            -p ch09-exercises -p project-frame --all-targets
+            -p ch09-exercises -p ch10-exercises -p ch11-exercises -p ch12-exercises \
+            -p project-frame --all-targets
       # Вложенные рабочие пространства глав 7 и 8 корневой cargo не видит:
       # их собирают тесты, а формат и clippy проверяются здесь. В typo
       # предупреждения о cfg — предмет опыта, в заготовке d-station ошибка
@@ -114,6 +126,17 @@ jobs:
       - run: cargo +nightly miri test -p ch08 -p ch08-solutions
       # Глава 9: трейты, маркеры и драйверы задач 9.B и 9.D на моделях шин.
       - run: cargo +nightly miri test -p ch09 -p ch09-solutions
+      # Глава 10: обобщения, typestate на модели PL011, матрицы и драйвер
+      # SPI-flash задачи 10.D на модели W25Q. qsort из libc Miri не
+      # исполняет, эти тесты помечены ignore.
+      - run: cargo +nightly miri test -p ch10 -p ch10-solutions
+      # Глава 11: объекты трейтов, таблица задачи 11.B и её деструкторы.
+      # Чтение таблицы методов в задаче 11.D Miri отвергает, этот тест
+      # помечен ignore.
+      - run: cargo +nightly miri test -p ch11 -p ch11-solutions
+      # Глава 12: замыкания, реестры задачи 12.B и потоки задачи 12.D.
+      # qsort_r из glibc Miri не исполняет, эти тесты помечены ignore.
+      - run: cargo +nightly miri test -p ch12 -p ch12-solutions
       - run: cargo +nightly miri test -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
       # Чек-лист приложения C требует проходить Miri в обеих моделях алиасинга.
       - run: cargo +nightly miri test -p appendix-c
@@ -123,7 +146,11 @@ jobs:
       # nightly, stable проверяет лишь то, что пример не компилируется.
       - run: |
           cargo +nightly test --doc -p ch00 -p ch01 -p ch02 -p ch06 -p ch07 -p ch08 -p ch09 \
-            -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
+            -p ch10 -p ch11 -p ch12 -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
+      # Глава 11: DynMetadata и -Zretpoline есть только в nightly.
+      - run: cargo +nightly test -p ch11 --features nightly --test nightly
+      # Глава 12: ручная реализация Fn через unboxed_closures и fn_traits.
+      - run: cargo +nightly test -p ch12 --features nightly --test nightly
       - run: |
           cargo +nightly test --doc -p ch03 -p ch04 -p ch05 -p ch03-solutions \
             -p ch04-solutions -p ch05-solutions
@@ -145,7 +172,9 @@ jobs:
         with:
           key: layout-${{ matrix.seed }}
       # Решения и проект не должны зависеть от раскладки repr(Rust).
-      - run: cargo +nightly test -p ch06-solutions -p telemetry-frame -p ch06-regs
+      # p12_inlined собирает крейт проекта закреплённым cargo и читает его
+      # ассемблер: к раскладке это не относится, тест проверяет задание host.
+      - run: cargo +nightly test -p ch06-solutions -p telemetry-frame -p ch06-regs -- --skip p12_inlined
       - run: cargo +nightly test -p ch00-solutions -p ch01-solutions
       # Задача 2.A сверяет ответы с ассемблером, а LLVM у nightly другой, чем
       # у закреплённого rustc (приложение E): к раскладке это не относится.
@@ -178,6 +207,24 @@ jobs:
       - run: |
           cargo +nightly test -p ch09 -p ch09-solutions -- --skip rustc_ \
             --skip task_a --skip task_b_access --skip task_b_thumb --skip task_c_sealed
+      # Глава 10: замеры кода `rustc_` и задачи 10.A, 10.B (сборка для
+      # хоста), 10.C и 10.D (пробы и сборка под Cortex-M4F) запускают
+      # закреплённые rustc и cargo.
+      - run: |
+          cargo +nightly test -p ch10 -p ch10-solutions -- --skip rustc_ --skip task_a \
+            --skip task_b_inlined --skip task_c_types --skip task_c_sizes --skip task_d_types
+      # Глава 11: ассемблер `rustc_`, проба 11.A для Cortex-M3 и ассемблер
+      # задач 11.B и 11.C собираются закреплённым cargo.
+      - run: |
+          cargo +nightly test -p ch11 -p ch11-solutions -- --skip rustc_ --skip task_a_thumb \
+            --skip task_b_same_code --skip task_c_calls
+      # Глава 12: ассемблер `rustc_`, проба 12.A для Cortex-M3, ассемблер
+      # задачи 12.C и пробы 12.D собираются закреплённым cargo;
+      # `observed_debounce_size` фиксирует раскладку repr(Rust) у rustc 1.97.
+      - run: |
+          cargo +nightly test -p ch12 -p ch12-solutions -- --skip rustc_ --skip task_a_thumb \
+            --skip task_c_no_indirect_calls --skip task_d_far_away --skip task_d_promise \
+            --skip observed
 
   thumb:
     name: Cortex-M и QEMU
@@ -209,6 +256,31 @@ jobs:
             cargo build -p ch09 --no-default-features --features alloc --target "$t"
             cargo build -p ch09-solutions -p ch09-exercises --target "$t"
           done
+      # Глава 10: без alloc, с alloc и задачи с embedded-hal.
+      - name: Глава 10 без std под три цели Cortex-M
+        run: |
+          for t in thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabihf; do
+            cargo build -p ch10 --no-default-features --target "$t"
+            cargo build -p ch10 --no-default-features --features alloc --target "$t"
+            cargo build -p ch10-solutions -p ch10-exercises --target "$t"
+          done
+      # Глава 11: без alloc (таблицы во flash) и с alloc (Box, Rc, задачи).
+      - name: Глава 11 без std под три цели Cortex-M
+        run: |
+          for t in thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabihf; do
+            cargo build -p ch11 --no-default-features --target "$t"
+            cargo build -p ch11 --no-default-features --features alloc --target "$t"
+            cargo build -p ch11-solutions -p ch11-exercises --target "$t"
+          done
+      # Глава 12: без alloc (таблица обработчиков во flash), с alloc
+      # (Box<dyn Fn>) и задачи A–C без std.
+      - name: Глава 12 без std под три цели Cortex-M
+        run: |
+          for t in thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabihf; do
+            cargo build -p ch12 --no-default-features --target "$t"
+            cargo build -p ch12 --no-default-features --features alloc --target "$t"
+            cargo build -p ch12-solutions -p ch12-exercises --no-default-features --target "$t"
+          done
       - name: Главы 0–2 без std под три цели Cortex-M
         run: |
           for t in thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabihf; do
@@ -236,7 +308,7 @@ jobs:
       - run: |
           sudo apt-get update && sudo apt-get install -y qemu-system-arm \
             gdb-multiarch llvm gcc-arm-none-eabi libnewlib-arm-none-eabi
-      - name: Опыты глав 0, 3, 5, 6, 7, 8 и 9 в QEMU
+      - name: Опыты глав 0, 3, 5–12 в QEMU
         run: bash firmware/run-demos.sh
       - name: Задача 2.B на дизассемблере всех прошивок
         run: cargo test -p ch02-solutions -- --ignored own_firmware --nocapture

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Прогоняет все прошивки глав 0, 3, 5, 6, 7, 8 и 9 в QEMU и сверяет вывод с ожидаемым.
+# Прогоняет все прошивки глав 0, 3, 5, 6, 7, 8, 9, 10, 11 и 12 в QEMU и сверяет вывод с ожидаемым.
 # Запуск: ./run-demos.sh (из каталога firmware). Используется и в CI.
 set -u
 cd "$(dirname "$0")"
@@ -119,5 +119,22 @@ run "M4F: .uninit переживает сброс"        "загрузка 2: .
 run "M3: SysTick через трейт Register"     "SysTick: 3 периода по 100000 тактов отсчитаны" -p ch09-systick
 run "M0: SysTick через трейт Register"     "SysTick: 3 периода по 100000 тактов отсчитаны" -p ch09-systick "${M0[@]}"
 run "M4F: SysTick через трейт Register"    "SysTick: 3 периода по 100000 тактов отсчитаны" -p ch09-systick "${M4F[@]}"
+
+run "M3: Uart<S> не больше ссылки"         "Uart<Enabled>: 4 байта, Uart<Disabled>: 4 байта, &Pl011: 4 байта" -p ch10-typestate
+run "M3: disable и повторный enable"       "снова включён: CR = 0x301" -p ch10-typestate
+
+run "M3: &dyn Sensor — два слова"          "&dyn Sensor: 8 байт, &Thermo: 4 байта" -p ch11-dyn
+run "M3: объект на стеке, таблица во flash" "датчик = 3: 4 байта, данные 0x2000" -p ch11-dyn
+run "M3: таблицы методов во flash"         "данных во flash: 2 из 3, таблиц во flash: 3 из 3" -p ch11-dyn
+run "M0: таблицы методов во flash"         "данных во flash: 2 из 3, таблиц во flash: 3 из 3" -p ch11-dyn "${M0[@]}"
+run "M4F: таблицы методов во flash"        "данных во flash: 2 из 3, таблиц во flash: 3 из 3" -p ch11-dyn "${M4F[@]}"
+
+run "M3: размер замыкания — захваченное"   "|| x + 1: 4 байта, move || x + 1: 4 байта, || n += 1 (u64): 4 байта" -p ch12-closures
+run "M3: таблица обработчиков во flash"    "во flash" -p ch12-closures
+run "M3: бит Thumb в адресах функций"      "адресов с битом Thumb: 4 из 4" -p ch12-closures
+run "M0: бит Thumb в адресах функций"      "адресов с битом Thumb: 4 из 4" -p ch12-closures "${M0[@]}"
+run "M4F: бит Thumb в адресах функций"     "адресов с битом Thumb: 4 из 4" -p ch12-closures "${M4F[@]}"
+run "M3: разбор кадра комбинаторами"       "parse::decode совпал с decode: 3 из 3" -p ch12-closures
+run "M0: разбор кадра комбинаторами"       "parse::decode совпал с decode: 3 из 3" -p ch12-closures "${M0[@]}"
 
 exit $fail
