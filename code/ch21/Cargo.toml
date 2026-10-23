@@ -1,0 +1,16 @@
+[package]
+name = "ch21"
+version = "0.1.0"
+description = "Глава 21: атомики и модель памяти — Ordering, happens-before, барьеры, SPSC-очередь"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[features]
+default = ["std"]
+std = []
+
+# Модель памяти разбирается на x86-64 (TSO) с потоками std. SPSC-очередь
+# (раздел 21.5) — no_std и строится под Cortex-M с `--no-default-features`:
+# ей хватает атомарных load/store без RMW, которые есть и на Cortex-M0.

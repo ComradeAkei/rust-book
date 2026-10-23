@@ -1,0 +1,12 @@
+[package]
+name = "ch21-solutions"
+version = "0.1.0"
+description = "Глава 21: эталонные решения задач A–D"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[[test]]
+name = "ch21"
+path = "tests/ch21.rs"
