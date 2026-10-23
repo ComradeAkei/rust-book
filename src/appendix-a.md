@@ -540,7 +540,7 @@ char boundary`.
 | `extern` объявление | `use`; для C — `unsafe extern "C" { ... }` | [гл. 18](ch18/01-abi.md), [приложение B](appendix-b.md) |
 | `inline`, `__attribute__((always_inline))`, `noinline` | `#[inline]`, `#[inline(always)]`, `#[inline(never)]` | |
 | `__attribute__((noreturn))` | `-> !` | |
-| `...` (переменное число аргументов) | макрос; вызов C-функции с `...` возможен | [гл. 18](ch18/index.md), [гл. 23](ch23.md) |
+| `...` (переменное число аргументов) | макрос; вызов C-функции с `...` возможен | [гл. 18](ch18/index.md), [23.2](ch23/02-repeat.md) |
 | перегрузка, аргументы по умолчанию | нет; трейты, `Option`, строители | |
 | `static` переменная в функции | `static` с атомиком, `OnceLock`, `LazyLock` | [гл. 14](ch14/06-lazy.md), [гл. 25](ch25.md) |
 | `__attribute__((constructor))` | нет: до `main` код не выполняется | явная инициализация или `LazyLock` |

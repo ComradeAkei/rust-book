@@ -1,0 +1,20 @@
+[package]
+name = "ch24"
+version = "0.1.0"
+description = "Глава 24: процедурные макросы — дерево токенов, syn и quote, спаны, атрибуты, тестирование, цена"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[features]
+default = ["std"]
+# Процедурный макрос выполняется на хосте при любой цели, а его код — обычный
+# no_std: без этой возможности библиотека собирается для Cortex-M.
+std = []
+
+[dependencies]
+ch24-macros = { path = "../ch24-macros" }
+
+[dev-dependencies]
+trybuild = "1.0.119"

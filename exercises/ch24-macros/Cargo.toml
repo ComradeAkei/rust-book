@@ -1,0 +1,19 @@
+[package]
+name = "ch24-exercises-macros"
+version = "0.1.0"
+description = "Глава 24: заготовки процедурных макросов задач B–D для студента"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro2 = "1.0.107"
+quote = "1.0.47"
+# Разбор XML для include_svd! (задача D): дерево только для чтения, без
+# собственных зависимостей.
+roxmltree = "0.21.1"
+syn = { version = "3.0.9", features = ["full"] }

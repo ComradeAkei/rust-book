@@ -1,0 +1,5 @@
+error: Describe: только для структур, не для перечислений
+ --> tests/ui/describe_enum.rs:3:5
+  |
+3 | pub enum Mode {
+  |     ^^^^

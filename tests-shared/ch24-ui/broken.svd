@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Файл к d_broken_svd.rs: поля регистра CTL перекрываются. -->
+<device>
+  <name>BROKEN</name>
+  <peripherals>
+    <peripheral>
+      <name>TIMER</name>
+      <baseAddress>0x40030000</baseAddress>
+      <registers>
+        <register>
+          <name>CTL</name>
+          <addressOffset>0x00</addressOffset>
+          <fields>
+            <field><name>EN</name><bitOffset>0</bitOffset><bitWidth>1</bitWidth></field>
+            <field><name>MODE</name><bitOffset>0</bitOffset><bitWidth>2</bitWidth></field>
+          </fields>
+        </register>
+      </registers>
+    </peripheral>
+  </peripherals>
+</device>

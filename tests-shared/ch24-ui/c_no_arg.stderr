@@ -1,0 +1,7 @@
+error: #[timed] ждёт путь к static Timing: #[timed(STATS)]
+ --> $WORKSPACE/tests-shared/ch24-ui/c_no_arg.rs
+  |
+  | #[tasks_macros::timed]
+  | ^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the attribute macro `tasks_macros::timed` (in Nightly builds, run with -Z macro-backtrace for more info)

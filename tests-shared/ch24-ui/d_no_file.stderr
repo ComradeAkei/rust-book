@@ -1,0 +1,5 @@
+error: nope/lm3s6965.svd: No such file or directory (os error 2)
+ --> $WORKSPACE/tests-shared/ch24-ui/d_no_file.rs
+  |
+  | tasks_macros::include_svd!("nope/lm3s6965.svd", "UART0");
+  |                            ^^^^^^^^^^^^^^^^^^^

@@ -1,0 +1,23 @@
+error: обработчик вызывает только процессор: уберите видимость
+ --> tests/ui/interrupt_signature.rs:5:1
+  |
+5 | pub async fn UART1(byte: u8) -> u8 {
+  | ^^^
+
+error: обработчик прерывания не может быть `async fn`: ждать в нём некому
+ --> tests/ui/interrupt_signature.rs:5:5
+  |
+5 | pub async fn UART1(byte: u8) -> u8 {
+  |     ^^^^^
+
+error: обработчик прерывания не принимает аргументов: состояние — `static mut` в начале тела
+ --> tests/ui/interrupt_signature.rs:5:20
+  |
+5 | pub async fn UART1(byte: u8) -> u8 {
+  |                    ^^^^^^^^
+
+error: обработчик прерывания возвращает `()` или `!`
+ --> tests/ui/interrupt_signature.rs:5:33
+  |
+5 | pub async fn UART1(byte: u8) -> u8 {
+  |                                 ^^

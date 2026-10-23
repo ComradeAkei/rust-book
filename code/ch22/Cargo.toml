@@ -1,0 +1,17 @@
+[package]
+name = "ch22"
+version = "0.1.0"
+description = "Глава 22: асинхронность изнутри — Future, автоматы, Pin, исполнитель, отмена, исполнитель без ОС"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[features]
+default = ["std"]
+std = []
+
+# Future, автоматы async fn, Pin, select/join и исполнитель без кучи
+# (раздел 22.6) — no_std и строятся под Cortex-M с `--no-default-features`:
+# будильнику хватает атомарных load/store, которые есть и на Cortex-M0.
+# block_on на потоке и исполнитель с очередью (22.4) требуют std.

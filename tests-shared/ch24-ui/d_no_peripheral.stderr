@@ -1,0 +1,5 @@
+error: ../../../../code/ch24/svd/lm3s6965.svd: нет периферии UART7; есть: UART0, UART1
+ --> $WORKSPACE/tests-shared/ch24-ui/d_no_peripheral.rs
+  |
+  | tasks_macros::include_svd!("../../../../code/ch24/svd/lm3s6965.svd", "UART7");
+  |                                                                      ^^^^^^^

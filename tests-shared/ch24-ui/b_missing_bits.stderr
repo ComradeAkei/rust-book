@@ -1,0 +1,5 @@
+error: поле `siren` без #[bits(N)]
+ --> $WORKSPACE/tests-shared/ch24-ui/b_missing_bits.rs
+  |
+  |     pub siren: bool,
+  |         ^^^^^

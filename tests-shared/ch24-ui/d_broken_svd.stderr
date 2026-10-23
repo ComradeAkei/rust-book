@@ -1,0 +1,5 @@
+error: ../../../../tests-shared/ch24-ui/broken.svd:10:9: регистр CTL: поля EN и MODE перекрываются
+ --> $WORKSPACE/tests-shared/ch24-ui/d_broken_svd.rs
+  |
+  | tasks_macros::include_svd!("../../../../tests-shared/ch24-ui/broken.svd", "TIMER");
+  |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

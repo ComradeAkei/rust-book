@@ -1,0 +1,5 @@
+error[E0080]: evaluation panicked: Describe: размер Frame не равен 8
+ --> tests/ui/describe_size.rs:3:19
+  |
+3 | #[describe(size = 8)]
+  |                   ^ evaluation of `_` failed here

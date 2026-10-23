@@ -1,0 +1,29 @@
+[package]
+name = "ch24-exercises"
+version = "0.1.0"
+description = "Глава 24: заготовки задач A–D для студента"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[features]
+default = ["std"]
+# Без std библиотека собирается для Cortex-M, как и решения.
+std = []
+
+# Макросы подключены под общим для заготовок и решений именем tasks_macros:
+# так один и тот же код тестов и снимков trybuild годится для обоих крейтов.
+[dependencies]
+tasks_macros = { package = "ch24-exercises-macros", path = "../ch24-macros" }
+
+[dev-dependencies]
+trybuild = "1.0.119"
+
+[[test]]
+name = "ch24"
+path = "tests/ch24.rs"
+
+[[test]]
+name = "ui"
+path = "tests/ui.rs"

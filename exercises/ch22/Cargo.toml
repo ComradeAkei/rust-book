@@ -1,0 +1,19 @@
+[package]
+name = "ch22-exercises"
+version = "0.1.0"
+description = "Глава 22: заготовки задач A–D для студента"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[features]
+default = ["std"]
+# Задачи B, C и D2 — на std (Rc, Vec, сеть). Без этой возможности крейт
+# собирается в no_std: задачи A и D1 идут и на Cortex-M.
+std = []
+
+[[test]]
+name = "ch22"
+path = "tests/ch22.rs"
+required-features = ["std"]

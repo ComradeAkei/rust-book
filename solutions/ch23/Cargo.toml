@@ -1,0 +1,15 @@
+[package]
+name = "ch23-solutions"
+version = "0.1.0"
+description = "Глава 23: эталонные решения задач A–D"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+# Библиотека — no_std: макросы flags!, peripheral! и fsm! раскрываются в
+# код без std, их же использует прошивка ch23-periph на Cortex-M3.
+
+[[test]]
+name = "ch23"
+path = "tests/ch23.rs"

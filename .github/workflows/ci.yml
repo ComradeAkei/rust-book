@@ -87,6 +87,10 @@ jobs:
       # solutions/ch18 — кольцевой буфер (задача C). Оба под ASan/LeakSanitizer.
       - run: bash code/ch18/c/run.sh
       - run: bash solutions/ch18/c/run.sh
+      # C-пример главы 23: SQUARE без скобок, MAX с двойным вычислением,
+      # SWAP с захватом имени tmp и LOG2 под if; X-macro. Что из этого видят
+      # GCC -Wall, -Wshadow и clang.
+      - run: bash code/ch23/c/run.sh
       # Заготовки студента не проходят тесты, пока задачи не решены,
       # но обязаны собираться.
       - run: |
@@ -96,20 +100,24 @@ jobs:
             -p ch09-exercises -p ch10-exercises -p ch11-exercises -p ch12-exercises \
             -p ch13-exercises -p ch14-exercises -p ch15-exercises -p ch16-exercises \
             -p ch17-exercises -p ch18-exercises -p ch19-exercises -p ch20-exercises \
-            -p ch21-exercises -p project-frame -p project-store --all-targets
-      # Вложенные рабочие пространства глав 7 и 8 корневой cargo не видит:
-      # их собирают тесты, а формат и clippy проверяются здесь. В typo
+            -p ch21-exercises -p ch22-exercises -p ch23-exercises -p ch24-exercises \
+            -p project-frame -p project-store --all-targets
+      # Вложенные рабочие пространства глав 7, 8 и 24 корневой cargo не
+      # видит: их собирают тесты, а формат и clippy проверяются здесь. В typo
       # предупреждения о cfg — предмет опыта, в заготовке d-station ошибка
-      # сборки — условие задачи 8.D, поэтому clippy их не проверяет.
+      # сборки — условие задачи 8.D, поэтому clippy их не проверяет. В
+      # code/ch24/renamed ошибка сборки — под feature broken, которую clippy
+      # не включает.
       - name: fmt и clippy вложенных рабочих пространств
         run: |
           for ws in code/ch07/c-size code/ch08/typo code/ch08/unify code/ch08/ffi \
               exercises/ch08/c/station solutions/ch08/c/station \
-              exercises/ch08/d-station solutions/ch08/d-station; do
+              exercises/ch08/d-station solutions/ch08/d-station code/ch24/renamed; do
             cargo fmt --all --check --manifest-path "$ws/Cargo.toml"
           done
           for ws in code/ch07/c-size code/ch08/unify code/ch08/ffi \
-              exercises/ch08/c/station solutions/ch08/c/station solutions/ch08/d-station; do
+              exercises/ch08/c/station solutions/ch08/c/station solutions/ch08/d-station \
+              code/ch24/renamed; do
             cargo clippy --manifest-path "$ws/Cargo.toml" --all-targets -- -D warnings
           done
 
@@ -219,6 +227,31 @@ jobs:
       # работу с UnsafeCell<MaybeUninit<T>> (нет чтения неинициализированного,
       # нет нарушения алиасинга). Миллионный прогон помечен ignore.
       - run: cargo +nightly miri test -p ch21 -- single_thread_fifo
+      # Глава 22: автоматы async, Pin, исполнители, RawWaker без кучи и
+      # таймеры — всё однопоточное и под Miri проходит целиком, в обеих
+      # моделях алиасинга (самоссылки и get_unchecked_mut — их предмет).
+      # Задача C (epoll через syscall и сеть) помечена ignore.
+      - run: cargo +nightly miri test -p ch22 -p ch22-solutions
+      - run: cargo +nightly miri test -p ch22 -p ch22-solutions
+        env:
+          MIRIFLAGS: -Zmiri-tree-borrows
+      # Глава 23: код из макросов — обычный код: регистры периферии на
+      # памяти теста (volatile через указатель с provenance), static mut
+      # через &raw mut в take_once!. Тесты, которые запускают rustc и
+      # cargo (раскрытие, кодогенерация), помечены ignore.
+      - run: cargo +nightly miri test -p ch23 -p ch23-solutions
+      - run: cargo +nightly miri test -p ch23 -p ch23-solutions
+        env:
+          MIRIFLAGS: -Zmiri-tree-borrows
+      # Глава 24: код из процедурных макросов — обычный код: Describe с
+      # offset_of!, обработчик #[interrupt] со static mut через &raw mut,
+      # Bitfield, Timing на атомиках и регистры из SVD на памяти теста. Сами
+      # макросы исполняет компилятор, а не Miri: крейты proc-macro здесь не
+      # тестируются, а тесты, которые запускают cargo и trybuild, — ignore.
+      - run: cargo +nightly miri test -p ch24 -p ch24-solutions
+      - run: cargo +nightly miri test -p ch24 -p ch24-solutions
+        env:
+          MIRIFLAGS: -Zmiri-tree-borrows
       - run: cargo +nightly miri test -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
       # Чек-лист приложения C требует проходить Miri в обеих моделях алиасинга.
       - run: cargo +nightly miri test -p appendix-c
@@ -229,7 +262,8 @@ jobs:
       - run: |
           cargo +nightly test --doc -p ch00 -p ch01 -p ch02 -p ch06 -p ch07 -p ch08 -p ch09 \
             -p ch10 -p ch11 -p ch12 -p ch13 -p ch14 -p ch15 -p ch16 -p ch17 -p ch17-solutions \
-            -p ch18 -p ch19 -p ch20 -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
+            -p ch18 -p ch19 -p ch20 -p ch22 -p ch23 -p ch23-solutions -p ch24 -p appendix-a \
+            -p appendix-b -p appendix-b-2021 -p appendix-c
       # Глава 11: DynMetadata и -Zretpoline есть только в nightly.
       - run: cargo +nightly test -p ch11 --features nightly --test nightly
       # Глава 12: ручная реализация Fn через unboxed_closures и fn_traits.
@@ -341,6 +375,18 @@ jobs:
       # собирает ассемблер закреплённым cargo и к раскладке repr(Rust) не
       # относится; остальное — регистры и SIMD, от раскладки не зависят.
       - run: cargo +nightly test -p ch19 -p ch19-solutions -- --skip chapter_instructions
+      # Глава 22: группа `observed` фиксирует размеры автоматов async fn у
+      # rustc 1.97 (раскладка автоматов не стабилизирована); остальное от
+      # раскладки repr(Rust) не зависит.
+      - run: cargo +nightly test -p ch22 -p ch22-solutions -- --skip observed
+      # Глава 23: `rustc_` — снимки раскрытия и ассемблер закреплённого
+      # компилятора, `observed` — текст stringify!; остальное от раскладки
+      # не зависит.
+      - run: cargo +nightly test -p ch23 -p ch23-solutions -- --skip rustc_ --skip observed
+      # Глава 24: `rustc_` — снимки trybuild и раскрытия закреплённого
+      # компилятора, `observed` — пробелы stringify! и раскладка repr(Rust)
+      # без #[repr(C)]; остальное от раскладки не зависит.
+      - run: cargo +nightly test -p ch24 -p ch24-macros -p ch24-solutions -- --skip rustc_ --skip observed
 
   thumb:
     name: Cortex-M и QEMU
@@ -452,6 +498,34 @@ jobs:
           for t in thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabihf; do
             cargo build -p ch21 --no-default-features --target "$t"
           done
+      # Глава 22: без std остаются future, автоматы, Pin, select/join и
+      # исполнитель без кучи на RawWaker (только load/store — годится и для
+      # Cortex-M0); исполнитель с очередью на Arc и потоки — только на хосте.
+      # Задачи A и D1 (арена, исполнитель на флагах, очередь из прерывания)
+      # тоже без std; их же собирает прошивка ch22-tasks.
+      - name: Глава 22 (async без кучи) без std под три цели Cortex-M
+        run: |
+          for t in thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabihf; do
+            cargo build -p ch22 --no-default-features --target "$t"
+            cargo build -p ch22-solutions -p ch22-exercises --no-default-features --target "$t"
+          done
+      # Глава 23: макросы раскрываются на хосте, а их код — no_std. flags!,
+      # peripheral! и fsm! из решений собирает и прошивка ch23-periph.
+      - name: Глава 23 (код из макросов) без std под три цели Cortex-M
+        run: |
+          for t in thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabihf; do
+            cargo build -p ch23 --no-default-features --target "$t"
+            cargo build -p ch23-solutions -p ch23-exercises --target "$t"
+          done
+      # Глава 24: процедурные макросы собираются для хоста, их вывод — для
+      # цели. Bitfield, include_svd! и #[timed] из решений собирает и
+      # прошивка ch24-tasks; Timing на ARMv6-M нет (нет fetch_add).
+      - name: Глава 24 (процедурные макросы) без std под три цели Cortex-M
+        run: |
+          for t in thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabihf; do
+            cargo build -p ch24 --no-default-features --target "$t"
+            cargo build -p ch24-solutions -p ch24-exercises --no-default-features --target "$t"
+          done
       - name: Главы 0–2 без std под три цели Cortex-M
         run: |
           for t in thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabihf; do
@@ -479,7 +553,7 @@ jobs:
       - run: |
           sudo apt-get update && sudo apt-get install -y qemu-system-arm \
             gdb-multiarch llvm gcc-arm-none-eabi libnewlib-arm-none-eabi
-      - name: Опыты глав 0, 3, 5–13 и 15 в QEMU
+      - name: Опыты глав 0, 3, 5–13, 15, 22, 23 и 24 в QEMU
         run: bash firmware/run-demos.sh
       - name: Задача 2.B на дизассемблере всех прошивок
         run: cargo test -p ch02-solutions -- --ignored own_firmware --nocapture

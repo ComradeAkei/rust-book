@@ -1,0 +1,5 @@
+error: expected identifier
+ --> $WORKSPACE/tests-shared/ch24-ui/c_not_path.rs
+  |
+  | #[tasks_macros::timed(1 + 2)]
+  |                       ^

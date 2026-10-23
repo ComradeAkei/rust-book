@@ -1,0 +1,14 @@
+[package]
+name = "ch23-exercises"
+version = "0.1.0"
+description = "Глава 23: заготовки задач A–D для студента"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+# Библиотека — no_std, как и решения: макросы раскрываются в код без std.
+
+[[test]]
+name = "ch23"
+path = "tests/ch23.rs"

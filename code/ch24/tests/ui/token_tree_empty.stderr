@@ -1,0 +1,7 @@
+error: proc macro panicked
+ --> tests/ui/token_tree_empty.rs:2:20
+  |
+2 | const TREE: &str = ch24::token_tree!();
+  |                    ^^^^^^^^^^^^^^^^^^^
+  |
+  = help: message: token_tree!: пустой вход, показывать нечего
