@@ -128,6 +128,14 @@
   bump-арена для дерева, своя таблица с открытой адресацией и длиной
   пробы), шаг проекта П15 (хранилище измерений и аллокатор-счётчик),
   прошивка `firmware/ch15-heap`.
+- Готова глава 16 «unsafe и неопределённое поведение»: пять возможностей
+  `unsafe`; инварианты валидности и безопасности и перечень UB; что
+  оптимизатор делает с проверкой границ и `unreachable_unchecked`
+  (ассемблер); provenance и строгий API; модели алиасинга Stacked и Tree
+  Borrows и Miri; как запереть `unsafe` за безопасным API; гигиена и
+  edition 2024. Задачи A–D (каталог UB под Miri, `split_first_mut`
+  вручную, unsound-API с use-after-free, расхождение Stacked и Tree
+  Borrows). Проектного раздела у главы нет.
 - Готовы приложения A–D: словарь соответствий C → Rust, edition 2024 для
   системного кода, чек-лист ревью `unsafe` с разбором примера, установка
   окружения и отладка в QEMU. Их код лежит в `code/appendix-*`.
@@ -148,7 +156,7 @@ src/                      текст книги (mdBook)
   ch06/                   эталонная глава, по файлу на раздел
   ch07/ ch08/ ch09/       главы 7–9, по файлу на раздел
   ch10/ ch11/ ch12/       главы 10–12, по файлу на раздел
-  ch13/ ch14/ ch15/       главы 13–15, по файлу на раздел
+  ch13/ ch14/ ch15/ ch16/  главы 13–16, по файлу на раздел
   appendix-e/             разборы задач всех глав
 code/chNN/                примеры главы; листинги попадают в текст через {{#include}}
 code/ch01/c/ … ch15/c/    те же примеры на C и run.sh, который сверяет их вывод с текстом
@@ -165,6 +173,8 @@ code/ch14/tests/          ассемблер Rc, Arc и ячеек, обраще
 code/ch14/examples/       Box::new на 16 МиБ, запись через &u32, цена clone и ячеек
 code/ch15/tests/          ассемблер push, VecDeque::get и heapless, блоки SwissTable и BTreeMap
 code/ch15/examples/       рост Vec под strace, раскладка SwissTable, вырождение таблицы, локальность
+code/ch16/tests/          ассемблер проверки границ, get_unchecked и unreachable_unchecked
+code/ch16/ub/             run.sh: каталог UB под Miri, unsound-API и расхождение Stacked/Tree Borrows
 code/ch07/c-size/         программа задачи 7.C: размер при panic = "unwind" и "abort"
 code/ch07/hir/            во что раскрывается `?`: снимок HIR для раздела 7.1
 code/ch08/typo/ unify/ ffi/  отдельные рабочие пространства для опытов главы 8 с cargo
@@ -236,6 +246,8 @@ $ cargo test -p project-store p15         # шаг проекта П15
 $ cargo run --release -p ch15-solutions --example report       # аллокации решений прошлых глав
 $ cargo run --release -p ch15-solutions --example ast          # дерево на Box против арены
 $ cargo run --release -p ch15-solutions --example probes       # длина пробы и загрузка (задача 15.D)
+$ cargo test -p ch16-exercises            # задачи B и C главы 16
+$ bash code/ch16/ub/run.sh                # каталог UB, unsound-API и расхождение моделей (A, C, D)
 $ cargo test -p project-frame             # задачи П6, П7, П12 и П13
 $ cargo test -p project-frame p7          # только П7
 $ cargo test -p project-frame p12         # только П12
@@ -269,11 +281,13 @@ $ cargo +nightly miri test -p ch12 -p ch12-solutions
 $ cargo +nightly miri test -p ch13 -p ch13-solutions
 $ cargo +nightly miri test -p ch14 -p ch14-solutions   # и ещё раз с MIRIFLAGS=-Zmiri-tree-borrows
 $ cargo +nightly miri test -p ch15 -p ch15-solutions   # и ещё раз с MIRIFLAGS=-Zmiri-tree-borrows
+$ cargo +nightly miri test -p ch16 -p ch16-solutions   # и ещё раз с MIRIFLAGS=-Zmiri-tree-borrows
+$ bash code/ch16/ub/run.sh                # каталог UB главы 16 под Miri (задачи A, C, D)
 $ cargo +nightly miri test -p appendix-a -p appendix-b -p appendix-b-2021 -p appendix-c
 $ MIRIFLAGS=-Zmiri-tree-borrows cargo +nightly miri test -p appendix-c
 $ cargo +nightly test --doc -p ch00 -p ch01 -p ch02 -p ch06 -p ch07 -p ch08 -p ch09 \
-      -p ch10 -p ch11 -p ch12 -p ch13 -p ch14 -p ch15 -p appendix-a -p appendix-b -p appendix-b-2021 \
-      -p appendix-c
+      -p ch10 -p ch11 -p ch12 -p ch13 -p ch14 -p ch15 -p ch16 -p appendix-a -p appendix-b \
+      -p appendix-b-2021 -p appendix-c
 $ cargo +nightly test -p ch11 --features nightly --test nightly   # DynMetadata и -Zretpoline
 $ cargo +nightly test -p ch12 --features nightly --test nightly   # Fn, FnMut и FnOnce вручную
 $ cargo +nightly test --doc -p ch03 -p ch04 -p ch05 -p ch03-solutions -p ch04-solutions \
@@ -303,6 +317,8 @@ $ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch14 -p 
       -- --skip rustc_ --skip cargo_ --skip observed
 $ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch15 -p ch15-solutions \
       -- --skip rustc_ --skip cargo_ --skip observed
+$ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch16 -p ch16-solutions \
+      -- --skip rustc_
 $ cargo build -p ch06 -p ch07 --no-default-features --target thumbv6m-none-eabi
 $ cargo build -p ch08 -p ch08-solutions --no-default-features --target thumbv6m-none-eabi
 $ cargo build -p ch09 --no-default-features --features alloc --target thumbv6m-none-eabi

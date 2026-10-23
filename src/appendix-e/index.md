@@ -30,3 +30,4 @@
 | 13. Итераторы | [разбор](ch13.md), код в `solutions/ch13`, проект в `project/telemetry-frame` |
 | 14. Умные указатели и внутренняя изменяемость | [разбор](ch14.md), код в `solutions/ch14` |
 | 15. Коллекции и аллокация | [разбор](ch15.md), код в `solutions/ch15`, проект в `project/telemetry-store` |
+| 16. unsafe и неопределённое поведение | [разбор](ch16.md), код в `solutions/ch16` |
