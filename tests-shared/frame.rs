@@ -1,5 +1,6 @@
-// Общие тесты формата кадра сквозного проекта (шаги глав 6, 7 и 12;
-// тесты задачи П7 начинаются с `p7_`, задачи П12 — с `p12_`).
+// Общие тесты формата кадра сквозного проекта (шаги глав 6, 7, 12 и 13;
+// тесты задачи П7 начинаются с `p7_`, задачи П12 — с `p12_`, задачи П13 —
+// с `p13_`).
 //
 // Подключаются через `include!` из `project/telemetry-frame/tests/frame.rs`
 // и `exercises/project-frame/tests/frame.rs` после `use <крейт> as sut;`.
@@ -397,5 +398,260 @@ fn p12_inlined() {
             })
             .collect();
         assert!(bad.is_empty(), "{target}: в parse::decode остались вызовы {bad:?}");
+    }
+}
+
+// ---------------------------------------------------------- задача П13
+
+/// Элемент `Frames` в сравнимом виде: смещение и тип с номером кадра либо
+/// ошибка.
+type P13Item = (usize, Result<(Kind, u8), FrameError>);
+
+fn p13_item(r: Result<(usize, Frame<'_>), RxError>) -> P13Item {
+    match r {
+        Ok((at, f)) => (at, Ok((f.header.kind, f.header.seq))),
+        Err(e) => (e.offset, Err(e.error)),
+    }
+}
+
+fn p13_items(it: stream::Frames<'_>) -> Vec<P13Item> {
+    it.map(p13_item).collect()
+}
+
+fn p13_crc_of(frame: &[u8]) -> u16 {
+    crc16_update(crc16(&frame[..6]), &frame[HEADER_LEN..])
+}
+
+#[test]
+fn p13_clean_stream() {
+    use stream::Frames;
+    let s = [&ACK[..], &MEAS[..], &ACK[..]].concat();
+    assert_eq!(
+        p13_items(Frames::new(&s)),
+        [(0, Ok((Kind::Ack, 255))), (8, Ok((Kind::Measurement, 5))), (26, Ok((Kind::Ack, 255)))]
+    );
+    // Нагрузка — срез исходного буфера, а не копия.
+    let (at, f) = Frames::new(&s).nth(1).unwrap().unwrap();
+    assert_eq!(at, 8);
+    assert!(core::ptr::eq(f.payload, &s[16..26]));
+    let mut it = Frames::new(&s);
+    assert_eq!(it.by_ref().count(), 3);
+    assert_eq!(it.position(), s.len());
+    assert!(it.rest().is_empty());
+    assert!(p13_items(Frames::new(&[])).is_empty());
+    assert!(p13_items(Frames::until_eof(&[])).is_empty());
+}
+
+#[test]
+fn p13_junk_between_frames() {
+    use stream::Frames;
+    // Участок мусора без маркера даёт одну ошибку, и кадр за ним цел.
+    let s = [&ACK[..], &[0x00, 0x13, 0x37, 0x42], &MEAS[..], &[0xff; 9], &ACK[..]].concat();
+    let want = [
+        (0, Ok((Kind::Ack, 255))),
+        (8, Err(FrameError::BadMagic(0x00))),
+        (12, Ok((Kind::Measurement, 5))),
+        (30, Err(FrameError::BadMagic(0xff))),
+        (39, Ok((Kind::Ack, 255))),
+    ];
+    assert_eq!(p13_items(Frames::new(&s)), want);
+    assert_eq!(p13_items(Frames::until_eof(&s)), want);
+}
+
+#[test]
+fn p13_corrupt_crc_resyncs() {
+    use stream::Frames;
+    let mut s = [&ACK[..], &MEAS[..], &ACK[..]].concat();
+    s[8 + 12] ^= 0x01; // байт нагрузки MEAS
+    let computed = p13_crc_of(&s[8..26]);
+    assert_eq!(
+        p13_items(Frames::new(&s)),
+        [
+            (0, Ok((Kind::Ack, 255))),
+            (8, Err(FrameError::BadCrc { stored: 0x73e5, computed })),
+            (26, Ok((Kind::Ack, 255))),
+        ]
+    );
+}
+
+#[test]
+fn p13_false_marker_inside_corrupt_frame() {
+    use stream::Frames;
+    // Маркер в нагрузке испорченного кадра — ложное начало: ещё одна
+    // ошибка, но следующий настоящий кадр не теряется.
+    let mut buf = [0u8; 16];
+    let n = encode(Kind::Event, 1, &[MAGIC, 0x07, 0x00], &mut buf).unwrap();
+    let mut s = [&buf[..n], &ACK[..]].concat();
+    s[6] ^= 0xff; // CRC события
+    let items = p13_items(Frames::new(&s));
+    assert_eq!(items.len(), 3, "{items:?}");
+    assert!(matches!(items[0], (0, Err(FrameError::BadCrc { .. }))), "{items:?}");
+    assert_eq!(items[1], (8, Err(FrameError::BadVersion(0x07))));
+    assert_eq!(items[2], (11, Ok((Kind::Ack, 255))));
+}
+
+#[test]
+fn p13_truncated_tail() {
+    use stream::Frames;
+    for cut in [3, 10] {
+        let s = [&ACK[..], &MEAS[..cut]].concat();
+        let mut it = Frames::new(&s);
+        assert_eq!(it.next().map(p13_item), Some((0, Ok((Kind::Ack, 255)))));
+        // Поток может продолжиться: неполный кадр не ошибка.
+        assert!(it.next().is_none());
+        assert_eq!(it.position(), 8);
+        assert_eq!(it.rest(), &MEAS[..cut]);
+        let need = if cut < HEADER_LEN { HEADER_LEN } else { MEAS.len() };
+        assert_eq!(
+            p13_items(Frames::until_eof(&s)),
+            [(0, Ok((Kind::Ack, 255))), (8, Err(FrameError::Short { need, have: cut }))]
+        );
+    }
+}
+
+#[test]
+fn p13_bad_length_waits_until_eof() {
+    use stream::Frames;
+    // Порча длины выглядит как неполный кадр (тест p7_context_in_stream):
+    // пока поток идёт, итератор ждёт продолжения, а когда поток кончился,
+    // ищет маркер и находит кадры, которые накрыл «длинный» кадр.
+    let mut s = [&MEAS[..], &ACK[..], &ACK[..]].concat();
+    s[4] = 30;
+    let mut it = Frames::new(&s);
+    assert!(it.next().is_none());
+    assert_eq!(it.rest(), &s[..]);
+    assert_eq!(
+        p13_items(Frames::until_eof(&s)),
+        [
+            (0, Err(FrameError::Short { need: 38, have: 34 })),
+            (18, Ok((Kind::Ack, 255))),
+            (26, Ok((Kind::Ack, 255))),
+        ]
+    );
+}
+
+#[test]
+fn p13_fused_and_size_hint() {
+    use stream::Frames;
+    fn fused<I: core::iter::FusedIterator>(_: &I) {}
+    let s = [&ACK[..], &[0u8; 5]].concat();
+    for mut it in [Frames::new(&s), Frames::until_eof(&s)] {
+        fused(&it);
+        assert_eq!(it.size_hint(), (0, Some(13)));
+        let n = it.by_ref().count();
+        assert!((1..=13).contains(&n));
+        for _ in 0..5 {
+            assert!(it.next().is_none());
+        }
+        let (lo, hi) = it.size_hint();
+        assert!(lo == 0 && hi.unwrap() >= it.clone().count());
+    }
+    // Хвост без маркера короче заголовка — неполный кадр.
+    assert_eq!(
+        p13_items(Frames::until_eof(&s))[1],
+        (8, Err(FrameError::Short { need: HEADER_LEN, have: 5 }))
+    );
+}
+
+#[test]
+fn p13_stats() {
+    let mut bad = MEAS;
+    bad[17] ^= 0x80;
+    let s = [&[0x13][..], &ACK[..], &MEAS[..], &bad[..], &ACK[..], &[MAGIC, VERSION]].concat();
+    assert_eq!(stream::stats(&s), stream::Stats { frames: [1, 0, 2], errors: 3, junk: 1 + 18 + 2 });
+    assert_eq!(stream::stats(&[]), stream::Stats::default());
+}
+
+/// Псевдослучайный поток: кадры всех типов вперемешку с мусором (в нём
+/// бывает и маркер), испорченными и обрезанными кадрами. Возвращает поток
+/// и смещения целых кадров.
+fn p13_stream(seed: u32, pieces: usize) -> (Vec<u8>, Vec<usize>) {
+    let mut seed = seed | 1;
+    let mut next = move || {
+        seed ^= seed << 13;
+        seed ^= seed >> 17;
+        seed ^= seed << 5;
+        seed
+    };
+    let mut s = Vec::new();
+    let mut good = Vec::new();
+    let mut buf = [0u8; HEADER_LEN + 24];
+    for _ in 0..pieces {
+        let kind = [Kind::Measurement, Kind::Event, Kind::Ack][next() as usize % 3];
+        let payload: Vec<u8> = (0..next() % 24).map(|_| next() as u8).collect();
+        let n = encode(kind, next() as u8, &payload, &mut buf).unwrap();
+        match next() % 8 {
+            0 => s.extend((0..1 + next() % 9).map(|_| next() as u8)),
+            1 => {
+                let mut f = buf[..n].to_vec();
+                let bit = next() as usize % (n * 8);
+                f[bit / 8] ^= 1 << (bit % 8);
+                s.extend(f);
+            }
+            2 => s.extend(&buf[..next() as usize % n]),
+            _ => {
+                good.push(s.len());
+                s.extend(&buf[..n]);
+            }
+        }
+    }
+    (s, good)
+}
+
+#[test]
+fn p13_no_frame_lost() {
+    use stream::Frames;
+    let runs = if cfg!(miri) { 3 } else { 200 };
+    for seed in 0..runs {
+        let (s, good) = p13_stream(seed, 40);
+        let ok: Vec<usize> =
+            Frames::until_eof(&s).filter_map(|r| r.ok()).map(|(at, _)| at).collect();
+        // Целые кадры найдены все; испорченный кадр может стать целым,
+        // только если порча задела мусор, поэтому сравниваем включение.
+        for at in &good {
+            assert!(ok.contains(at), "seed {seed}: потерян кадр со смещения {at}");
+        }
+        let st = stream::stats(&s);
+        assert_eq!(st.frames.iter().sum::<usize>(), ok.len());
+    }
+}
+
+/// Поток, принятый кусками: на каждом куске `Frames::new` и сдвиг остатка
+/// в начало буфера, в конце — `until_eof`. Кадры и ошибки на маркерах те
+/// же, что при разборе целиком; лишние ошибки бывают только там, где кусок
+/// разрезал участок мусора.
+#[test]
+fn p13_chunked_same_as_whole() {
+    use stream::Frames;
+    let seeds = if cfg!(miri) { 2 } else { 40 };
+    let sizes: &[usize] = if cfg!(miri) { &[1, 7] } else { &[1, 2, 3, 5, 7, 8, 13, 64, 300] };
+    for seed in 0..seeds {
+        let (s, _) = p13_stream(seed, 30);
+        let on_marker = |v: Vec<P13Item>| -> Vec<P13Item> {
+            v.into_iter().filter(|(at, _)| s[*at] == MAGIC).collect()
+        };
+        let whole = p13_items(Frames::until_eof(&s));
+        for &size in sizes {
+            let mut pending = Vec::new();
+            let mut base = 0;
+            let mut got = Vec::new();
+            for chunk in s.chunks(size) {
+                pending.extend_from_slice(chunk);
+                let mut it = Frames::new(&pending);
+                got.extend(it.by_ref().map(|r| {
+                    let (at, x) = p13_item(r);
+                    (base + at, x)
+                }));
+                let used = it.position();
+                pending.drain(..used);
+                base += used;
+            }
+            got.extend(Frames::until_eof(&pending).map(|r| {
+                let (at, x) = p13_item(r);
+                (base + at, x)
+            }));
+            assert!(got.len() >= whole.len(), "seed {seed}, кусок {size}");
+            assert_eq!(on_marker(got), on_marker(whole.clone()), "seed {seed}, кусок {size}");
+        }
     }
 }
