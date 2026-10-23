@@ -148,7 +148,18 @@
     - [14.7. Cow](ch14/07-cow.md)
     - [14.8. Трюки и ловушки](ch14/08-tricks.md)
     - [14.9. Задачи](ch14/09-tasks.md)
-- [15. Коллекции и аллокация](ch15.md)
+- [15. Коллекции и аллокация](ch15/index.md)
+    - [15.1. Vec: указатель, ёмкость, длина](ch15/01-vec.md)
+    - [15.2. String и &str](ch15/02-strings.md)
+    - [15.3. HashMap: SwissTable и SipHash](ch15/03-maps.md)
+    - [15.4. BTreeMap, VecDeque, BinaryHeap](ch15/04-ordered.md)
+    - [15.5. Локальность данных](ch15/05-locality.md)
+    - [15.6. Аллокатор: GlobalAlloc, Layout, арены](ch15/06-alloc.md)
+    - [15.7. Как malloc переходит на mmap](ch15/07-glibc.md)
+    - [15.8. Коллекции без кучи и фрагментация](ch15/08-nostd.md)
+    - [15.9. Трюки и ловушки](ch15/09-tricks.md)
+    - [15.10. Задачи](ch15/10-tasks.md)
+    - [15.11. Сквозной проект: хранилище измерений](ch15/11-project.md)
 
 # Часть III. Небезопасный Rust и граница с железом
 
@@ -208,3 +219,4 @@
     - [Глава 12](appendix-e/ch12.md)
     - [Глава 13](appendix-e/ch13.md)
     - [Глава 14](appendix-e/ch14.md)
+    - [Глава 15](appendix-e/ch15.md)
