@@ -1,0 +1,3 @@
+# SPDX-License-Identifier: GPL-2.0
+# Задача 29.C: эталон на C, с которым сравнивают модуль студента.
+obj-m := ch29_counter_c.o

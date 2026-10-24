@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: GPL-2.0
+#
+# Модули главы 29, которые не должны собираться: каждый — одна ошибка,
+# которую rustc ловит там, где C собирается молча. Тест
+# compile_fail_modules собирает их с `make -k` и сверяет коды ошибок.
+obj-m += ch29_fail_pin_value.o
+obj-m += ch29_fail_pin_move.o
+obj-m += ch29_fail_racy_plain.o
+obj-m += ch29_fail_racy_cell.o
+obj-m += ch29_fail_irq_cell.o

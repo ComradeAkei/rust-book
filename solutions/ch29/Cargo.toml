@@ -1,0 +1,25 @@
+[package]
+name = "ch29-solutions"
+version = "0.1.0"
+description = "Глава 29: эталонные решения задач A–D — ошибки в C-драйвере, модуль с параметром, счётчик-устройство, kobject на Rust, замер горячего пути read"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+# Крейт только для Linux. Модули задач B, C и D1 лежат в modules/ и
+# собираются системой сборки ядра (Kbuild), а не cargo: тесты собирают их
+# вместе с C-фрагментами задачи A и эталоном задачи C из tests-shared и
+# запускают в QEMU программой гостя ch29-task-guest. Без собранного ядра
+# (code/ch29/kernel/build.sh) тесты, которым оно нужно, пропускаются.
+[dependencies]
+ch29 = { path = "../../code/ch29" }
+nix = { version = "0.31.3", features = ["fs", "ioctl", "kmod", "mount", "process", "reboot", "signal"] }
+
+[[bin]]
+name = "ch29-task-guest"
+path = "../../tests-shared/ch29-guest.rs"
+
+[[test]]
+name = "ch29"
+path = "tests/ch29.rs"

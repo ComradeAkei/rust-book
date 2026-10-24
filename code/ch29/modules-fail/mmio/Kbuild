@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: GPL-2.0
+#
+# Чтение регистра за концом BAR и по смещению, неизвестному при компиляции
+# (раздел 29.8). rustc модули соберёт, а откажет компоновка: проверку
+# границ `build_assert!` довершает modpost.
+obj-m += ch29_fail_mmio.o
+obj-m += ch29_fail_mmio_var.o

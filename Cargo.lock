@@ -601,6 +601,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "ch29"
+version = "0.1.0"
+dependencies = [
+ "nix",
+]
+
+[[package]]
+name = "ch29-exercises"
+version = "0.1.0"
+dependencies = [
+ "ch29",
+ "nix",
+]
+
+[[package]]
+name = "ch29-solutions"
+version = "0.1.0"
+dependencies = [
+ "ch29",
+ "nix",
+]
+
+[[package]]
 name = "cortex-m"
 version = "0.7.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"

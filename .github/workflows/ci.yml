@@ -112,7 +112,7 @@ jobs:
             -p ch17-exercises -p ch18-exercises -p ch19-exercises -p ch20-exercises \
             -p ch21-exercises -p ch22-exercises -p ch23-exercises -p ch24-exercises \
             -p ch25-exercises -p ch26-exercises -p ch27-exercises -p ch28-exercises \
-            -p project-frame -p project-store \
+            -p ch29-exercises -p project-frame -p project-store \
             --all-targets
       # Вложенные рабочие пространства глав 7, 8, 24 и 26 корневой cargo не
       # видит: их собирают тесты, а формат и clippy проверяются здесь. В typo
@@ -439,6 +439,60 @@ jobs:
       # от раскладки repr(Rust) не зависят. strace это задание не ставит:
       # если его нет в образе, тесты под ним пропускаются.
       - run: cargo +nightly test -p ch28 -p ch28-solutions
+      # Глава 29: без собранного ядра опыты в QEMU пропускаются (их
+      # проверяет задание kernel); разбор трассы и objdump задачи D2 и
+      # служебные функции хоста от раскладки не зависят.
+      - run: cargo +nightly test -p ch29 -p ch29-solutions
+
+  # Глава 29: модули ядра Linux 7.0 на Rust. Ядра собираются здесь же
+  # (code/ch29/kernel/build.sh), опыты и задачи идут в QEMU под KVM.
+  # Каталог ядер — вне target: его не должен трогать rust-cache.
+  kernel:
+    name: Модули ядра Linux в QEMU
+    runs-on: ubuntu-24.04
+    env:
+      # Без ядра, QEMU или gdb тесты главы 29 не пропускаются, а падают.
+      CH29_REQUIRE_KERNEL: 1
+    steps:
+      - uses: actions/checkout@v4
+      # Ядро собирается тем же rustc, что и книга; крейтам core и kernel
+      # нужны исходники стандартной библиотеки.
+      - run: rustup toolchain install && rustup component add rust-src
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: kernel
+      # clang, lld и llvm 18 — сборка с LLVM=1; libclang — bindgen; flex,
+      # bison, bc, libelf-dev и cpio — сборка ядра; QEMU и gdb — опыты.
+      - run: |
+          sudo apt-get update && sudo apt-get install -y clang lld llvm libclang1-18 \
+            flex bison bc libelf-dev cpio qemu-system-x86 gdb
+      # На раннере /dev/kvm доступен только root; тесты открывают его на
+      # чтение и запись, а без доступа берут TCG — в несколько раз дольше.
+      - name: Доступ к KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Установить bindgen-cli 0.72.1
+        run: cargo install --locked bindgen-cli@0.72.1
+      - name: Каталог ядер
+        run: |
+          echo "CH29_KERNEL_DIR=$RUNNER_TEMP/ch29-kernel" >> "$GITHUB_ENV"
+          echo "CH29_KERNEL=$RUNNER_TEMP/ch29-kernel/build" >> "$GITHUB_ENV"
+          echo "CH29_KERNEL_DEBUG=$RUNNER_TEMP/ch29-kernel/build-debug" >> "$GITHUB_ENV"
+      # Архив исходников (~250 МБ) не меняется: контрольную сумму
+      # проверяет build.sh.
+      - uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/ch29-kernel/linux_7.0.0.orig.tar.gz
+          key: linux-7.0.0-orig-c6343795
+      - name: Ядра 7.0, обычное и отладочное
+        run: bash code/ch29/kernel/build.sh
+      # Модули главы и задач собираются с CLIPPY=1 без предупреждений,
+      # заготовки задач — тоже; задача A — на отладочном ядре.
+      - name: Опыты главы 29 и задачи в QEMU
+        run: cargo test -p ch29 -p ch29-solutions
 
   thumb:
     name: Cortex-M и QEMU

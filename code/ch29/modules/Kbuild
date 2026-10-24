@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: GPL-2.0
+#
+# Модули главы 29. Сборка — из каталога сборки ядра:
+#
+#   make -C target/ch29-kernel/build M=$PWD MO=<каталог для объектов> LLVM=1
+#
+# Kbuild сам решает, чем собирать каждый объект: есть ch29_hello.rs —
+# rustc, есть ch29_errors_c.c — clang.
+obj-m += ch29_hello.o
+obj-m += ch29_errors.o
+obj-m += ch29_errors_c.o
+obj-m += ch29_alloc.o
+obj-m += ch29_pin.o
+obj-m += ch29_pin_c.o
+obj-m += ch29_sync.o
+obj-m += ch29_sync_c.o
+obj-m += ch29_notes.o
+obj-m += ch29_notes_c.o
+obj-m += ch29_edu.o
+obj-m += ch29_oops.o
