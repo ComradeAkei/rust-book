@@ -1,0 +1,32 @@
+[package]
+name = "ch30"
+version = "0.1.0"
+description = "Глава 30: производительность и профилирование — методика замеров, criterion и divan, perf, cachegrind, встраивание и LTO, проверки границ, ветвления, кэш и аллокации, Cortex-M, профиль станции"
+edition.workspace = true
+# std::hint::cold_path (раздел 30.5) стабилен с 1.95.
+rust-version = "1.95"
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+libc = "0.2.191"
+ch30-dep = { path = "../ch30-dep" }
+telemetry-frame = { path = "../../project/telemetry-frame" }
+telemetry-store = { path = "../../project/telemetry-store" }
+
+[dev-dependencies]
+# Без графиков (plotters) и без rayon: отчёт — текст в терминале.
+criterion = { version = "0.7.0", default-features = false, features = ["cargo_bench_support"] }
+divan = "0.1.21"
+
+[[bench]]
+name = "crit"
+harness = false
+
+[[bench]]
+name = "div"
+harness = false
+
+[[bench]]
+name = "alloc"
+harness = false

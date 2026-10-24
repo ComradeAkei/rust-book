@@ -1,0 +1,22 @@
+[package]
+name = "ch29"
+version = "0.1.0"
+description = "Глава 29: Rust в ядре Linux — сборка ядра 7.0, модули, память, pin-init, блокировки, misc-устройство, PCI-драйвер, отладка в QEMU"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+# Сами модули ядра — не крейты cargo: их собирает Kbuild ядра из
+# каталога modules/ (см. modules/Kbuild). Этот крейт — обвязка вокруг них:
+# host — сборка модулей, initramfs и запуск QEMU, guest — init внутри
+# виртуальной машины (статическая программа, PID 1), kmsg — разбор
+# /dev/kmsg. Ядро собирает kernel/build.sh; без собранного ядра тесты
+# пропускаются.
+
+[dependencies]
+nix = { version = "0.31.3", features = ["fs", "ioctl", "kmod", "mount", "process", "reboot", "signal", "term"] }
+
+[[bin]]
+name = "ch29-guest"
+path = "src/bin/ch29-guest.rs"

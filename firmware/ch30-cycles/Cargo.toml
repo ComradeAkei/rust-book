@@ -1,0 +1,22 @@
+[package]
+name = "ch30-cycles"
+version = "0.1.0"
+description = "Глава 30: счётчик тактов DWT и SysTick под QEMU — побитовая и табличная CRC на Cortex-M"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+cortex-m = { workspace = true }
+cortex-m-rt = { workspace = true }
+cortex-m-semihosting = { workspace = true }
+telemetry-frame = { path = "../../project/telemetry-frame" }
+
+[[bin]]
+name = "ch30-cycles"
+test = false
+bench = false

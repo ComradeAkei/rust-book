@@ -16,7 +16,7 @@
 - Программа курса: глава 0, 31 глава в шести частях, приложения A–E.
 - Готова эталонная глава 6 «Составные типы и раскладка памяти»:
   11 разделов, задачи A–D, первая задача проекта П6 и разборы в
-  приложении E. Остальные главы, кроме 0–26, пока содержат план из
+  приложении E. Остальные главы, кроме 0–29, пока содержат план из
   программы курса.
 - Готовы главы 0–2: окружение и инструменты (rustup, cargo, чтение
   ассемблера, одна программа на x86_64 и Cortex-M, Miri и clippy, QEMU и
@@ -249,6 +249,33 @@
   Задачи A–D2 (таблица векторов из ELF, байт в UART0 тремя способами,
   консоль команд с эхом, переключатель задач на PendSV, разбор CFSR и
   HFSR с продолжением после сбоя; прошивки — `firmware/ch27-tasks`).
+- Готова глава 28 «Системное программирование под Linux»: один вызов
+  через std, libc, rustix и nix, что std делает до `main`, цена вызова и
+  vDSO; `OwnedFd`, `BorrowedFd` и `AsFd`, копия файла на C с `goto` под
+  GCC, clang и valgrind, проверка двойного закрытия в отладочной сборке,
+  memfd; `Command` через posix_spawn и через fork с `pre_exec`, `fork`
+  под чужим мьютексом, наследование маски сигналов; SIGPIPE, обработчик-
+  флаг, `println!` в обработчике, EINTR и SA_RESTART, signalfd; `mmap`,
+  страничные сбои, огромные страницы, SIGBUS; epoll и обзор io_uring;
+  разбор /proc/self/maps и status. Шаг проекта — журнал кадров на mmap,
+  переживающий SIGKILL, и демон с signalfd и epoll. Задачи A–D (системные
+  вызовы шести операций под strace, `ls -la` на getdents64, мини-оболочка
+  с группами процессов и Ctrl-C на псевдотерминале, поиск в файле на
+  2 ГиБ через read и mmap с огромными страницами).
+- Готова глава 29 «Rust в ядре Linux»: два ядра 7.0 с `CONFIG_RUST`
+  (обычное и отладочное с KASAN, kmemleak и lockdep), сборка из
+  tinyconfig, init на Rust в initramfs и QEMU; привязки, помощники и
+  крейт `kernel`; `module!`, параметры, ошибки как `Result` и откат без
+  `goto`; `KBox`, `KVec`, флаги GFP, сон под спин-блокировкой, стек ядра
+  и запрет плавающей точки; pin-init и мьютекс на месте; `SpinLock`,
+  `Mutex`, атомики LKMM и `Arc` в работах очереди против гонки на C;
+  misc-устройство и граница с пространством пользователя с ошибкой
+  `simple_read_from_buffer` в 7.0; драйвер PCI-устройства QEMU `edu` с
+  MMIO, MSI и проверкой границ регистров при компоновке; паника как
+  oops без раскрутки, `decode_stacktrace.sh` и модуль в gdb. Задачи A–D2
+  (шесть ошибок драйвера на отладочном ядре, параметр модуля, счётчик
+  против эталона на C, `kobject-example` через привязки, путь `read`
+  Rust против C по трассе ftrace и ассемблеру).
 - Готовы приложения A–D: словарь соответствий C → Rust, edition 2024 для
   системного кода, чек-лист ревью `unsafe` с разбором примера, установка
   окружения и отладка в QEMU. Их код лежит в `code/appendix-*`.
@@ -277,6 +304,9 @@ src/                      текст книги (mdBook)
   ch25/                   глава 25, по файлу на раздел
   ch26/                   глава 26, по файлу на раздел
   ch27/                   глава 27, по файлу на раздел
+  ch28/                   глава 28, по файлу на раздел
+  ch29/                   глава 29, по файлу на раздел
+  ch30/                   глава 30, по файлу на раздел, и flamegraph.svg раздела 30.3
   appendix-e/             разборы задач всех глав
 code/chNN/                примеры главы; листинги попадают в текст через {{#include}}
 code/ch01/c/ … ch15/c/    те же примеры на C и run.sh, который сверяет их вывод с текстом
@@ -324,6 +354,17 @@ code/ch27/svd/            lm3s6965.svd (SYSCTL, GPIO, UART, таймеры, АЦ
 code/ch27/tests/          станция в QEMU: кадры из UART0 в файл, разбор крейтом telemetry-frame
 code/ch27-pac/            PAC главы 27, вывод svd2rust; CI сверяет его с повторной генерацией
 code/ch27-hal/            HAL главы 27: GPIO с typestate, UART, таймер, АЦП; tests/ — ассемблер и ошибки типов
+code/ch28/c/              copy.c: копия файла с errno и goto, вариант с утечкой; run.sh — GCC, clang, valgrind
+code/ch28/tests/          опыты главы отдельными процессами, strace-журналы, демон журнала под SIGKILL
+code/ch29/kernel/         build.sh и фрагменты .config: ядра Linux 7.0 с CONFIG_RUST, обычное и отладочное
+code/ch29/modules/        модули ядра главы на Rust и их пары на C; собирает Kbuild, а не cargo
+code/ch29/modules-fail/   модули, которые не должны собраться: pin, Send/Sync, плавающая точка, границы MMIO
+code/ch29/tests/          опыты главы в QEMU, сеанс gdb, .modinfo, разбор трассы oops, цитаты из ядра
+code/ch30/src/bin/        программы опытов главы 30: часы, счётчики, профиль, матрица, проверки, память, станция
+code/ch30/benches/        замеры criterion и divan, счётчик выделений divan
+code/ch30/tests/          ассемблер, модель кэша и предсказателя cachegrind, профиль perf, время с запасом
+code/ch30/pgo/            run.sh: PGO программы inlining и ассемблер check_plain с профилем и без
+code/ch30-dep/            «чужой» крейт для опытов главы 30 со встраиванием между крейтами
 code/ch07/c-size/         программа задачи 7.C: размер при panic = "unwind" и "abort"
 code/ch07/hir/            во что раскрывается `?`: снимок HIR для раздела 7.1
 code/ch08/typo/ unify/ ffi/  отдельные рабочие пространства для опытов главы 8 с cargo
@@ -347,6 +388,10 @@ solutions/ch08/c/ d-station/  решения задач 8.C и 8.D
 exercises/ch24-macros/    заготовки макросов задач 24.B–24.D; решения — в solutions/ch24-macros
 tests-shared/             тесты, общие для заготовок и решений
 tests-shared/ch24-ui/     снимки ошибок задач 24.B–24.D для trybuild, общие для заготовок и решений
+tests-shared/ch28-ops.rs  программа задачи 28.A: шесть операций std между метками getppid
+tests-shared/ch29/        фрагменты задачи 29.A на C и Rust, эталон счётчика задачи 29.C на C
+tests-shared/ch29-guest.rs  init гостя задач главы 29: сценарии A–D2 в QEMU
+tests-shared/ch30-task.rs  программа замеров задач главы 30: тесты зовут её напрямую и под cachegrind
 project/                  сквозной проект «станция телеметрии»
 firmware/                 прошивки для QEMU (отдельный workspace)
 theme/                    стили врезок: справка, сравнение с C, под капотом, трюк, ловушка
@@ -369,7 +414,16 @@ tools/                    вспомогательные проверки для
   нужен только для проверки C-примеров глав 1, 4 и 26 на Cortex-M;
 - mdBook 0.5.4 и `cargo-show-asm`;
 - для главы 27 — svd2rust 0.37.1 (повторная генерация PAC) и flip-link
-  0.1.12 (опыт раздела 27.7; без него `run-demos.sh` его пропускает).
+  0.1.12 (опыт раздела 27.7; без него `run-demos.sh` его пропускает);
+- для главы 29 — clang, lld и llvm 18, flex, bison, bc, libelf, cpio,
+  компонент `rust-src` и bindgen-cli 0.72.1 для сборки ядра,
+  `qemu-system-x86_64` 8.x и gdb для опытов; без собранного ядра
+  (`bash code/ch29/kernel/build.sh`) тесты главы пропускаются;
+- для главы 30 — valgrind 3.22 (cachegrind), perf из `linux-tools` (путь
+  можно задать в `PERF`), компонент `llvm-tools` для PGO и inferno для
+  flamegraph; без valgrind и perf их опыты пропускаются (опыты с perf —
+  и при `kernel.perf_event_paranoid` выше 2), а `CH30_REQUIRE_VALGRIND`,
+  `CH30_REQUIRE_PERF` и `CH30_REQUIRE_PERF_EVENTS` делают пропуск ошибкой.
 
 ## Задачи
 
@@ -415,6 +469,13 @@ $ cargo test -p ch24-exercises            # задачи A–D главы 24 (о
 $ cargo test -p ch25-exercises            # задачи A–D главы 25 (D берёт бюджет ОЗУ из firmware/memory.x)
 $ cargo test -p ch26-exercises            # задачи A, B и D главы 26 (C — прошивка, эталон firmware/ch26-boot)
 $ cargo test -p ch27-exercises            # задачи A–D2 главы 27 (прошивки C, D1, D2 — образец firmware/ch27-tasks)
+$ cargo test -p ch28-exercises            # задачи A–D главы 28 (A без strace пропускается)
+$ bash code/ch29/kernel/build.sh          # ядра Linux 7.0 для главы 29: обычное и отладочное
+$ cargo test -p ch29                      # опыты главы 29 в QEMU, gdb и модули, которые не собираются
+$ cargo test -p ch29-exercises            # задачи A–D2 главы 29 (модули ядра — в exercises/ch29/modules)
+$ cargo test -p ch30                      # опыты главы 30: ассемблер, cachegrind, perf, время
+$ cargo test -p ch30-exercises            # задачи A–D главы 30 (замеры — программа ch30-task)
+$ bash code/ch30/pgo/run.sh               # PGO: горячий путь подряд по профилю (раздел 30.5)
 $ cargo test -p project-frame             # задачи П6, П7, П12 и П13
 $ cargo test -p project-frame p7          # только П7
 $ cargo test -p project-frame p12         # только П12

@@ -509,6 +509,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "ch30-cycles"
+version = "0.1.0"
+dependencies = [
+ "cortex-m",
+ "cortex-m-rt",
+ "cortex-m-semihosting",
+ "telemetry-frame",
+]
+
+[[package]]
 name = "cortex-m"
 version = "0.7.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"

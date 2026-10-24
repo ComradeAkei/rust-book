@@ -27,13 +27,55 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       # Глава 18 линкуется с zlib (crc32, compress); dev-символ libz.so даёт
       # zlib1g-dev. Ставим до clippy/теста, которые собирают крейты главы 18.
-      - run: sudo apt-get update && sudo apt-get install -y zlib1g-dev
+      # strace нужен тестам глав 15 и 28 и задаче 28.A: без него они
+      # пропускаются. valgrind (cachegrind) и perf нужны опытам и задачам
+      # главы 30 — ставим до `cargo test`.
+      - run: |
+          sudo apt-get update
+          sudo apt-get install -y zlib1g-dev strace valgrind linux-tools-generic
+      # Глава 30: /usr/bin/perf — обёртка, которая ищет perf для ядра
+      # раннера и не находит; сам perf из linux-tools-generic с этим ядром
+      # работает. Его и берём явно: в образе есть и perf 6.17 для ядер
+      # azure, а `ls … | head` выбирал его — 6.17 в списке раньше 6.8.
+      # Ubuntu по умолчанию не пускает пользователя к событиям
+      # perf_event_open (kernel.perf_event_paranoid = 4). CH30_REQUIRE_*
+      # превращают пропуск опыта без инструмента в ошибку.
+      - name: perf и valgrind для главы 30
+        run: |
+          sudo sysctl -w kernel.perf_event_paranoid=1
+          perf=$(ls /usr/lib/linux-tools/*-generic/perf | head -n 1)
+          "$perf" --version
+          # Процессор раннера — для чисел тестов `observed_`.
+          grep -m 1 'model name' /proc/cpuinfo
+          {
+            echo "PERF=$perf"
+            echo "CH30_REQUIRE_PERF=1"
+            echo "CH30_REQUIRE_PERF_EVENTS=1"
+            echo "CH30_REQUIRE_VALGRIND=1"
+          } >> "$GITHUB_ENV"
       - run: cargo fmt --all --check
       - run: cargo fmt --all --check
         working-directory: firmware
       - run: cargo clippy --workspace --all-targets -- -D warnings
       # Корневой `cargo test` проверяет примеры глав и эталонные решения.
-      - run: cargo test
+      # --no-fail-fast: упавший тест одного крейта не прячет остальные.
+      - run: cargo test --no-fail-fast
+      # Глава 30: опыты под perf — ещё раз с каждым другим perf образа.
+      # perf 6.17 для ядер azure собран без libunwind (стек по DWARF
+      # раскручивает libdw) и сам разбирает имена v0: на нём тесты
+      # проверяют оба случая из раздела 30.3.
+      - name: Глава 30 с другими perf образа
+        run: |
+          n=0
+          for p in /usr/lib/linux-tools/*/perf; do
+            [ "$p" = "$PERF" ] && continue
+            "$p" --version || continue
+            PERF="$p" cargo test -p ch30 --test perf
+            n=$((n + 1))
+          done
+          if [ "$n" -eq 0 ]; then
+            echo "::warning::других perf в образе нет: путь libdw не проверен"
+          fi
       # Часть поведения в приложении A зависит от профиля сборки.
       - run: cargo test -p appendix-a --release
       # C-примеры приложения A под UBSan: gcc с libubsan есть в образе.
@@ -95,6 +137,13 @@ jobs:
       # из C23 без функций, делитель UART препроцессором и #error. Нужен
       # gcc 13 — он в образе ubuntu-24.04.
       - run: bash code/ch25/c/run.sh
+      # C-пример главы 28: копия файла с errno и goto. Утечку дескриптора
+      # на пути ошибки GCC -Wall и clang --analyze не видят, -fanalyzer —
+      # только без оптимизации, valgrind --track-fds=yes — всегда.
+      - run: bash code/ch28/c/run.sh
+      # Раздел 30.5: PGO программы главы 30. llvm-profdata той же версии
+      # LLVM, что у rustc, даёт компонент llvm-tools.
+      - run: rustup component add llvm-tools && bash code/ch30/pgo/run.sh
       # Заготовки студента не проходят тесты, пока задачи не решены,
       # но обязаны собираться.
       - run: |
@@ -105,7 +154,8 @@ jobs:
             -p ch13-exercises -p ch14-exercises -p ch15-exercises -p ch16-exercises \
             -p ch17-exercises -p ch18-exercises -p ch19-exercises -p ch20-exercises \
             -p ch21-exercises -p ch22-exercises -p ch23-exercises -p ch24-exercises \
-            -p ch25-exercises -p ch26-exercises -p ch27-exercises -p project-frame -p project-store \
+            -p ch25-exercises -p ch26-exercises -p ch27-exercises -p ch28-exercises \
+            -p ch29-exercises -p ch30-exercises -p project-frame -p project-store \
             --all-targets
       # Вложенные рабочие пространства глав 7, 8, 24 и 26 корневой cargo не
       # видит: их собирают тесты, а формат и clippy проверяются здесь. В typo
@@ -428,6 +478,71 @@ jobs:
       # прошивки; остальное от раскладки не зависит, кадры исключений —
       # #[repr(C)]. Тест станции с QEMU помечен ignore.
       - run: cargo +nightly test -p ch27 -p ch27-hal -p ch27-solutions -- --skip rustc_
+      # Глава 28: системные вызовы, процессы, сигналы, mmap и задачи —
+      # от раскладки repr(Rust) не зависят. strace это задание не ставит:
+      # если его нет в образе, тесты под ним пропускаются.
+      - run: cargo +nightly test -p ch28 -p ch28-solutions
+      # Глава 29: без собранного ядра опыты в QEMU пропускаются (их
+      # проверяет задание kernel); разбор трассы и objdump задачи D2 и
+      # служебные функции хоста от раскладки не зависят.
+      - run: cargo +nightly test -p ch29 -p ch29-solutions
+      # Глава 30: `rustc_` — ассемблер закреплённого компилятора,
+      # `observed_` — время. valgrind и perf это задание не ставит, а
+      # kernel.perf_event_paranoid оставляет 4: даже если perf в образе
+      # есть, ядро его не пускает, и опыты под perf и valgrind
+      # пропускаются. Структуры, байты которых считают опыты, —
+      # repr(C), остальное от раскладки не зависит.
+      - run: cargo +nightly test -p ch30 -p ch30-solutions -- --skip rustc_ --skip observed
+
+  # Глава 29: модули ядра Linux 7.0 на Rust. Ядра собираются здесь же
+  # (code/ch29/kernel/build.sh), опыты и задачи идут в QEMU под KVM.
+  # Каталог ядер — вне target: его не должен трогать rust-cache.
+  kernel:
+    name: Модули ядра Linux в QEMU
+    runs-on: ubuntu-24.04
+    env:
+      # Без ядра, QEMU или gdb тесты главы 29 не пропускаются, а падают.
+      CH29_REQUIRE_KERNEL: 1
+    steps:
+      - uses: actions/checkout@v4
+      # Ядро собирается тем же rustc, что и книга; крейтам core и kernel
+      # нужны исходники стандартной библиотеки.
+      - run: rustup toolchain install && rustup component add rust-src
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: kernel
+      # clang, lld и llvm 18 — сборка с LLVM=1; libclang — bindgen; flex,
+      # bison, bc, libelf-dev и cpio — сборка ядра; QEMU и gdb — опыты.
+      - run: |
+          sudo apt-get update && sudo apt-get install -y clang lld llvm libclang1-18 \
+            flex bison bc libelf-dev cpio qemu-system-x86 gdb
+      # На раннере /dev/kvm доступен только root; тесты открывают его на
+      # чтение и запись, а без доступа берут TCG — в несколько раз дольше.
+      - name: Доступ к KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Установить bindgen-cli 0.72.1
+        run: cargo install --locked bindgen-cli@0.72.1
+      - name: Каталог ядер
+        run: |
+          echo "CH29_KERNEL_DIR=$RUNNER_TEMP/ch29-kernel" >> "$GITHUB_ENV"
+          echo "CH29_KERNEL=$RUNNER_TEMP/ch29-kernel/build" >> "$GITHUB_ENV"
+          echo "CH29_KERNEL_DEBUG=$RUNNER_TEMP/ch29-kernel/build-debug" >> "$GITHUB_ENV"
+      # Архив исходников (~250 МБ) не меняется: контрольную сумму
+      # проверяет build.sh.
+      - uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/ch29-kernel/linux_7.0.0.orig.tar.gz
+          key: linux-7.0.0-orig-c6343795
+      - name: Ядра 7.0, обычное и отладочное
+        run: bash code/ch29/kernel/build.sh
+      # Модули главы и задач собираются с CLIPPY=1 без предупреждений,
+      # заготовки задач — тоже; задача A — на отладочном ядре.
+      - name: Опыты главы 29 и задачи в QEMU
+        run: cargo test -p ch29 -p ch29-solutions
 
   thumb:
     name: Cortex-M и QEMU
@@ -612,14 +727,15 @@ jobs:
           done
       # Прошивки главы 27 — только для Cortex-M3 и старше: BASEPRI, CFSR,
       # MPU ARMv7-M, RTIC с thumbv7-backend и атомарный fetch_add, которых
-      # у Cortex-M0 нет. Под thumbv6m они исключены; тот же список — в
-      # задаче 2.B (tests-shared/ch02.rs, M3_ONLY).
+      # у Cortex-M0 нет. Прошивка главы 30 читает счётчик тактов DWT,
+      # которого нет у ARMv6-M. Под thumbv6m они исключены; тот же список —
+      # в задаче 2.B (tests-shared/ch02.rs, M3_ONLY).
       - name: clippy для прошивок
         working-directory: firmware
         run: |
           m3only=(--exclude ch27-core --exclude ch27-nvic --exclude ch27-periph \
             --exclude ch27-irq --exclude ch27-fault --exclude ch27-rtic \
-            --exclude ch27-station --exclude ch27-tasks)
+            --exclude ch27-station --exclude ch27-tasks --exclude ch30-cycles)
           for t in thumbv7m-none-eabi thumbv7em-none-eabihf; do
             cargo clippy --workspace --target "$t" -- -D warnings
           done
@@ -645,7 +761,7 @@ jobs:
       - run: |
           sudo apt-get update && sudo apt-get install -y qemu-system-arm \
             gdb-multiarch llvm gcc-arm-none-eabi libnewlib-arm-none-eabi
-      - name: Опыты глав 0, 3, 5–13, 15, 22–27 в QEMU
+      - name: Опыты глав 0, 3, 5–13, 15, 22–27, 30 в QEMU
         run: bash firmware/run-demos.sh
       # Станция главы 27 шлёт двоичные кадры в UART0: тест запускает её в
       # QEMU с UART0 в файл и разбирает файл крейтом telemetry-frame.

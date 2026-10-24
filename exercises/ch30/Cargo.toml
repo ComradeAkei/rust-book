@@ -1,0 +1,23 @@
+[package]
+name = "ch30-exercises"
+version = "0.1.0"
+description = "Глава 30: заготовки задач A–D для студента — ошибки методики замеров, частицы AoS и SoA, n-граммы в десять раз быстрее, ветвление против cmov"
+edition.workspace = true
+# std::hint::select_unpredictable (задача D) стабилен с 1.88, а замеры
+# идут через ch30::measure, крейт главы — ему нужна 1.95.
+rust-version = "1.95"
+license.workspace = true
+publish.workspace = true
+
+# Замеры задач — программа ch30-task (tests-shared/ch30-task.rs): тесты
+# собирают её с --release и запускают сами, напрямую и под cachegrind.
+[dependencies]
+ch30 = { path = "../../code/ch30" }
+
+# Тесты запускают ch30-task без огромных страниц: prctl(PR_SET_THP_DISABLE).
+[dev-dependencies]
+libc = "0.2.191"
+
+[[test]]
+name = "ch30"
+path = "tests/ch30.rs"

@@ -1,0 +1,5 @@
+# SPDX-License-Identifier: GPL-2.0
+#
+# Модули задач главы 29: B — модуль с параметром, C — счётчик на
+# мьютексе, D1 — перенос samples/kobject/kobject-example.c на Rust.
+obj-m += ch29_b.o ch29_c.o ch29_d1.o

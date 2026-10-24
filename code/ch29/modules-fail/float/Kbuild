@@ -1,0 +1,6 @@
+# SPDX-License-Identifier: GPL-2.0
+#
+# Плавающая точка в модуле (раздел 29.4). rustc этот модуль соберёт, а
+# откажет компоновка: отдельный каталог, потому что `make -k` в
+# modules-fail до modpost не доходит.
+obj-m += ch29_fail_float.o
