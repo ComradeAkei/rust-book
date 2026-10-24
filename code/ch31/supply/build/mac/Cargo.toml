@@ -1,0 +1,13 @@
+# Раздел 31.9: зависимость с процедурным макросом для приложения app. Пустая
+# таблица [workspace] — как у app: крейт лежит внутри рабочего пространства
+# учебника, но в него не входит.
+[workspace]
+
+[package]
+name = "ch31-supply-mac"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[lib]
+proc-macro = true

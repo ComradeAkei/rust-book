@@ -1,0 +1,12 @@
+# Раздел 31.9: крейт для опыта с cargo vet. Версии зависимостей
+# закреплены, чтобы размер аудита в тексте не менялся.
+[workspace]
+
+[package]
+name = "ch31-vet"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+cfg-if = "=1.0.5"

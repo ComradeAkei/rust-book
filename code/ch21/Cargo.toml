@@ -14,3 +14,8 @@ std = []
 # Модель памяти разбирается на x86-64 (TSO) с потоками std. SPSC-очередь
 # (раздел 21.5) — no_std и строится под Cortex-M с `--no-default-features`:
 # ей хватает атомарных load/store без RMW, которые есть и на Cortex-M0.
+
+# Шаг главы 31: доказательства Kani в spsc.rs собирает только Kani, он
+# задаёт `cfg(kani)`.
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ["cfg(kani)"] }

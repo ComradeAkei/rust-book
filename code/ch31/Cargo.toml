@@ -1,0 +1,46 @@
+[package]
+name = "ch31"
+version = "0.1.0"
+description = "Глава 31: надёжность — тесты cargo, тесты без std, proptest, cargo-fuzz, санитайзеры, Miri и loom, Kani, cargo-mutants, цепочка поставок"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+# Раздел 31.4: `Arbitrary` для команд — фаззеру с входом-структурой.
+arbitrary = { version = "1.5.0", optional = true }
+
+[features]
+arbitrary = ["dep:arbitrary"]
+
+# Раздел 31.6: под `--cfg loom` очередь берёт атомики и UnsafeCell из loom.
+[target.'cfg(loom)'.dependencies]
+loom = "0.7.2"
+
+# Раздел 31.7: кадры проекта нужны библиотеке только в доказательствах Kani,
+# а тестам — всегда.
+[target.'cfg(kani)'.dependencies]
+telemetry-frame = { path = "../../project/telemetry-frame" }
+
+[dev-dependencies]
+proptest = "1.12.0"
+telemetry-frame = { path = "../../project/telemetry-frame" }
+
+# Раздел 31.5: C-функция для опыта с ASan по ту сторону FFI.
+[build-dependencies]
+cc = "1.10.0"
+
+# `cfg(loom)` задаёт RUSTFLAGS="--cfg loom", `cfg(kani)` — сам Kani.
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ["cfg(loom)", "cfg(kani)"] }
+
+# Опыт overflow в src/bin/san.rs читает за концом блока в куче, и ASan
+# должен назвать его heap-buffer-overflow: вектор там нарочно, а не массив.
+[lints.clippy]
+useless_vec = "allow"
+
+# Раздел 31.1: тест со своим main вместо libtest.
+[[test]]
+name = "vectors"
+harness = false

@@ -1,0 +1,30 @@
+# Задача 31.B: цели cargo-fuzz для оракулов из src/b_fuzz. Свой workspace,
+# как у code/ch31/fuzz: каталог лежит внутри члена корневого workspace.
+[workspace]
+
+[package]
+name = "ch31-exercises-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2024"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4.13"
+ch31-exercises = { path = ".." }
+
+[[bin]]
+name = "packet"
+path = "fuzz_targets/packet.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "config"
+path = "fuzz_targets/config.rs"
+test = false
+doc = false
+bench = false

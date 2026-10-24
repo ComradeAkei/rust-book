@@ -87,6 +87,60 @@ impl<T, const N: usize> Drop for Spsc<T, N> {
     }
 }
 
+// ANCHOR: proofs
+/// Шаг главы 31 (раздел 31.10): доказательства Kani. Kani не перебирает
+/// потоки — он проверяет одну операцию из любого допустимого состояния:
+/// индексы меньше `N`, слоты записаны. Если операция из любого такого
+/// состояния ведёт в такое же и не выходит за границы, то по индукции
+/// ни одна последовательность операций от `new()` не выйдет за границы.
+#[cfg(kani)]
+mod proofs {
+    use super::*;
+
+    fn any_queue<const N: usize>() -> Spsc<u8, N> {
+        let q = Spsc::<u8, N>::new();
+        for slot in &q.buf {
+            // SAFETY: очередь ещё ничья, слот пишем один раз.
+            unsafe { (*slot.get()).write(kani::any()) };
+        }
+        q.head.store(kani::any_where(|&h: &usize| h < N), Ordering::Relaxed);
+        q.tail.store(kani::any_where(|&t: &usize| t < N), Ordering::Relaxed);
+        q
+    }
+
+    fn len<const N: usize>(q: &Spsc<u8, N>) -> usize {
+        (q.head.load(Ordering::Relaxed) + N - q.tail.load(Ordering::Relaxed)) % N
+    }
+
+    fn one_step<const N: usize>() {
+        let q = any_queue::<N>();
+        let before = len(&q);
+        if kani::any() {
+            let pushed = q.push(kani::any()).is_ok();
+            assert!(pushed == (before < N - 1));
+            assert!(len(&q) == before + usize::from(pushed));
+        } else {
+            let popped = q.pop().is_some();
+            assert!(popped == (before > 0));
+            assert!(len(&q) + usize::from(popped) == before);
+        }
+        assert!(q.head.load(Ordering::Relaxed) < N && q.tail.load(Ordering::Relaxed) < N);
+    }
+
+    macro_rules! sizes {
+        ($($name:ident: $n:literal),*) => {$(
+            #[kani::proof]
+            #[kani::unwind(10)]
+            fn $name() {
+                one_step::<$n>();
+            }
+        )*};
+    }
+
+    sizes!(step_2: 2, step_3: 3, step_4: 4, step_5: 5, step_6: 6, step_7: 7, step_8: 8);
+}
+// ANCHOR_END: proofs
+
 #[cfg(test)]
 mod tests {
     use super::*;

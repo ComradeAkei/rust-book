@@ -307,6 +307,7 @@ src/                      текст книги (mdBook)
   ch28/                   глава 28, по файлу на раздел
   ch29/                   глава 29, по файлу на раздел
   ch30/                   глава 30, по файлу на раздел, и flamegraph.svg раздела 30.3
+  ch31/                   глава 31, по файлу на раздел
   appendix-e/             разборы задач всех глав
 code/chNN/                примеры главы; листинги попадают в текст через {{#include}}
 code/ch01/c/ … ch15/c/    те же примеры на C и run.sh, который сверяет их вывод с текстом
@@ -365,6 +366,14 @@ code/ch30/benches/        замеры criterion и divan, счётчик выд
 code/ch30/tests/          ассемблер, модель кэша и предсказателя cachegrind, профиль perf, время с запасом
 code/ch30/pgo/            run.sh: PGO программы inlining и ассемблер check_plain с профилем и без
 code/ch30-dep/            «чужой» крейт для опытов главы 30 со встраиванием между крейтами
+code/ch31/src/            окно отсчётов, SLIP, команды хоста, очередь SPSC под loom, доказательства Kani
+code/ch31/src/bin/san.rs  опыты санитайзеров и Miri: uaf, overflow, ffi, leak, race, spsc, relaxed, once
+code/ch31/tests/          тесты главы 31: отчёт о падении, свой main, proptest, санитайзеры, loom
+code/ch31/fuzz/           цели cargo-fuzz главы 31 (отдельный workspace) и run.sh с их исходами
+code/ch31/c/              разбор команд на C: ASan, цели libFuzzer, CBMC; run.sh сверяет с текстом
+code/ch31/{miri,kani,mutants,supply}/  run.sh: Miri, Kani, cargo-mutants и цепочка поставок
+code/ch31/supply/build/   приложение с двумя зависимостями, чей код выполняется при сборке
+code/ch31-irq/            логика прерывания АЦП без std: тесты хоста и прошивка firmware/ch31-tests
 code/ch07/c-size/         программа задачи 7.C: размер при panic = "unwind" и "abort"
 code/ch07/hir/            во что раскрывается `?`: снимок HIR для раздела 7.1
 code/ch08/typo/ unify/ ffi/  отдельные рабочие пространства для опытов главы 8 с cargo
@@ -385,6 +394,7 @@ solutions/chNN/           эталонные решения
 solutions/ch02-2021/      решение задачи 2.D в edition 2021
 solutions/ch08/c/ d-station/  решения задач 8.C и 8.D
 {exercises,solutions}/ch26/tiny/  задача 26.B: программа без libc, отдельное рабочее пространство
+{exercises,solutions}/ch31/fuzz/  цели фаззинга задачи 31.B, отдельные рабочие пространства
 exercises/ch24-macros/    заготовки макросов задач 24.B–24.D; решения — в solutions/ch24-macros
 tests-shared/             тесты, общие для заготовок и решений
 tests-shared/ch24-ui/     снимки ошибок задач 24.B–24.D для trybuild, общие для заготовок и решений
@@ -396,6 +406,7 @@ project/                  сквозной проект «станция тел�
 firmware/                 прошивки для QEMU (отдельный workspace)
 theme/                    стили врезок: справка, сравнение с C, под капотом, трюк, ловушка
 tools/                    вспомогательные проверки для CI
+deny.toml                 политика зависимостей для cargo-deny (раздел 31.9)
 ```
 
 ## Окружение
@@ -423,7 +434,17 @@ tools/                    вспомогательные проверки для
   можно задать в `PERF`), компонент `llvm-tools` для PGO и inferno для
   flamegraph; без valgrind и perf их опыты пропускаются (опыты с perf —
   и при `kernel.perf_event_paranoid` выше 2), а `CH30_REQUIRE_VALGRIND`,
-  `CH30_REQUIRE_PERF` и `CH30_REQUIRE_PERF_EVENTS` делают пропуск ошибкой.
+  `CH30_REQUIRE_PERF` и `CH30_REQUIRE_PERF_EVENTS` делают пропуск ошибкой;
+- для главы 31 — nightly с компонентами miri и rust-src (санитайзеры
+  собирают std с `-Zbuild-std`), llvm-symbolizer (пакет `llvm`: без него
+  ASan печатает адреса вместо имён функций), cargo-fuzz 0.13.2, рантаймы
+  compiler-rt для clang (пакет `libclang-rt-18-dev`), Kani 0.68.0
+  (`cargo install --locked kani-verifier@0.68.0 && cargo kani setup`, он
+  же ставит CBMC), cargo-mutants 27.1.0, cargo-deny 0.20.2, cargo-audit
+  0.22.2, cargo-vet 0.10.3 и сеть для базы RustSec; без nightly опыты с
+  санитайзерами, а без cargo-mutants прогон задачи D пропускаются, а
+  `CH31_REQUIRE_SANITIZERS` и `CH31_REQUIRE_MUTANTS` делают пропуск
+  ошибкой.
 
 ## Задачи
 
@@ -476,6 +497,9 @@ $ cargo test -p ch29-exercises            # задачи A–D2 главы 29 (�
 $ cargo test -p ch30                      # опыты главы 30: ассемблер, cachegrind, perf, время
 $ cargo test -p ch30-exercises            # задачи A–D главы 30 (замеры — программа ch30-task)
 $ bash code/ch30/pgo/run.sh               # PGO: горячий путь подряд по профилю (раздел 30.5)
+$ cargo test -p ch31-exercises            # задачи A–D главы 31 (D без cargo-mutants пропускается)
+$ cd exercises/ch31/fuzz && cargo +nightly fuzz run packet   # фаззинг задачи 31.B, цели packet и config
+$ cargo kani -p ch31-exercises            # доказательства задачи 31.C
 $ cargo test -p project-frame             # задачи П6, П7, П12 и П13
 $ cargo test -p project-frame p7          # только П7
 $ cargo test -p project-frame p12         # только П12
@@ -639,8 +663,20 @@ $ bash solutions/ch18/c/run.sh            # C управляет кольцев�
 $ cargo fmt --all --check --manifest-path code/ch08/ffi/Cargo.toml   # и так каждое вложенное
       # рабочее пространство: code/ch07/c-size, code/ch08/{typo,unify,ffi},
       # {exercises,solutions}/ch08/c/station, {exercises,solutions}/ch08/d-station,
-      # code/ch24/renamed, code/ch26/start, {exercises,solutions}/ch26/tiny
+      # code/ch24/renamed, code/ch26/start, {exercises,solutions}/ch26/tiny,
+      # {code,exercises,solutions}/ch31/fuzz, code/ch31/supply/{build/app,vet}
 $ bash solutions/ch01/c/run.sh            # задача 1.A на C
+$ CH31_REQUIRE_SANITIZERS=1 cargo test -p ch31 --test sanitizers   # ASan и TSan над san (раздел 31.5)
+$ bash code/ch31/fuzz/run.sh              # исходы фаззинга раздела 31.4
+$ bash solutions/ch31/fuzz/run.sh         # фаззинг задачи 31.B: внедрённые ошибки найдены, решения чисты
+$ bash code/ch31/miri/run.sh              # опыты san под Miri (раздел 31.6)
+$ cargo +nightly miri test -p ch31 -p ch31-irq -p ch31-solutions   # и ещё раз с MIRIFLAGS=-Zmiri-tree-borrows
+$ RUSTFLAGS="--cfg loom" cargo test -p ch31 --release --test loom --target-dir target/loom
+$ bash code/ch31/kani/run.sh              # вердикты Kani разделов 31.7, 31.10 и задач C и D
+$ bash code/ch31/c/run.sh                 # разбор команд на C: ASan, libFuzzer, CBMC
+$ bash code/ch31/mutants/run.sh           # cargo-mutants на разборе кадров (раздел 31.8)
+$ CH31_REQUIRE_MUTANTS=1 cargo test -p ch31-solutions   # задача D: мутанты хранилища убиты
+$ bash code/ch31/supply/run.sh            # cargo-deny, cargo-audit, cargo-vet (раздел 31.9)
 $ python3 tools/check-includes.py         # все {{#include}} указывают на существующие якоря, ссылки — на страницы
 $ mdbook build
 ```

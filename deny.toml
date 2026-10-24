@@ -1,0 +1,142 @@
+# Шаг главы 31 (раздел 31.9): политика зависимостей учебника для
+# cargo deny. Запуск из корня: cargo deny check; для прошивок —
+# cargo deny --manifest-path firmware/Cargo.toml --config deny.toml check,
+# и так же для целей фаззинга: code/ch31/fuzz, exercises/ch31/fuzz и
+# solutions/ch31/fuzz. Каждое исключение подписано причиной: политика —
+# это решения, а не список всего, что лежит в Cargo.lock. Политика одна на
+# пять рабочих пространств, поэтому в каждом часть правил «не
+# встречается» — это предупреждения, а не ошибки.
+
+# ANCHOR: graph
+[graph]
+# Хост учебника — Linux на x86-64, прошивки — Cortex-M. Зависимости только
+# для Windows и macOS не собираются и в проверку не попадают.
+targets = [
+    "x86_64-unknown-linux-gnu",
+    "thumbv6m-none-eabi",
+    "thumbv7m-none-eabi",
+    "thumbv7em-none-eabihf",
+]
+all-features = true
+# ANCHOR_END: graph
+
+# ANCHOR: advisories
+[advisories]
+# Уязвимости — ошибка всегда. Заброшенные крейты — тоже, кроме
+# перечисленных ниже.
+unmaintained = "all"
+yanked = "deny"
+ignore = [
+    # bare-metal 0.2 заброшен, а приходит он через cortex-m 0.7 — главы 27 и
+    # прошивки. Безопасной версии нет: ветка cortex-m 0.7 — последняя
+    # выпущенная и держит bare-metal ради совместимости API. Сами мы его не
+    # используем: критические секции — через critical-section.
+    { id = "RUSTSEC-2026-0110", reason = "приходит только через cortex-m 0.7, замены нет" },
+]
+# ANCHOR_END: advisories
+
+# ANCHOR: licenses
+[licenses]
+# Что можно распространять вместе с учебником под MIT OR Apache-2.0.
+allow = [
+    "MIT",
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "Unicode-3.0",
+    "Unlicense",
+]
+confidence-threshold = 0.93
+
+# Исключение на один крейт, а не на всех: libFuzzer — код LLVM под NCSA.
+# Он попадает только в цели фаззинга главы 31 (code/ch31/fuzz и цели задачи
+# B), которые мы не распространяем.
+[[licenses.exceptions]]
+crate = "libfuzzer-sys"
+allow = ["NCSA"]
+
+[licenses.private]
+# Крейты учебника не публикуются (publish = false) — их лицензия задана
+# в корне и проверять её против списка незачем.
+ignore = true
+# ANCHOR_END: licenses
+
+# ANCHOR: bans
+[bans]
+multiple-versions = "warn"
+# Зависимость "*" — любая будущая версия; для путей внутри репозитория
+# версия не нужна.
+wildcards = "deny"
+allow-wildcard-paths = true
+
+# Сценарий сборки — программа, которую cargo build, cargo check и
+# rust-analyzer запускают с правами разработчика. Список — кому это
+# разрешено; новый крейт со сценарием сборки остановит CI, пока его не
+# прочтут и не впишут сюда.
+[bans.build]
+allow-build-scripts = [
+    # Спрашивают у rustc версию или пробуют собрать кусок кода и включают
+    # cfg под возможности компилятора и цели.
+    { crate = "bare-metal" },
+    { crate = "cortex-m" },
+    { crate = "cortex-m-macros" },
+    { crate = "cortex-m-semihosting" },
+    { crate = "getrandom" },
+    { crate = "heapless" },
+    { crate = "libc" },
+    { crate = "nix" },
+    { crate = "num-traits" },
+    { crate = "portable-atomic" },
+    { crate = "proc-macro2" },
+    { crate = "quote" },
+    { crate = "rtic" },
+    { crate = "rtic-macros" },
+    { crate = "rustix" },
+    { crate = "serde" },
+    { crate = "serde_core" },
+    { crate = "serde_json" },
+    { crate = "target-triple" },
+    { crate = "zerocopy" },
+    { crate = "zmij" },
+    # Кладёт сценарий компоновки link.x в OUT_DIR и добавляет путь к нему.
+    { crate = "cortex-m-rt" },
+    # Собирает libFuzzer из исходников C++ (цели фаззинга главы 31).
+    { crate = "libfuzzer-sys" },
+    # Свои: таблица датчиков (глава 8), PAC из SVD (глава 27), C для
+    # опыта с ASan (глава 31). В прошивках и фаззинге это зависимости
+    # по пути, а не члены рабочего пространства.
+    { crate = "ch08" },
+    { crate = "ch27-pac" },
+    { crate = "ch31" },
+]
+# В исходниках крейтов, чей код выполняется при сборке, — со сценарием
+# сборки и процедурных макросов — ни готовых исполняемых файлов, ни
+# скриптов: собранное должно получаться из исходников, которые можно
+# прочитать.
+executables = "deny"
+interpreted = "deny"
+
+# Скрипты, которые лежат в исходниках, но сборка их не запускает:
+# сценарии сборки этих крейтов их не вызывают (проверено чтением build.rs).
+[[bans.build.bypass]]
+crate = "zerocopy"
+allow-globs = ["cargo.sh", "ci/*.sh"] # CI самого zerocopy
+[[bans.build.bypass]]
+crate = "cortex-m-rt"
+allow-globs = ["ci/script.sh"] # CI самого cortex-m-rt
+[[bans.build.bypass]]
+crate = "ch08"
+allow-globs = ["c/run.sh"] # опыт главы 8
+[[bans.build.bypass]]
+crate = "ch31"
+# Опыты главы 31 и сборка целей фаззинга — она идёт внутри каталога
+# крейта и в git не попадает.
+allow-globs = ["*/run.sh", "fuzz/target/**"]
+# ANCHOR_END: bans
+
+# ANCHOR: sources
+[sources]
+# Только crates.io: ни других реестров, ни git-зависимостей.
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+# ANCHOR_END: sources

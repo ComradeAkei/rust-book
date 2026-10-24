@@ -310,7 +310,18 @@
     - [30.8. Такты на Cortex-M: DWT, SysTick и QEMU](ch30/08-cortex-m.md)
     - [30.9. Сквозной проект: профиль приёма кадров станции](ch30/09-project.md)
     - [30.10. Задачи](ch30/10-tasks.md)
-- [31. Надёжность: тесты, фаззинг, верификация](ch31.md)
+- [31. Надёжность: тесты, фаззинг, верификация](ch31/index.md)
+    - [31.1. Тесты в cargo](ch31/01-cargo-test.md)
+    - [31.2. Тесты без std: хост и QEMU](ch31/02-no-std.md)
+    - [31.3. Свойства вместо примеров: proptest](ch31/03-proptest.md)
+    - [31.4. Фаззинг: cargo-fuzz](ch31/04-fuzz.md)
+    - [31.5. Санитайзеры: ASan, LeakSanitizer, TSan](ch31/05-sanitizers.md)
+    - [31.6. Miri и loom](ch31/06-miri-loom.md)
+    - [31.7. Kani: для всех входов](ch31/07-kani.md)
+    - [31.8. Кто проверит тесты: cargo-mutants](ch31/08-mutants.md)
+    - [31.9. Цепочка поставок: cargo-deny, cargo-audit, cargo-vet](ch31/09-supply-chain.md)
+    - [31.10. Сквозной проект: доказательства, фаззинг и мутанты для разбора кадров](ch31/10-project.md)
+    - [31.11. Задачи](ch31/11-tasks.md)
 
 # Сквозной проект
 
@@ -354,3 +365,4 @@
     - [Глава 28](appendix-e/ch28.md)
     - [Глава 29](appendix-e/ch29.md)
     - [Глава 30](appendix-e/ch30.md)
+    - [Глава 31](appendix-e/ch31.md)

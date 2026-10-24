@@ -1,0 +1,23 @@
+[package]
+name = "ch31-tests"
+version = "0.1.0"
+description = "Глава 31, раздел 31.2: тесты на Cortex-M3 в QEMU — векторы кадров проекта и логика прерывания АЦП с настоящим вытеснением через SysTick"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+ch31-irq = { path = "../../code/ch31-irq" }
+cortex-m = { workspace = true }
+cortex-m-rt = { workspace = true }
+cortex-m-semihosting = { workspace = true }
+telemetry-frame = { path = "../../project/telemetry-frame" }
+
+[[bin]]
+name = "ch31-tests"
+test = false
+bench = false

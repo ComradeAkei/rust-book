@@ -76,29 +76,32 @@ fn eintr() {
     let mut buf = [0u8; 1];
     let errno = |e: rustix::io::Errno| nix::errno::Errno::from_raw(e.raw_os_error());
 
+    // Отсчёт — до запуска писателя: его 400 мс идут с момента запуска, и
+    // если главный поток вытеснят между spawn и Instant::now, байт
+    // пришёл бы «раньше» 400 мс.
     on_sigalrm(false);
-    let pipe = pipe_with_late_byte(400);
     let t = Instant::now();
+    let pipe = pipe_with_late_byte(400);
     alarm_in(200);
     let r = rustix::io::read(&pipe, &mut buf).map_err(errno);
     println!("без SA_RESTART: read {r:?} через {} мс", ms(t));
 
     on_sigalrm(true);
-    let pipe = pipe_with_late_byte(400);
     let t = Instant::now();
+    let pipe = pipe_with_late_byte(400);
     alarm_in(200);
     let r = rustix::io::read(&pipe, &mut buf).map_err(errno);
     println!("с SA_RESTART:   read {r:?} через {} мс", ms(t));
 
     on_sigalrm(false);
-    let mut pipe = pipe_with_late_byte(400);
     let t = Instant::now();
+    let mut pipe = pipe_with_late_byte(400);
     alarm_in(200);
     let r = pipe.read(&mut buf).map_err(|e| e.kind());
     println!("std read:       {r:?} через {} мс", ms(t));
 
-    let mut pipe = pipe_with_late_byte(400);
     let t = Instant::now();
+    let mut pipe = pipe_with_late_byte(400);
     alarm_in(200);
     let r = pipe.read_exact(&mut buf).map_err(|e| e.kind());
     println!("std read_exact: {r:?} через {} мс", ms(t));
