@@ -282,11 +282,11 @@ nightly 1.101.0 (2026-10-20) для x86_64 Linux.
 
 ```console
 $ cargo test -p appendix-c -- --ignored --exact before::tests::before_push_past_capacity
-thread 'before::tests::before_push_past_capacity' panicked at code/appendix-c/src/before.rs:93:9:
+thread 'before::tests::before_push_past_capacity' (21457) panicked at code/appendix-c/src/before.rs:93:9:
 assertion `left == right` failed
   left: Ok(())
  right: Err(3)
-thread 'before::tests::before_push_past_capacity' panicked at code/appendix-c/src/before.rs:64:31:
+thread 'before::tests::before_push_past_capacity' (21457) panicked at code/appendix-c/src/before.rs:64:31:
 range end index 4 out of range for slice of length 2
 ...
 panic in a destructor during cleanup
@@ -363,9 +363,9 @@ Stacked Borrows возражает уже против создания `&mut` �
 
 ```console
 $ cargo test -p appendix-c -- --ignored --exact before::tests::before_panic_in_clone
-thread 'before::tests::before_panic_in_clone' panicked at code/appendix-c/src/before.rs:118:13:
+thread 'before::tests::before_panic_in_clone' (21468) panicked at code/appendix-c/src/before.rs:118:13:
 clone №2 не удался
-thread 'before::tests::before_panic_in_clone' panicked at code/appendix-c/src/before.rs:139:9:
+thread 'before::tests::before_panic_in_clone' (21468) panicked at code/appendix-c/src/before.rs:139:9:
 assertion `left == right` failed
   left: [101, 2425393296]
  right: [101]

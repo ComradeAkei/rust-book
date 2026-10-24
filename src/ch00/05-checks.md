@@ -363,10 +363,10 @@ error: this comparison involving the minimum or maximum element for this type co
 warning: this lint expectation is unfulfilled
  --> src/lib.rs:7:10
   |
-7 | #[expect(clippy::manual_memcpy, reason = "лишнее")]
+7 | #[expect(clippy::manual_memcpy, reason = "демонстрация")]
   |          ^^^^^^^^^^^^^^^^^^^^^
   |
-  = note: лишнее
+  = note: демонстрация
 ```
 
 `#[allow]` в той же ситуации молча остаётся в коде навсегда.

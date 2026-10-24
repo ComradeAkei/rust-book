@@ -137,7 +137,8 @@ let idx = usize::try_from(offset_u32).expect("смещение не помеща
 На x86_64 видно «неопределённое целое» `cvttss2si`, а последняя строка ещё
 интереснее: GCC переводит `float` в `uint32_t` через 64-битную
 `cvttss2si rdx, xmm0`, получает −5 и берёт младшие 32 бита. На ARM ответы
-совпадают с Rust, потому что `vcvt` и `__aeabi_f2iz` насыщают. UBSan
+совпадают с Rust, потому что `vcvt`, `__aeabi_f2iz` и `__aeabi_f2uiz`
+насыщают. UBSan
 (`-fsanitize=float-cast-overflow`) сообщает о всех трёх строках:
 
 ```text
