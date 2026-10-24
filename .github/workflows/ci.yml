@@ -466,8 +466,10 @@ jobs:
       # служебные функции хоста от раскладки не зависят.
       - run: cargo +nightly test -p ch29 -p ch29-solutions
       # Глава 30: `rustc_` — ассемблер закреплённого компилятора,
-      # `observed_` — время. valgrind и perf это задание не ставит: опыты
-      # под ними пропускаются. Структуры, байты которых считают опыты, —
+      # `observed_` — время. valgrind и perf это задание не ставит, а
+      # kernel.perf_event_paranoid оставляет 4: даже если perf в образе
+      # есть, ядро его не пускает, и опыты под perf и valgrind
+      # пропускаются. Структуры, байты которых считают опыты, —
       # repr(C), остальное от раскладки не зависит.
       - run: cargo +nightly test -p ch30 -p ch30-solutions -- --skip rustc_ --skip observed
 

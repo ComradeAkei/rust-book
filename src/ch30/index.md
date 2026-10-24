@@ -92,7 +92,9 @@ $ cargo test -p ch30-solutions                # задачи A–D
 сбоев, число выделений памяти, ассемблер — тест сверяет точно или почти
 точно. Время — только в тестах `observed_`, с запасом в разы: в CI
 другая машина. Опыты под perf и valgrind без этих программ
-пропускаются; переменные `CH30_REQUIRE_PERF`, `CH30_REQUIRE_PERF_EVENTS`
+пропускаются, опыты с perf — и тогда, когда ядро не пускает к
+`perf_event_open` (`kernel.perf_event_paranoid` выше 2); переменные
+`CH30_REQUIRE_PERF`, `CH30_REQUIRE_PERF_EVENTS`
 и `CH30_REQUIRE_VALGRIND` делают пропуск ошибкой — так тесты запускает
 CI.
 

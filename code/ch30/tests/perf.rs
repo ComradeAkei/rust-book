@@ -6,7 +6,8 @@
 //! считает ядро, они есть всегда, если `kernel.perf_event_paranoid`
 //! пускает пользователя; при отказе (EACCES) опыт пропускается, а с
 //! `CH30_REQUIRE_PERF_EVENTS` в окружении — падает. Опыты с perf
-//! пропускаются без perf; `CH30_REQUIRE_PERF` делает пропуск ошибкой.
+//! пропускаются без perf и при том же отказе; `CH30_REQUIRE_PERF` делает
+//! пропуск без perf ошибкой.
 
 mod common;
 
@@ -93,10 +94,13 @@ fn counters_program_matches_text() {
     }
 }
 
+/// perf, если он есть и ядро пускает к `perf_event_open`: perf считает
+/// через тот же вызов, и при `kernel.perf_event_paranoid` выше 2 опыт
+/// пропускается, как у счётчиков выше.
 fn perf() -> Option<std::path::PathBuf> {
     let p = common::tool("PERF", "perf");
     assert!(p.is_some() || !common::required("CH30_REQUIRE_PERF"), "нужен perf");
-    p
+    p.filter(|_| open(Event::TaskClock).is_some())
 }
 
 /// perf stat в машиночитаемом виде (`-x,`): событие → значение или

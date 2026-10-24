@@ -421,8 +421,9 @@ tools/                    вспомогательные проверки для
   (`bash code/ch29/kernel/build.sh`) тесты главы пропускаются;
 - для главы 30 — valgrind 3.22 (cachegrind), perf из `linux-tools` (путь
   можно задать в `PERF`), компонент `llvm-tools` для PGO и inferno для
-  flamegraph; без valgrind и perf их опыты пропускаются, а
-  `CH30_REQUIRE_VALGRIND` и `CH30_REQUIRE_PERF` делают пропуск ошибкой.
+  flamegraph; без valgrind и perf их опыты пропускаются (опыты с perf —
+  и при `kernel.perf_event_paranoid` выше 2), а `CH30_REQUIRE_VALGRIND`,
+  `CH30_REQUIRE_PERF` и `CH30_REQUIRE_PERF_EVENTS` делают пропуск ошибкой.
 
 ## Задачи
 
