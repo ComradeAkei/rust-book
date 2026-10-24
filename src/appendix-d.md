@@ -109,7 +109,7 @@ $ gdb-multiarch -q target/thumbv7m-none-eabi/debug/ch06-uart    # на Arch: arm
 (gdb) info registers pc
 pc             0x400               0x400 <Reset>
 (gdb) break main
-Breakpoint 1 at 0x802: file ch06-uart/src/main.rs, line 40.
+Breakpoint 1 at 0x7e6: file ch06-uart/src/main.rs, line 40.
 (gdb) continue
 Breakpoint 1, ch06_uart::__cortex_m_rt_main_trampoline () at ch06-uart/src/main.rs:40
 40	#[entry]
@@ -127,6 +127,12 @@ ch06_uart::__cortex_m_rt_main () at ch06-uart/src/main.rs:43
 `opt-level = "s"`, и `next` иногда возвращается на уже пройденную строку:
 код переставлен оптимизатором. После `kill` QEMU завершается с сообщением
 «QEMU: Terminated via GDBstub».
+
+Адрес точки останова зависит не только от версии компилятора, но и от
+режима сборки. Отладочный профиль по умолчанию собирается инкрементально, и
+компилятор делит крейт на единицы кодогенерации иначе, чем без этого
+режима. С `CARGO_INCREMENTAL=0`, как в CI книги, функции лягут в другом
+порядке, и та же точка останова окажется по адресу `0x874`.
 
 <div class="box trap">
 
@@ -157,9 +163,10 @@ error[E0463]: can't find crate for `core`
   |
   = note: the `thumbv7m-none-eabi` target may not be installed
   = help: consider downloading the target with `rustup target add thumbv7m-none-eabi`
+  = help: consider building the standard library from source with `cargo build -Zbuild-std`
 ```
 
-Совет из сообщения в каталоге книги не поможет: `rustup target add`
+Первый совет из сообщения в каталоге книги не поможет: `rustup target add`
 добавит цель к 1.97.0 из `rust-toolchain.toml` и ответит, что она уже
 стоит. Тулчейн нужно назвать явно:
 `rustup target add --toolchain nightly thumbv7m-none-eabi`.
@@ -184,7 +191,7 @@ AddressSanitizer собирается и без этого.
 | Инструмент | Версия | Зачем нужен |
 |---|---|---|
 | rustc, cargo, clippy, rustfmt | 1.97.0 | вся книга, версия закреплена в `rust-toolchain.toml` |
-| nightly | 1.101.0-nightly от 2026-10-20 | Miri, `-Zprint-type-sizes`, санитайзеры, коды ошибок в doc-тестах |
+| nightly | 1.101.0-nightly от 2026-10-20 (приложения) и 2026-10-21 (главы) | Miri, `-Zprint-type-sizes`, санитайзеры, коды ошибок в doc-тестах |
 | QEMU | 8.2.2 | прошивки |
 | gdb-multiarch | 15.1 | отладка прошивок |
 | gcc | 13.3 | C-примеры приложения A под UBSan |

@@ -290,8 +290,11 @@ fn observed_task_b_soa_faster() {
     let (ea, es) = (number_after(&aos, "energy"), number_after(&soa, "energy"));
     let (sa, ss) = (number_after(&aos, "step"), number_after(&soa, "step"));
     // Энергия столбцами упирается в цепочку сложений f64, строками — в
-    // память: насколько выигрыш больше полутора раз, зависит от машины.
-    assert!(1.5 * es < ea, "energy: AoS {ea}, SoA {es}");
+    // память, и выигрыш равен отношению этих двух времён. Обычно он от двух
+    // до пяти раз, но на ядре с быстрой памятью меньше: на AMD EPYC 9V74
+    // раннера CI 48 байт частицы читаются за 1,23 нс, цепочка занимает
+    // 0,89 нс — 1,4 раза. У шага цепочки нет, там выигрыш втрое.
+    assert!(1.2 * es < ea, "energy: AoS {ea}, SoA {es}");
     assert!(1.3 * ss < sa, "step: AoS {sa}, SoA {ss}");
 }
 // ANCHOR_END: b

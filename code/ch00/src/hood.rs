@@ -1,7 +1,7 @@
 //! Разделы 0.2, 0.3 и 0.5: что показывает ассемблер debug- и release-сборки.
 //!
 //! ```text
-//! cargo asm -p ch00 --lib --dev ch00_add        # профиль dev
+//! cargo asm -p ch00 --lib --dev ch00_add 0      # профиль dev: имени подходят две функции
 //! cargo asm -p ch00 --lib ch00_add              # профиль release
 //! cargo asm -p ch00 --lib --llvm ch00_add       # LLVM IR
 //! cargo asm -p ch00 --lib ch00_average_bad      # что оптимизатор сделал из UB

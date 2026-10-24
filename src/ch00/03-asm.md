@@ -11,15 +11,18 @@
 $ cargo asm -p ch00 --lib
 0 "ch00_add" [9]
 1 "ch00_args8" [49]
-2 "ch00_keep" [42]
-3 "ch00_mul_wide" [12]
-4 "ch00_pair" [10]
-5 "ch00_quad" [16]
-6 "ch00_scale" [10]
+2 "ch00_average_bad" [27]
+3 "ch00_keep" [42]
+4 "ch00_mul_wide" [12]
+5 "ch00_pair" [10]
+6 "ch00_quad" [16]
+7 "ch00_scale" [10]
 ```
 
 В квадратных скобках число строк листинга. Функцию выбирают по имени или
-по номеру. Самая простая функция главы:
+по номеру. Имя работает как фильтр по подстроке: если ему подходят
+несколько функций, `cargo asm` снова печатает список, и тогда после имени
+добавляют номер из этого списка. Самая простая функция главы:
 
 ```rust
 {{#include ../../code/ch00/src/hood.rs:add}}
@@ -36,6 +39,12 @@ ch00_add:
 	lea eax, [rdi + rsi]
 	ret
 ```
+
+Функции `ch00_add_wrapping` из того же файла в списке нет. Её тело в
+release совпало с телом `ch00_add` до инструкции, и LLVM оставил одну
+копию, а второе имя сделал псевдонимом: в полном листинге
+(`--everything`) стоит строка `ch00_add_wrapping = ch00_add`. Подробнее
+об этом слиянии — в разделе [2.2](../ch02/02-loops.md).
 
 Строки с точкой — директивы ассемблеру, а не инструкции: в какую секцию
 положить функцию, как её выровнять, что записать в таблицу раскрутки
@@ -58,10 +67,12 @@ ch00_add:
 
 ## Debug-сборка лжёт о стоимости
 
-Та же функция в профиле dev:
+Та же функция в профиле dev. Без оптимизаций функции не сливаются, и
+имени `ch00_add` подходят две: `ch00_add` и `ch00_add_wrapping`. Номер 0
+после имени выбирает первую:
 
 ```console
-$ cargo asm -p ch00 --lib --dev --simplify ch00_add
+$ cargo asm -p ch00 --lib --dev --simplify ch00_add 0
 ch00_add:
 	sub rsp, 24
 	mov eax, edi
@@ -71,12 +82,12 @@ ch00_add:
 	add edi, esi
 	mov dword ptr [rsp + 12], edi
 	cmp edi, eax
-	jb .LBB1_2
+	jb .LBB10_2
 	mov eax, dword ptr [rsp + 12]
 	add rsp, 24
 	ret
-.LBB1_2:
-	lea rdi, [rip + .Lanon.bb9af681d2793f60107c5ff154dc1052.1]
+.LBB10_2:
+	lea rdi, [rip + .Lanon.bf21702488e6121fb311b8aa10c5ed51.5]
 	call qword ptr [rip + core::panicking::panic_const::panic_const_add_overflow@GOTPCREL]
 ```
 
@@ -96,15 +107,15 @@ ch00_add:
 	mov r2, r0
 	str r2, [sp, #4]
 	cmp r0, r1
-	blo .LBB1_2
-	b .LBB1_1
-.LBB1_1:
+	blo .LBB10_2
+	b .LBB10_1
+.LBB10_1:
 	ldr r0, [sp, #4]
 	add sp, #16
 	pop {r7, pc}
-.LBB1_2:
-	movw r0, :lower16:.Lanon.96ff480536478bd41affff5ff678983e.1
-	movt r0, :upper16:.Lanon.96ff480536478bd41affff5ff678983e.1
+.LBB10_2:
+	movw r0, :lower16:.Lanon.5e89357b0e826a5923765716217ad3ae.5
+	movt r0, :upper16:.Lanon.5e89357b0e826a5923765716217ad3ae.5
 	bl core::panicking::panic_const::panic_const_add_overflow
 ```
 
@@ -135,15 +146,15 @@ rustc переводит программу в промежуточное пре
 удобно понимать, что обещал компилятору Rust, а что придумал бэкенд.
 
 ```console
-$ cargo asm -p ch00 --lib --llvm ch00_add --dev
-define i32 @ch00_add(i32 %a, i32 %b) unnamed_addr #1 !dbg !24 {
+$ cargo asm -p ch00 --lib --llvm ch00_add --dev 0
+define i32 @ch00_add(i32 %a, i32 %b) unnamed_addr #3 !dbg !477 {
 start:
   %b.dbg.spill = alloca [4 x i8], align 4
   %a.dbg.spill = alloca [4 x i8], align 4
   ...
-  %_3.0 = add i32 %a, %b, !dbg !34
-  %_3.1 = icmp ult i32 %_3.0, %a, !dbg !34
-  br i1 %_3.1, label %panic, label %bb1, !dbg !34
+  %_3.0 = add i32 %a, %b, !dbg !486
+  %_3.1 = icmp ult i32 %_3.0, %a, !dbg !486
+  br i1 %_3.1, label %panic, label %bb1, !dbg !486
 
 $ cargo asm -p ch00 --lib --llvm ch00_add
 define noundef i32 @ch00_add(i32 noundef %a, i32 noundef %b) unnamed_addr #0 !dbg !7 {
@@ -216,10 +227,11 @@ fold::main:
 `no_mangle`, чтобы имя было одинаковым под любой целью, и
 `inline(never)`, чтобы тело существовало отдельно, а там, где их
 вызывают, аргументы проходят через `black_box`, чтобы не сработала
-свёртка констант. Атрибут `unsafe(...)` вокруг
-`no_mangle` появился в edition 2024: два крейта с одинаковым
-неискажённым именем дадут конфликт символов при компоновке, и программист
-берёт эту ответственность на себя явно.
+свёртка констант. Обёртка `unsafe(...)` вокруг
+`no_mangle` обязательна с edition 2024 (сам синтаксис появился в Rust 1.82
+и годится в любой редакции): два крейта с одинаковым неискажённым именем
+дадут конфликт символов при компоновке, и программист берёт эту
+ответственность на себя явно.
 
 <div class="box trap">
 

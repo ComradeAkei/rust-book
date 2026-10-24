@@ -74,12 +74,14 @@ fn observed_memory_layout_and_sharing() {
 #[test]
 fn observed_matrix_cols_slower() {
     // При 2000 столбцы платят промахами кэша: в тексте в 2,5 раза, на
-    // машине CI книги — в 1,9. При 4000 к ним добавляются промахи TLB
+    // машине CI книги — в 1,9, а на раннере с AMD EPYC 7763 лишь в 1,46:
+    // строки упираются в цепочку addsd, а задержку промахов столбцов это
+    // ядро почти прячет. При 4000 к ним добавляются промахи TLB
     // (раздел 30.4), и разница больше.
     let ns = |order: &str, n: &str, sum: &str| number_after(&run("matrix", &[order, n]), sum);
     let rows = ns("rows", "2000", "сумма 11999994,");
     let cols = ns("cols", "2000", "сумма 11999994,");
-    assert!(cols > 1.5 * rows, "2000: {rows} {cols}");
+    assert!(cols > 1.2 * rows, "2000: {rows} {cols}");
     let rows = ns("rows", "4000", "сумма 47999995,");
     let cols = ns("cols", "4000", "сумма 47999995,");
     assert!(cols > 2.0 * rows, "4000: {rows} {cols}");
