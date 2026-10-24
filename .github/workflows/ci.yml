@@ -54,7 +54,8 @@ jobs:
         working-directory: firmware
       - run: cargo clippy --workspace --all-targets -- -D warnings
       # Корневой `cargo test` проверяет примеры глав и эталонные решения.
-      - run: cargo test
+      # --no-fail-fast: упавший тест одного крейта не прячет остальные.
+      - run: cargo test --no-fail-fast
       # Часть поведения в приложении A зависит от профиля сборки.
       - run: cargo test -p appendix-a --release
       # C-примеры приложения A под UBSan: gcc с libubsan есть в образе.
