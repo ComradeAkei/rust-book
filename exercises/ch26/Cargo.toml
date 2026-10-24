@@ -1,0 +1,15 @@
+[package]
+name = "ch26-exercises"
+version = "0.1.0"
+description = "Глава 26: заготовки задач A, B и D для студента (задача C — своя прошивка, см. раздел 26.8)"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+# Библиотека — no_std, как и решения. Программа задачи B — отдельный крейт
+# в tiny/ со своим workspace.
+
+[[test]]
+name = "ch26"
+path = "tests/ch26.rs"

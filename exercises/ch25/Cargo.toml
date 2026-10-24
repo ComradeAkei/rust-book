@@ -1,0 +1,19 @@
+[package]
+name = "ch25-exercises"
+version = "0.1.0"
+description = "Глава 25: заготовки задач A–D для студента"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+# Библиотека — no_std, как и решения. build.rs — ваша часть задачи D: он
+# должен взять объём ОЗУ из firmware/memory.x.
+
+[dev-dependencies]
+# Таблица синуса из build.rs задачи 8.B — эталон для её const-версии.
+ch08-solutions = { path = "../../solutions/ch08" }
+
+[[test]]
+name = "ch25"
+path = "tests/ch25.rs"

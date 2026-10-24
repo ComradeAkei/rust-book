@@ -1,0 +1,22 @@
+PROVIDE(GPIOA = DefaultHandler);
+PROVIDE(GPIOB = DefaultHandler);
+PROVIDE(GPIOC = DefaultHandler);
+PROVIDE(GPIOD = DefaultHandler);
+PROVIDE(GPIOE = DefaultHandler);
+PROVIDE(UART0 = DefaultHandler);
+PROVIDE(UART1 = DefaultHandler);
+PROVIDE(ADC0SS0 = DefaultHandler);
+PROVIDE(ADC0SS1 = DefaultHandler);
+PROVIDE(ADC0SS2 = DefaultHandler);
+PROVIDE(ADC0SS3 = DefaultHandler);
+PROVIDE(TIMER0A = DefaultHandler);
+PROVIDE(TIMER0B = DefaultHandler);
+PROVIDE(TIMER1A = DefaultHandler);
+PROVIDE(TIMER1B = DefaultHandler);
+PROVIDE(TIMER2A = DefaultHandler);
+PROVIDE(TIMER2B = DefaultHandler);
+PROVIDE(GPIOF = DefaultHandler);
+PROVIDE(GPIOG = DefaultHandler);
+PROVIDE(TIMER3A = DefaultHandler);
+PROVIDE(TIMER3B = DefaultHandler);
+

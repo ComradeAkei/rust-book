@@ -1,0 +1,1810 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Подмножество описания LM3S6965 для главы 27: системное управление,
+     порты GPIO, UART, таймеры и АЦП. UART0 и UART1 — те же, что в главе 24.
+     Регистры, смещения, поля и значения после сброса — по техническому
+     описанию LM3S6965. Формат — CMSIS-SVD 1.3. По этому файлу svd2rust
+     строит крейт code/ch27-pac (раздел 27.3). -->
+<device schemaVersion="1.3" xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocation="CMSIS-SVD.xsd">
+  <vendor>Texas Instruments</vendor>
+  <name>LM3S6965</name>
+  <version>1.0</version>
+  <description>Stellaris LM3S6965, подмножество: SYSCTL, GPIOA–GPIOG, UART0, UART1, TIMER0–TIMER3, ADC0</description>
+  <!-- ANCHOR: cpu -->
+  <cpu>
+    <name>CM3</name>
+    <revision>r2p0</revision>
+    <endian>little</endian>
+    <mpuPresent>true</mpuPresent>
+    <fpuPresent>false</fpuPresent>
+    <nvicPrioBits>3</nvicPrioBits>
+    <vendorSystickConfig>false</vendorSystickConfig>
+  </cpu>
+  <!-- ANCHOR_END: cpu -->
+  <addressUnitBits>8</addressUnitBits>
+  <width>32</width>
+  <size>32</size>
+  <access>read-write</access>
+  <resetValue>0x00000000</resetValue>
+  <resetMask>0xFFFFFFFF</resetMask>
+  <peripherals>
+    <peripheral>
+      <name>SYSCTL</name>
+      <description>Системное управление: тактирование и сброс</description>
+      <groupName>SYSCTL</groupName>
+      <baseAddress>0x400FE000</baseAddress>
+      <addressBlock>
+        <offset>0x0</offset>
+        <size>0x1000</size>
+        <usage>registers</usage>
+      </addressBlock>
+      <registers>
+        <register>
+          <name>RCC</name>
+          <description>Настройка тактирования</description>
+          <addressOffset>0x060</addressOffset>
+          <resetValue>0x078E3AD1</resetValue>
+          <fields>
+            <field>
+              <name>MOSCDIS</name>
+              <description>Выключить главный генератор</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>IOSCDIS</name>
+              <description>Выключить внутренний генератор</description>
+              <bitOffset>1</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>OSCSRC</name>
+              <description>Источник тактов</description>
+              <bitOffset>4</bitOffset>
+              <bitWidth>2</bitWidth>
+              <enumeratedValues>
+                <enumeratedValue>
+                  <name>MAIN</name>
+                  <description>Главный генератор</description>
+                  <value>0</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>INTERNAL</name>
+                  <description>Внутренний генератор 12 МГц</description>
+                  <value>1</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>INTERNAL_DIV4</name>
+                  <description>Внутренний генератор, делённый на 4</description>
+                  <value>2</value>
+                </enumeratedValue>
+              </enumeratedValues>
+            </field>
+            <field>
+              <name>XTAL</name>
+              <description>Частота кварца</description>
+              <bitOffset>6</bitOffset>
+              <bitWidth>4</bitWidth>
+            </field>
+            <field>
+              <name>BYPASS</name>
+              <description>Обойти PLL</description>
+              <bitOffset>11</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>PWRDN</name>
+              <description>Выключить PLL</description>
+              <bitOffset>13</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>USESYSDIV</name>
+              <description>Делить системную частоту на SYSDIV + 1</description>
+              <bitOffset>22</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>SYSDIV</name>
+              <description>Делитель системной частоты</description>
+              <bitOffset>23</bitOffset>
+              <bitWidth>4</bitWidth>
+            </field>
+            <field>
+              <name>ACG</name>
+              <description>Автоматическое управление тактами в режимах сна</description>
+              <bitOffset>27</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>RCGC0</name>
+          <description>Такты периферии в рабочем режиме, группа 0</description>
+          <addressOffset>0x100</addressOffset>
+          <resetValue>0x00000040</resetValue>
+          <fields>
+            <field>
+              <name>WDT</name>
+              <description>Сторожевой таймер</description>
+              <bitOffset>3</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>ADC</name>
+              <description>АЦП</description>
+              <bitOffset>16</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>RCGC1</name>
+          <description>Такты периферии в рабочем режиме, группа 1</description>
+          <addressOffset>0x104</addressOffset>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <dim>3</dim>
+              <dimIncrement>1</dimIncrement>
+              <name>UART%s</name>
+              <description>UART0–UART2</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <dim>4</dim>
+              <dimIncrement>1</dimIncrement>
+              <name>TIMER%s</name>
+              <description>Таймеры 0–3</description>
+              <bitOffset>16</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>RCGC2</name>
+          <description>Такты периферии в рабочем режиме, группа 2: порты GPIO</description>
+          <addressOffset>0x108</addressOffset>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <dim>7</dim>
+              <dimIncrement>1</dimIncrement>
+              <name>GPIO%s</name>
+              <description>Порты A–G (бит 0 — порт A)</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+      </registers>
+    </peripheral>
+    <peripheral>
+      <name>GPIOA</name>
+      <description>Порт ввода-вывода общего назначения (PL061)</description>
+      <groupName>GPIO</groupName>
+      <baseAddress>0x40004000</baseAddress>
+      <addressBlock>
+        <offset>0x0</offset>
+        <size>0x1000</size>
+        <usage>registers</usage>
+      </addressBlock>
+      <interrupt>
+        <name>GPIOA</name>
+        <value>0</value>
+      </interrupt>
+      <registers>
+        <register>
+          <dim>256</dim>
+          <dimIncrement>4</dimIncrement>
+          <name>DATA[%s]</name>
+          <description>Данные. Биты 2–9 адреса — маска: читаются и пишутся только выводы, чьи биты маски равны 1</description>
+          <addressOffset>0x000</addressOffset>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <dim>8</dim>
+              <dimIncrement>1</dimIncrement>
+              <name>P%s</name>
+              <description>Уровень вывода</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>DIR</name>
+          <description>Направление: 1 — выход</description>
+          <addressOffset>0x400</addressOffset>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <dim>8</dim>
+              <dimIncrement>1</dimIncrement>
+              <name>P%s</name>
+              <description>Вывод — выход</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>IS</name>
+          <description>Чувствительность прерывания: 1 — по уровню, 0 — по фронту</description>
+          <addressOffset>0x404</addressOffset>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <dim>8</dim>
+              <dimIncrement>1</dimIncrement>
+              <name>P%s</name>
+              <description>По уровню</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>IBE</name>
+          <description>Прерывание по обоим фронтам</description>
+          <addressOffset>0x408</addressOffset>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <dim>8</dim>
+              <dimIncrement>1</dimIncrement>
+              <name>P%s</name>
+              <description>Оба фронта</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>IEV</name>
+          <description>Событие прерывания: 1 — нарастающий фронт или высокий уровень</description>
+          <addressOffset>0x40C</addressOffset>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <dim>8</dim>
+              <dimIncrement>1</dimIncrement>
+              <name>P%s</name>
+              <description>Нарастающий фронт или высокий уровень</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>IM</name>
+          <description>Маска прерываний: 1 — прерывание разрешено</description>
+          <addressOffset>0x410</addressOffset>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <dim>8</dim>
+              <dimIncrement>1</dimIncrement>
+              <name>P%s</name>
+              <description>Прерывание разрешено</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>RIS</name>
+          <description>Необработанные запросы прерываний</description>
+          <addressOffset>0x414</addressOffset>
+          <access>read-only</access>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <dim>8</dim>
+              <dimIncrement>1</dimIncrement>
+              <name>P%s</name>
+              <description>Запрос есть</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>MIS</name>
+          <description>Запросы прерываний после маски</description>
+          <addressOffset>0x418</addressOffset>
+          <access>read-only</access>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <dim>8</dim>
+              <dimIncrement>1</dimIncrement>
+              <name>P%s</name>
+              <description>Запрос есть</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>ICR</name>
+          <description>Сброс запросов прерываний по фронту: 1 сбрасывает бит</description>
+          <addressOffset>0x41C</addressOffset>
+          <access>write-only</access>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <dim>8</dim>
+              <dimIncrement>1</dimIncrement>
+              <name>P%s</name>
+              <description>Сбросить запрос</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>AFSEL</name>
+          <description>Альтернативная функция: 1 — выводом управляет периферия</description>
+          <addressOffset>0x420</addressOffset>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <dim>8</dim>
+              <dimIncrement>1</dimIncrement>
+              <name>P%s</name>
+              <description>Альтернативная функция</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>ODR</name>
+          <description>Открытый сток</description>
+          <addressOffset>0x50C</addressOffset>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <dim>8</dim>
+              <dimIncrement>1</dimIncrement>
+              <name>P%s</name>
+              <description>Открытый сток</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PUR</name>
+          <description>Подтяжка к питанию</description>
+          <addressOffset>0x510</addressOffset>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <dim>8</dim>
+              <dimIncrement>1</dimIncrement>
+              <name>P%s</name>
+              <description>Подтяжка к питанию</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PDR</name>
+          <description>Подтяжка к земле</description>
+          <addressOffset>0x514</addressOffset>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <dim>8</dim>
+              <dimIncrement>1</dimIncrement>
+              <name>P%s</name>
+              <description>Подтяжка к земле</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>DEN</name>
+          <description>Цифровой режим: 1 — вывод работает как цифровой</description>
+          <addressOffset>0x51C</addressOffset>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <dim>8</dim>
+              <dimIncrement>1</dimIncrement>
+              <name>P%s</name>
+              <description>Цифровой режим</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+      </registers>
+    </peripheral>
+    <peripheral derivedFrom="GPIOA">
+      <name>GPIOB</name>
+      <baseAddress>0x40005000</baseAddress>
+      <interrupt>
+        <name>GPIOB</name>
+        <value>1</value>
+      </interrupt>
+    </peripheral>
+    <peripheral derivedFrom="GPIOA">
+      <name>GPIOC</name>
+      <baseAddress>0x40006000</baseAddress>
+      <interrupt>
+        <name>GPIOC</name>
+        <value>2</value>
+      </interrupt>
+    </peripheral>
+    <peripheral derivedFrom="GPIOA">
+      <name>GPIOD</name>
+      <baseAddress>0x40007000</baseAddress>
+      <interrupt>
+        <name>GPIOD</name>
+        <value>3</value>
+      </interrupt>
+    </peripheral>
+    <peripheral derivedFrom="GPIOA">
+      <name>GPIOE</name>
+      <baseAddress>0x40024000</baseAddress>
+      <interrupt>
+        <name>GPIOE</name>
+        <value>4</value>
+      </interrupt>
+    </peripheral>
+    <peripheral derivedFrom="GPIOA">
+      <name>GPIOF</name>
+      <baseAddress>0x40025000</baseAddress>
+      <interrupt>
+        <name>GPIOF</name>
+        <value>30</value>
+      </interrupt>
+    </peripheral>
+    <peripheral derivedFrom="GPIOA">
+      <name>GPIOG</name>
+      <baseAddress>0x40026000</baseAddress>
+      <interrupt>
+        <name>GPIOG</name>
+        <value>31</value>
+      </interrupt>
+    </peripheral>
+    <!-- ANCHOR: uart0 -->
+    <peripheral>
+      <name>UART0</name>
+      <description>Универсальный асинхронный приёмопередатчик (PL011)</description>
+      <groupName>UART</groupName>
+      <baseAddress>0x4000C000</baseAddress>
+      <addressBlock>
+        <offset>0x0</offset>
+        <size>0x1000</size>
+        <usage>registers</usage>
+      </addressBlock>
+      <interrupt>
+        <name>UART0</name>
+        <value>5</value>
+      </interrupt>
+      <registers>
+        <register>
+          <name>DR</name>
+          <description>Данные: запись — в FIFO передатчика, чтение — из FIFO приёмника с флагами ошибок</description>
+          <addressOffset>0x000</addressOffset>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <name>DATA</name>
+              <description>Байт данных</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>8</bitWidth>
+              <writeConstraint>
+                <range>
+                  <minimum>0</minimum>
+                  <maximum>255</maximum>
+                </range>
+              </writeConstraint>
+            </field>
+            <field>
+              <name>FE</name>
+              <description>Ошибка кадра</description>
+              <bitOffset>8</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-only</access>
+            </field>
+            <!-- ANCHOR_END: uart0 -->
+            <field>
+              <name>PE</name>
+              <description>Ошибка чётности</description>
+              <bitOffset>9</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>BE</name>
+              <description>Разрыв линии</description>
+              <bitOffset>10</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>OE</name>
+              <description>Переполнение приёмника</description>
+              <bitOffset>11</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-only</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>RSR</name>
+          <description>Состояние приёма; запись сбрасывает ошибки (UARTECR)</description>
+          <addressOffset>0x004</addressOffset>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <name>FE</name>
+              <description>Ошибка кадра</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>PE</name>
+              <description>Ошибка чётности</description>
+              <bitOffset>1</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>BE</name>
+              <description>Разрыв линии</description>
+              <bitOffset>2</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>OE</name>
+              <description>Переполнение приёмника</description>
+              <bitOffset>3</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>FR</name>
+          <description>Флаги</description>
+          <addressOffset>0x018</addressOffset>
+          <access>read-only</access>
+          <resetValue>0x00000090</resetValue>
+          <fields>
+            <field>
+              <name>BUSY</name>
+              <description>Передатчик занят</description>
+              <bitOffset>3</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>RXFE</name>
+              <description>FIFO приёмника пуст</description>
+              <bitOffset>4</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>TXFF</name>
+              <description>FIFO передатчика полон</description>
+              <bitOffset>5</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>RXFF</name>
+              <description>FIFO приёмника полон</description>
+              <bitOffset>6</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>TXFE</name>
+              <description>FIFO передатчика пуст</description>
+              <bitOffset>7</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>ILPR</name>
+          <description>Делитель IrDA для режима низкого потребления</description>
+          <addressOffset>0x020</addressOffset>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <name>ILPDVSR</name>
+              <description>Делитель</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>8</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>IBRD</name>
+          <description>Целая часть делителя скорости</description>
+          <addressOffset>0x024</addressOffset>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <name>DIVINT</name>
+              <description>Целая часть</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>16</bitWidth>
+              <writeConstraint>
+                <range>
+                  <minimum>0</minimum>
+                  <maximum>65535</maximum>
+                </range>
+              </writeConstraint>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>FBRD</name>
+          <description>Дробная часть делителя скорости</description>
+          <addressOffset>0x028</addressOffset>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <name>DIVFRAC</name>
+              <description>Дробная часть, 1/64</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>6</bitWidth>
+              <writeConstraint>
+                <range>
+                  <minimum>0</minimum>
+                  <maximum>63</maximum>
+                </range>
+              </writeConstraint>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>LCRH</name>
+          <description>Формат кадра</description>
+          <addressOffset>0x02C</addressOffset>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <name>BRK</name>
+              <description>Послать разрыв</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>PEN</name>
+              <description>Чётность включена</description>
+              <bitOffset>1</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>EPS</name>
+              <description>Чётность — чётная</description>
+              <bitOffset>2</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>STP2</name>
+              <description>Два стоповых бита</description>
+              <bitOffset>3</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>FEN</name>
+              <description>FIFO включены</description>
+              <bitOffset>4</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>WLEN</name>
+              <description>Длина слова: 0 — 5 бит … 3 — 8 бит</description>
+              <bitOffset>5</bitOffset>
+              <bitWidth>2</bitWidth>
+              <writeConstraint>
+                <range>
+                  <minimum>0</minimum>
+                  <maximum>3</maximum>
+                </range>
+              </writeConstraint>
+            </field>
+            <field>
+              <name>SPS</name>
+              <description>Фиксированная чётность</description>
+              <bitOffset>7</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>CTL</name>
+          <description>Управление</description>
+          <addressOffset>0x030</addressOffset>
+          <resetValue>0x00000300</resetValue>
+          <fields>
+            <field>
+              <name>UARTEN</name>
+              <description>UART включён</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>SIREN</name>
+              <description>IrDA включён</description>
+              <bitOffset>1</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>SIRLP</name>
+              <description>IrDA низкого потребления</description>
+              <bitOffset>2</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>LBE</name>
+              <description>Петля</description>
+              <bitOffset>7</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>TXE</name>
+              <description>Передатчик включён</description>
+              <bitOffset>8</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>RXE</name>
+              <description>Приёмник включён</description>
+              <bitOffset>9</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <!-- ANCHOR: ifls -->
+        <register>
+          <name>IFLS</name>
+          <description>Пороги прерываний FIFO</description>
+          <addressOffset>0x034</addressOffset>
+          <resetValue>0x00000012</resetValue>
+          <fields>
+            <field>
+              <name>TXIFLSEL</name>
+              <description>Порог передатчика</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>3</bitWidth>
+            </field>
+            <field>
+              <name>RXIFLSEL</name>
+              <description>Порог приёмника</description>
+              <bitOffset>3</bitOffset>
+              <bitWidth>3</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <!-- ANCHOR_END: ifls -->
+        <register>
+          <name>IM</name>
+          <description>Маска прерываний</description>
+          <addressOffset>0x038</addressOffset>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <name>RXIM</name>
+              <bitOffset>4</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>TXIM</name>
+              <bitOffset>5</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>RTIM</name>
+              <bitOffset>6</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>FEIM</name>
+              <bitOffset>7</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>PEIM</name>
+              <bitOffset>8</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>BEIM</name>
+              <bitOffset>9</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>OEIM</name>
+              <bitOffset>10</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>RIS</name>
+          <description>Сырые запросы прерываний</description>
+          <addressOffset>0x03C</addressOffset>
+          <access>read-only</access>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <name>RXRIS</name>
+              <bitOffset>4</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>TXRIS</name>
+              <bitOffset>5</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>RTRIS</name>
+              <bitOffset>6</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>FERIS</name>
+              <bitOffset>7</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>PERIS</name>
+              <bitOffset>8</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>BERIS</name>
+              <bitOffset>9</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>OERIS</name>
+              <bitOffset>10</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>MIS</name>
+          <description>Запросы прерываний после маски</description>
+          <addressOffset>0x040</addressOffset>
+          <access>read-only</access>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <name>RXMIS</name>
+              <bitOffset>4</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>TXMIS</name>
+              <bitOffset>5</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>RTMIS</name>
+              <bitOffset>6</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>FEMIS</name>
+              <bitOffset>7</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>PEMIS</name>
+              <bitOffset>8</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>BEMIS</name>
+              <bitOffset>9</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>OEMIS</name>
+              <bitOffset>10</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>ICR</name>
+          <description>Сброс запросов прерываний: 1 сбрасывает бит</description>
+          <addressOffset>0x044</addressOffset>
+          <access>write-only</access>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <name>RXIC</name>
+              <bitOffset>4</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>TXIC</name>
+              <bitOffset>5</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>RTIC</name>
+              <bitOffset>6</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>FEIC</name>
+              <bitOffset>7</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>PEIC</name>
+              <bitOffset>8</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>BEIC</name>
+              <bitOffset>9</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>OEIC</name>
+              <bitOffset>10</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+      </registers>
+    </peripheral>
+    <peripheral derivedFrom="UART0">
+      <name>UART1</name>
+      <baseAddress>0x4000D000</baseAddress>
+      <interrupt>
+        <name>UART1</name>
+        <value>6</value>
+      </interrupt>
+    </peripheral>
+    <peripheral>
+      <name>TIMER0</name>
+      <description>Таймер общего назначения (GPTM)</description>
+      <groupName>TIMER</groupName>
+      <baseAddress>0x40030000</baseAddress>
+      <addressBlock>
+        <offset>0x0</offset>
+        <size>0x1000</size>
+        <usage>registers</usage>
+      </addressBlock>
+      <interrupt>
+        <name>TIMER0A</name>
+        <value>19</value>
+      </interrupt>
+      <interrupt>
+        <name>TIMER0B</name>
+        <value>20</value>
+      </interrupt>
+      <registers>
+        <register>
+          <name>CFG</name>
+          <description>Конфигурация: 32-битный таймер или два 16-битных</description>
+          <addressOffset>0x000</addressOffset>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <name>GPTMCFG</name>
+              <description>Режим</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>3</bitWidth>
+              <enumeratedValues>
+                <enumeratedValue>
+                  <name>BITS32</name>
+                  <description>Один 32-битный таймер</description>
+                  <value>0</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>RTC</name>
+                  <description>32-битные часы реального времени</description>
+                  <value>1</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>BITS16</name>
+                  <description>Два 16-битных таймера</description>
+                  <value>4</value>
+                </enumeratedValue>
+              </enumeratedValues>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>TAMR</name>
+          <description>Режим таймера A</description>
+          <addressOffset>0x004</addressOffset>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <name>TAMR</name>
+              <description>Режим</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>2</bitWidth>
+              <enumeratedValues>
+                <enumeratedValue>
+                  <name>ONE_SHOT</name>
+                  <description>Однократный</description>
+                  <value>1</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>PERIODIC</name>
+                  <description>Периодический</description>
+                  <value>2</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>CAPTURE</name>
+                  <description>Захват</description>
+                  <value>3</value>
+                </enumeratedValue>
+              </enumeratedValues>
+            </field>
+            <field>
+              <name>TACMR</name>
+              <description>Захват по времени</description>
+              <bitOffset>2</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>TAAMS</name>
+              <description>Режим ШИМ</description>
+              <bitOffset>3</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>TBMR</name>
+          <description>Режим таймера B</description>
+          <addressOffset>0x008</addressOffset>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <name>TBMR</name>
+              <description>Режим</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>2</bitWidth>
+              <enumeratedValues>
+                <enumeratedValue>
+                  <name>ONE_SHOT</name>
+                  <description>Однократный</description>
+                  <value>1</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>PERIODIC</name>
+                  <description>Периодический</description>
+                  <value>2</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>CAPTURE</name>
+                  <description>Захват</description>
+                  <value>3</value>
+                </enumeratedValue>
+              </enumeratedValues>
+            </field>
+            <field>
+              <name>TBCMR</name>
+              <description>Захват по времени</description>
+              <bitOffset>2</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>TBAMS</name>
+              <description>Режим ШИМ</description>
+              <bitOffset>3</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>CTL</name>
+          <description>Управление</description>
+          <addressOffset>0x00C</addressOffset>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <name>TAEN</name>
+              <description>Таймер A включён</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>TASTALL</name>
+              <description>Таймер A стоит при остановке отладчиком</description>
+              <bitOffset>1</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>RTCEN</name>
+              <description>Часы реального времени при остановке</description>
+              <bitOffset>4</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>TAOTE</name>
+              <description>Таймер A запускает АЦП</description>
+              <bitOffset>5</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>TBEN</name>
+              <description>Таймер B включён</description>
+              <bitOffset>8</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>TBSTALL</name>
+              <description>Таймер B стоит при остановке отладчиком</description>
+              <bitOffset>9</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>TBOTE</name>
+              <description>Таймер B запускает АЦП</description>
+              <bitOffset>13</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>IMR</name>
+          <description>Маска прерываний: 1 — прерывание разрешено</description>
+          <addressOffset>0x018</addressOffset>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <name>TATOIM</name>
+              <description>Таймер A досчитал</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>CAMIM</name>
+              <description>Совпадение захвата A</description>
+              <bitOffset>1</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>CAEIM</name>
+              <description>Событие захвата A</description>
+              <bitOffset>2</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>RTCIM</name>
+              <description>Часы реального времени</description>
+              <bitOffset>3</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>TBTOIM</name>
+              <description>Таймер B досчитал</description>
+              <bitOffset>8</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>CBMIM</name>
+              <description>Совпадение захвата B</description>
+              <bitOffset>9</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>CBEIM</name>
+              <description>Событие захвата B</description>
+              <bitOffset>10</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>RIS</name>
+          <description>Необработанные запросы прерываний</description>
+          <addressOffset>0x01C</addressOffset>
+          <access>read-only</access>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <name>TATORIS</name>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>CAMRIS</name>
+              <bitOffset>1</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>CAERIS</name>
+              <bitOffset>2</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>RTCRIS</name>
+              <bitOffset>3</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>TBTORIS</name>
+              <bitOffset>8</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>CBMRIS</name>
+              <bitOffset>9</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>CBERIS</name>
+              <bitOffset>10</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>MIS</name>
+          <description>Запросы прерываний после маски</description>
+          <addressOffset>0x020</addressOffset>
+          <access>read-only</access>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <name>TATOMIS</name>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>CAMMIS</name>
+              <bitOffset>1</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>CAEMIS</name>
+              <bitOffset>2</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>RTCMIS</name>
+              <bitOffset>3</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>TBTOMIS</name>
+              <bitOffset>8</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>CBMMIS</name>
+              <bitOffset>9</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>CBEMIS</name>
+              <bitOffset>10</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>ICR</name>
+          <description>Сброс запросов прерываний: 1 сбрасывает бит</description>
+          <addressOffset>0x024</addressOffset>
+          <access>write-only</access>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <name>TATOCINT</name>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>CAMCINT</name>
+              <bitOffset>1</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>CAECINT</name>
+              <bitOffset>2</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>RTCCINT</name>
+              <bitOffset>3</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>TBTOCINT</name>
+              <bitOffset>8</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>CBMCINT</name>
+              <bitOffset>9</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>CBECINT</name>
+              <bitOffset>10</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>TAILR</name>
+          <description>Начальное значение таймера A: период в тактах минус один</description>
+          <addressOffset>0x028</addressOffset>
+          <resetValue>0xFFFFFFFF</resetValue>
+          <fields>
+            <field>
+              <name>TAILR</name>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <writeConstraint>
+                <range>
+                  <minimum>0</minimum>
+                  <maximum>4294967295</maximum>
+                </range>
+              </writeConstraint>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>TBILR</name>
+          <description>Начальное значение таймера B</description>
+          <addressOffset>0x02C</addressOffset>
+          <resetValue>0x0000FFFF</resetValue>
+          <fields>
+            <field>
+              <name>TBILR</name>
+              <bitOffset>0</bitOffset>
+              <bitWidth>16</bitWidth>
+              <writeConstraint>
+                <range>
+                  <minimum>0</minimum>
+                  <maximum>65535</maximum>
+                </range>
+              </writeConstraint>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>TAMATCHR</name>
+          <description>Совпадение таймера A</description>
+          <addressOffset>0x030</addressOffset>
+          <resetValue>0xFFFFFFFF</resetValue>
+          <fields>
+            <field>
+              <name>TAMR</name>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>TBMATCHR</name>
+          <description>Совпадение таймера B</description>
+          <addressOffset>0x034</addressOffset>
+          <resetValue>0x0000FFFF</resetValue>
+          <fields>
+            <field>
+              <name>TBMR</name>
+              <bitOffset>0</bitOffset>
+              <bitWidth>16</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>TAPR</name>
+          <description>Предделитель таймера A</description>
+          <addressOffset>0x038</addressOffset>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <name>TAPSR</name>
+              <bitOffset>0</bitOffset>
+              <bitWidth>8</bitWidth>
+              <writeConstraint>
+                <range>
+                  <minimum>0</minimum>
+                  <maximum>255</maximum>
+                </range>
+              </writeConstraint>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>TBPR</name>
+          <description>Предделитель таймера B</description>
+          <addressOffset>0x03C</addressOffset>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <name>TBPSR</name>
+              <bitOffset>0</bitOffset>
+              <bitWidth>8</bitWidth>
+              <writeConstraint>
+                <range>
+                  <minimum>0</minimum>
+                  <maximum>255</maximum>
+                </range>
+              </writeConstraint>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>TAR</name>
+          <description>Текущее значение таймера A</description>
+          <addressOffset>0x048</addressOffset>
+          <access>read-only</access>
+          <resetValue>0xFFFFFFFF</resetValue>
+          <fields>
+            <field>
+              <name>TAR</name>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>TBR</name>
+          <description>Текущее значение таймера B</description>
+          <addressOffset>0x04C</addressOffset>
+          <access>read-only</access>
+          <resetValue>0x0000FFFF</resetValue>
+          <fields>
+            <field>
+              <name>TBR</name>
+              <bitOffset>0</bitOffset>
+              <bitWidth>16</bitWidth>
+            </field>
+          </fields>
+        </register>
+      </registers>
+    </peripheral>
+    <peripheral derivedFrom="TIMER0">
+      <name>TIMER1</name>
+      <baseAddress>0x40031000</baseAddress>
+      <interrupt>
+        <name>TIMER1A</name>
+        <value>21</value>
+      </interrupt>
+      <interrupt>
+        <name>TIMER1B</name>
+        <value>22</value>
+      </interrupt>
+    </peripheral>
+    <peripheral derivedFrom="TIMER0">
+      <name>TIMER2</name>
+      <baseAddress>0x40032000</baseAddress>
+      <interrupt>
+        <name>TIMER2A</name>
+        <value>23</value>
+      </interrupt>
+      <interrupt>
+        <name>TIMER2B</name>
+        <value>24</value>
+      </interrupt>
+    </peripheral>
+    <peripheral derivedFrom="TIMER0">
+      <name>TIMER3</name>
+      <baseAddress>0x40033000</baseAddress>
+      <interrupt>
+        <name>TIMER3A</name>
+        <value>35</value>
+      </interrupt>
+      <interrupt>
+        <name>TIMER3B</name>
+        <value>36</value>
+      </interrupt>
+    </peripheral>
+    <peripheral>
+      <name>ADC0</name>
+      <description>Аналого-цифровой преобразователь, 10 бит</description>
+      <groupName>ADC</groupName>
+      <baseAddress>0x40038000</baseAddress>
+      <addressBlock>
+        <offset>0x0</offset>
+        <size>0x1000</size>
+        <usage>registers</usage>
+      </addressBlock>
+      <interrupt>
+        <name>ADC0SS0</name>
+        <value>14</value>
+      </interrupt>
+      <interrupt>
+        <name>ADC0SS1</name>
+        <value>15</value>
+      </interrupt>
+      <interrupt>
+        <name>ADC0SS2</name>
+        <value>16</value>
+      </interrupt>
+      <interrupt>
+        <name>ADC0SS3</name>
+        <value>17</value>
+      </interrupt>
+      <registers>
+        <register>
+          <name>ACTSS</name>
+          <description>Включённые последовательности выборки</description>
+          <addressOffset>0x000</addressOffset>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <dim>4</dim>
+              <dimIncrement>1</dimIncrement>
+              <name>SS%s</name>
+              <description>Последовательность включена</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>RIS</name>
+          <description>Необработанные запросы прерываний</description>
+          <addressOffset>0x004</addressOffset>
+          <access>read-only</access>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <dim>4</dim>
+              <dimIncrement>1</dimIncrement>
+              <name>SS%s</name>
+              <description>Последовательность закончила выборку</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>IM</name>
+          <description>Маска прерываний</description>
+          <addressOffset>0x008</addressOffset>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <dim>4</dim>
+              <dimIncrement>1</dimIncrement>
+              <name>SS%s</name>
+              <description>Прерывание разрешено</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>ISC</name>
+          <description>Запросы после маски; запись 1 сбрасывает запрос</description>
+          <addressOffset>0x00C</addressOffset>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <dim>4</dim>
+              <dimIncrement>1</dimIncrement>
+              <name>SS%s</name>
+              <description>Запрос есть; 1 — сбросить</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>OSTAT</name>
+          <description>Переполнение FIFO</description>
+          <addressOffset>0x010</addressOffset>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <dim>4</dim>
+              <dimIncrement>1</dimIncrement>
+              <name>SS%s</name>
+              <description>FIFO переполнено; 1 — сбросить</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>EMUX</name>
+          <description>Источник запуска каждой последовательности</description>
+          <addressOffset>0x014</addressOffset>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <dim>4</dim>
+              <dimIncrement>4</dimIncrement>
+              <name>EM%s</name>
+              <description>Запуск последовательности</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>4</bitWidth>
+              <enumeratedValues>
+                <enumeratedValue>
+                  <name>PROCESSOR</name>
+                  <description>Программный запуск через PSSI</description>
+                  <value>0</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>COMP0</name>
+                  <description>Аналоговый компаратор 0</description>
+                  <value>1</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>COMP1</name>
+                  <description>Аналоговый компаратор 1</description>
+                  <value>2</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>EXTERNAL</name>
+                  <description>Внешний сигнал GPIO PB4</description>
+                  <value>4</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>TIMER</name>
+                  <description>Таймер с битом TnOTE</description>
+                  <value>5</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>PWM0</name>
+                  <description>ШИМ 0</description>
+                  <value>6</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>PWM1</name>
+                  <description>ШИМ 1</description>
+                  <value>7</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>PWM2</name>
+                  <description>ШИМ 2</description>
+                  <value>8</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>ALWAYS</name>
+                  <description>Непрерывно</description>
+                  <value>15</value>
+                </enumeratedValue>
+              </enumeratedValues>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>USTAT</name>
+          <description>Опустошение FIFO</description>
+          <addressOffset>0x018</addressOffset>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <dim>4</dim>
+              <dimIncrement>1</dimIncrement>
+              <name>SS%s</name>
+              <description>FIFO опустошено; 1 — сбросить</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PSSI</name>
+          <description>Программный запуск последовательностей</description>
+          <addressOffset>0x028</addressOffset>
+          <access>write-only</access>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <dim>4</dim>
+              <dimIncrement>1</dimIncrement>
+              <name>SS%s</name>
+              <description>Запустить последовательность</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>SSMUX3</name>
+          <description>Последовательность 3: номер входа</description>
+          <addressOffset>0x0A0</addressOffset>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <name>MUX0</name>
+              <description>Вход АЦП</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>2</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>SSCTL3</name>
+          <description>Последовательность 3: управление выборкой</description>
+          <addressOffset>0x0A4</addressOffset>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <name>D0</name>
+              <description>Дифференциальный вход</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>END0</name>
+              <description>Последняя выборка последовательности</description>
+              <bitOffset>1</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>IE0</name>
+              <description>Прерывание после выборки</description>
+              <bitOffset>2</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>TS0</name>
+              <description>Датчик температуры вместо входа</description>
+              <bitOffset>3</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>SSFIFO3</name>
+          <description>Последовательность 3: результат из FIFO</description>
+          <addressOffset>0x0A8</addressOffset>
+          <access>read-only</access>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <name>DATA</name>
+              <description>Результат преобразования</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>10</bitWidth>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>SSFSTAT3</name>
+          <description>Последовательность 3: состояние FIFO</description>
+          <addressOffset>0x0AC</addressOffset>
+          <access>read-only</access>
+          <resetValue>0x00000100</resetValue>
+          <fields>
+            <field>
+              <name>TPTR</name>
+              <description>Хвост</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>4</bitWidth>
+            </field>
+            <field>
+              <name>HPTR</name>
+              <description>Голова</description>
+              <bitOffset>4</bitOffset>
+              <bitWidth>4</bitWidth>
+            </field>
+            <field>
+              <name>EMPTY</name>
+              <description>Пусто</description>
+              <bitOffset>8</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
+              <name>FULL</name>
+              <description>Полно</description>
+              <bitOffset>12</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+          </fields>
+        </register>
+      </registers>
+    </peripheral>
+  </peripherals>
+</device>

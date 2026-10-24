@@ -88,7 +88,7 @@ rustdoc сверяет только на nightly, поэтому вторая к
 ```
 
 В прошивках для Cortex-M так кладут данные в нужную область памяти
-([гл. 8](ch08/08-sections.md), [гл. 27](ch27.md)). Макросы `#[entry]` и `#[exception]`
+([гл. 8](ch08/08-sections.md), [гл. 27](ch27/03-pac.md)). Макросы `#[entry]` и `#[exception]`
 из `cortex-m-rt` раскрываются как раз в `export_name` и `link_section`.
 
 ### Тело unsafe fn
@@ -134,7 +134,7 @@ rustdoc сверяет только на nightly, поэтому вторая к
 
 На Cortex-M0 нет атомарного `fetch_add` (ARMv6-M без
 `LDREX`/`STREX`), и там счётчик держат в `critical_section::Mutex`
-([гл. 21](ch21/04-hardware.md), [гл. 27](ch27.md)).
+([гл. 21](ch21/04-hardware.md), [гл. 27](ch27/06-interrupts.md)).
 
 ### set_var и remove_var
 

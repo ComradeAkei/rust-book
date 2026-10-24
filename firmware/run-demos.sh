@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Прогоняет все прошивки глав 0, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 22, 23 и 24 в QEMU и сверяет вывод с ожидаемым.
+# Прогоняет все прошивки глав 0, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 22, 23, 24, 25, 26 и 27 в QEMU и сверяет вывод с ожидаемым.
 # Запуск: ./run-demos.sh (из каталога firmware). Используется и в CI.
 set -u
 cd "$(dirname "$0")"
@@ -82,6 +82,51 @@ symbols() {
         echo "ok    $what"
     else
         echo "FAIL  $what: «$needle» ожидалось: $want"
+        fail=1
+    fi
+}
+
+# buildfail <описание> <ожидаемая подстрока> <аргументы cargo build...>
+# Сборка должна упасть, и в её выводе должна быть подстрока: проверка в
+# скрипте компоновки (раздел 26.3).
+buildfail() {
+    local what="$1" expect="$2"
+    shift 2
+    local out
+    if out=$(cargo build --release -q --color never "$@" 2>&1); then
+        echo "FAIL  $what: сборка прошла, а должна была упасть"
+        fail=1
+    elif grep -qF -- "$expect" <<<"$out"; then
+        echo "ok    $what"
+    else
+        echo "FAIL  $what: нет строки «$expect»"
+        echo "$out" | sed 's/^/      /'
+        fail=1
+    fi
+}
+
+# fliplink <описание> <пакет>
+# Собирает прошивку компоновщиком flip-link (раздел 27.7) и проверяет
+# раскладку ОЗУ: вершина стека — под .data и .bss, а не в конце ОЗУ.
+# Что будет при переполнении, здесь не проверяется: в QEMU обращения ниже
+# 0x2000_0000 не дают сбоя (раздел 27.7).
+fliplink() {
+    local what="$1" pkg="$2"
+    if [ -z "$(command -v flip-link)" ] || [ -z "$(command -v llvm-nm)" ]; then
+        echo "skip  $what: нет flip-link или llvm-nm"
+        return
+    fi
+    local dir="${CARGO_TARGET_DIR:-target}/flip-link"
+    RUSTFLAGS="-C linker=flip-link -C link-arg=-Tlink.x" \
+        cargo build --release -q -p "$pkg" --target-dir "$dir" || { fail=1; return; }
+    local nm top data
+    nm=$(llvm-nm "$dir/thumbv7m-none-eabi/release/$pkg")
+    top=$(awk '$3 == "_stack_start" { print $1 }' <<<"$nm")
+    data=$(awk '$3 == "__sdata" { print $1 }' <<<"$nm")
+    if [ -n "$top" ] && [ -n "$data" ] && (( 16#$top <= 16#$data )); then
+        echo "ok    $what"
+    else
+        echo "FAIL  $what: вершина стека 0x$top, .data с 0x$data"
         fail=1
     fi
 }
@@ -190,5 +235,53 @@ run "M3: include_svd! — строка через UART0" "uart0: hello from incl
 run "M3: RESET из SVD совпал с устройством" "CTL: 0x300, по SVD 0x300" -p ch24-tasks
 run "M3: Bitfield — LCRH 8N1 с FIFO"        "LCRH = Lcrh { brk: false, pen: false, eps: false, stp2: false, fen: true, wlen: 3, sps: false }" -p ch24-tasks
 run "M3: #[timed] — вызовы и максимум"      "send: вызовов 3, самый долгий не дольше всех: true" -p ch24-tasks
+run "M3: таблицы во flash, в .data 4 байта"  ".data: 4 байт в ОЗУ с 0x20000000" -p ch25-flash
+run "M3: делитель UART0 из const fn"         "UART0 при 16 МГц, 115200 бод: IBRD = 8, FBRD = 44, ошибка -799 ppm" -p ch25-flash
+run "M3: таблица в static mut — в .data"     ".data: 1028 байт в ОЗУ с 0x20000000" -p ch25-flash --features ram-table
+run "M0: таблица обратных против деления"    "таблица и деление совпали: 4 из 4" -p ch25-flash "${M0[@]}"
+
+run "M3: без cortex-m-rt, свой Reset"         "ch26-bare: без cortex-m-rt, без .data и .bss" -p ch26-bare
+run "M0: без cortex-m-rt, свой Reset"         "VECTORS по адресу 0x00000000" -p ch26-bare "${M0[@]}"
+run "M4F: без cortex-m-rt, свой Reset"        "слово 0: 0x20004000" -p ch26-bare "${M4F[@]}"
+buildfail "M3: static mut без .data — ошибка сборки" "ch26.ld: изменяемый static, а код запуска не готовит .data и .bss" -p ch26-bare --features orphan-data
+CH26_NO_GUARD=1 run "M3: без проверки static mut во flash" "COUNTER = 5 (ожидалось 6)" -p ch26-bare --features orphan-data
+run "M3: memcpy из compiler_builtins"        "присваивание 256 байт: сумма 2016, после обнуления 0" -p ch26-bare --bin mem
+run "M0: strlen из compiler_builtins"        "strlen(\"станция\") = 14" -p ch26-bare --bin mem "${M0[@]}"
+symbols "M3: чужой __aeabi_memcpy — локальный" есть "t __aeabi_memcpy" ch26-bare mem
+run "M3: станция без cortex-m-rt"            "кадров 8, разобрано обратно 8, CRC по таблице совпал 8" -p ch26-station
+run "M0: станция без cortex-m-rt"            "кадров 8, разобрано обратно 8, CRC по таблице совпал 8" -p ch26-station "${M0[@]}"
+run "M4F: станция без cortex-m-rt"           "кадров 8, разобрано обратно 8, CRC по таблице совпал 8" -p ch26-station "${M4F[@]}"
+run "M3: свой код запуска, три загрузки"     "загрузка 2: DATA = 6 (ожидалось 6), BSS = 1 (ожидалось 1)" -p ch26-boot
+run "M0: свой код запуска, три загрузки"     "три загрузки: .data и .bss каждый раз заново, .uninit сохранился" -p ch26-boot "${M0[@]}"
+run "M4F: свой код запуска открыл FPU"       "FPU открыт: 1.5 * 3.0 * 2 = 9" -p ch26-boot "${M4F[@]}"
+run "M3: свои memcpy, memmove, memset"       "вызовы пришли в наши функции: 5 из 5" -p ch26-tasks
+run "M0: свои memcpy, memmove, memset"       "вызовы пришли в наши функции: 5 из 5" -p ch26-tasks "${M0[@]}"
+run "M4F: свои memcpy, memmove, memset"      "вызовы пришли в наши функции: 5 из 5" -p ch26-tasks "${M4F[@]}"
+symbols "M3: наш __aeabi_memcpy — глобальный" есть "T __aeabi_memcpy" ch26-tasks ch26-tasks
+
+run "M3: SVC и EXC_RETURN на MSP"            "EXC_RETURN 0xfffffff9 = ExcReturn { to_thread: true, psp: false, fpu_frame: false }" -p ch27-core
+run "M3: SVC и EXC_RETURN на PSP"            "EXC_RETURN 0xfffffffd = ExcReturn { to_thread: true, psp: true, fpu_frame: false }" -p ch27-core
+run "M3: вытеснение по приоритетам NVIC"     "вытеснение: m A B a C M" -p ch27-nvic
+run "M3: BASEPRI откладывает прерывания"     "ждали под BASEPRI: A true, B false, C true" -p ch27-nvic
+run "M3: svc под BASEPRI — HardFault FORCED" "HardFault: HFSR 0x40000000, FORCED 1" -p ch27-nvic
+run "M3: делитель UART0 для 12 МГц"          "UART0: 115200 бод при 12 МГц, IBRD 6, FBRD 33" -p ch27-periph
+run "M3: Peripherals::take() один раз"       "Peripherals::take() второй раз: None" -p ch27-periph
+run "M3: 74HC595 на embedded-hal"            "74HC595 <- 0xa5; выводы PB2..PB0 после write: 001" -p ch27-periph
+run "M3: таймер в Mutex<RefCell<Option>>"    "TIMER0: 10 тиков по 10 мс, main спал в wfi" -p ch27-irq
+run "M3: несброшенный запрос прерывания"     "обработчик вошёл 1000 раз; запрос всё ещё висит: true" -p ch27-irq
+run "M3: длинная критическая секция"         "SysTick: 5 периодов в критической секции, обработчик вошёл 1 раз" -p ch27-irq
+buildfail "M3: опечатка в имени прерывания"   "no variant, associated function, or constant named `TIMER0X`" -p ch27-irq --features typo
+run "M3: переход по чётному адресу"          "CFSR 0x00020000, HFSR 0x40000000" -p ch27-fault --bin badptr
+run "M3: сторож стека на MPU"                "MemManage: CFSR 0x00000092, MMFAR 0x20000070" -p ch27-fault --bin guard
+run "M3: RTIC, lock через BASEPRI"           "в lock: BASEPRI 0xc0, тиков до 5 и после 5, TIMER0A ждал" -p ch27-rtic
+fliplink "M3: flip-link кладёт стек под .data" ch27-irq
+runin "M3: команды по UART0 с эхом"          "период 50 мс, идёт" $'status\rperiod 50\rperiod 5\rbogus\rstart\rstatus\rthis line is far too long for the editor\rquit\r' -p ch27-tasks --bin c_uart
+runin "M3: приём по прерыванию без потерь"   "строк 7, потеряно байт 0" $'status\rperiod 50\rperiod 5\rbogus\rstart\rstatus\rthis line is far too long for the editor\rquit\r' -p ch27-tasks --bin c_uart
+run "M3: переключатель задач на PendSV"      "журнал: [ A0| B0 A1 B1 A2 B2 A* B" -p ch27-tasks --bin d1_switch
+run "M3: SysTick вытесняет задачу"           "переключений 8, A крутилась без yield: true" -p ch27-tasks --bin d1_switch
+run "M3: три сбоя UsageFault и продолжение"  "три сбоя пройдены" -p ch27-tasks --bin d2_faults
+# Станцию главы 27 (ch27-station) здесь не запускаем: её UART0 выдаёт
+# двоичные кадры. Её запускает и разбирает на хосте тест
+# code/ch27/tests/station.rs.
 
 exit $fail

@@ -1,0 +1,28 @@
+[package]
+name = "ch27-irq"
+version = "0.1.0"
+description = "Глава 27, раздел 27.6: прерывания и общее состояние — Mutex<RefCell<Option<T>>>, атомики, несброшенный запрос и длинная критическая секция"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+ch27-hal = { path = "../../code/ch27-hal" }
+ch27-pac = { path = "../../code/ch27-pac", features = ["rt", "critical-section"] }
+cortex-m = { workspace = true, features = ["critical-section-single-core"] }
+cortex-m-rt = { workspace = true }
+cortex-m-semihosting = { workspace = true }
+critical-section = "1.2.0"
+
+[features]
+# Раздел 27.6: опечатка в имени обработчика прерывания — ошибка сборки.
+typo = []
+
+[[bin]]
+name = "ch27-irq"
+test = false
+bench = false

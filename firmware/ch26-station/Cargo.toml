@@ -1,0 +1,20 @@
+[package]
+name = "ch26-station"
+version = "0.1.0"
+description = "Глава 26, сквозной проект: прошивка станции на своей среде выполнения — кадры измерений через semihosting"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+ch26-bare = { path = "../ch26-bare" }
+telemetry-frame = { path = "../../project/telemetry-frame" }
+
+[[bin]]
+name = "ch26-station"
+test = false
+bench = false

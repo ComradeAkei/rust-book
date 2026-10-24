@@ -3,7 +3,8 @@
 //! ошибки в потоке байт. Шаг главы 12: модуль [`parse`] — тот же разбор,
 //! собранный из комбинаторов на замыканиях. Шаг главы 13: модуль
 //! [`stream`] — итератор по кадрам потока байт с восстановлением после
-//! ошибок.
+//! ошибок. Шаг главы 25: [`CRC16_TABLE`] и [`crc16_update_table`] —
+//! таблица CRC, посчитанная при компиляции.
 //!
 //! Крейт `no_std` и без аллокаций: его подключают и прошивка на Cortex-M,
 //! и хост на Linux. Кадр на проводе (все многобайтовые поля little-endian):
@@ -214,6 +215,40 @@ pub const fn crc16(data: &[u8]) -> u16 {
 
 const _: () = assert!(crc16(b"123456789") == 0x29B1);
 // ANCHOR_END: crc
+
+// ANCHOR: crc_table
+/// Шаг главы 25: таблица CRC-16/CCITT-FALSE. `CRC16_TABLE[b]` — восемь
+/// шагов `crc16_update` для старшего байта `b` и нулевого младшего; её
+/// считает `const fn` при компиляции, и в прошивке это 512 байт во flash.
+pub static CRC16_TABLE: [u16; 256] = {
+    let mut t = [0u16; 256];
+    let mut b = 0;
+    while b < 256 {
+        let mut crc = (b as u16) << 8;
+        let mut bit = 0;
+        while bit < 8 {
+            crc = if crc & 0x8000 != 0 { (crc << 1) ^ 0x1021 } else { crc << 1 };
+            bit += 1;
+        }
+        t[b] = crc;
+        b += 1;
+    }
+    t
+};
+
+/// То же обновление по таблице: один поиск на байт вместо восьми сдвигов.
+/// Результат совпадает с [`crc16_update`] на любых данных.
+pub const fn crc16_update_table(mut crc: u16, data: &[u8]) -> u16 {
+    let mut i = 0;
+    while i < data.len() {
+        crc = (crc << 8) ^ CRC16_TABLE[((crc >> 8) as u8 ^ data[i]) as usize];
+        i += 1;
+    }
+    crc
+}
+
+const _: () = assert!(crc16_update_table(0xFFFF, b"123456789") == 0x29B1);
+// ANCHOR_END: crc_table
 
 // ANCHOR: frame
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]

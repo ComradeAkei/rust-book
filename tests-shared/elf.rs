@@ -3,7 +3,7 @@
 // и для собранной программы.
 //
 // Файл подключают через `include!` внутри `mod elf { … }`: общие тесты
-// главы 10 и тесты `code/ch10/tests`.
+// глав 10 и 25 и тесты `code/ch10/tests`.
 
 pub struct Symbol {
     pub name: String,
@@ -16,6 +16,10 @@ pub struct Symbol {
 
 pub struct Elf {
     pub symbols: Vec<Symbol>,
+    /// Имена секций по номеру: `sections[sym.shndx]` — секция символа.
+    /// Читают только тесты главы 25, в главе 10 поле не нужно.
+    #[allow(dead_code)]
+    pub sections: Vec<String>,
 }
 
 fn u(b: &[u8], at: usize, size: usize) -> u64 {
@@ -31,16 +35,17 @@ pub fn parse(b: &[u8]) -> Elf {
     assert!(b.starts_with(b"\x7fELF") && b[5] == 1, "ожидался ELF little-endian");
     let wide = b[4] == 2;
     // Смещения полей заголовков ELF32 и ELF64.
-    let (shoff, shentsize, shnum) = if wide {
-        (u(b, 0x28, 8), u(b, 0x3a, 2), u(b, 0x3c, 2))
+    let (shoff, shentsize, shnum, shstrndx) = if wide {
+        (u(b, 0x28, 8), u(b, 0x3a, 2), u(b, 0x3c, 2), u(b, 0x3e, 2))
     } else {
-        (u(b, 0x20, 4), u(b, 0x2e, 2), u(b, 0x30, 2))
+        (u(b, 0x20, 4), u(b, 0x2e, 2), u(b, 0x30, 2), u(b, 0x32, 2))
     };
     let (shoff, shentsize, shnum) = (shoff as usize, shentsize as usize, shnum as usize);
-    // Поле f заголовка секции i: тип, смещение, размер, связь.
+    // Поле f заголовка секции i: имя, тип, смещение, размер, связь.
     let sh = |i: usize, f: &str| {
         let base = shoff + i * shentsize;
         let (at, size) = match (f, wide) {
+            ("name", _) => (0, 4),
             ("type", _) => (4, 4),
             ("offset", true) => (0x18, 8),
             ("size", true) => (0x20, 8),
@@ -72,7 +77,9 @@ pub fn parse(b: &[u8]) -> Elf {
             });
         }
     }
-    Elf { symbols }
+    let names = sh(shstrndx as usize, "offset");
+    let sections = (0..shnum).map(|i| cstr(b, names + sh(i, "name"))).collect();
+    Elf { symbols, sections }
 }
 
 /// Члены архива ar в формате GNU, кроме служебных.

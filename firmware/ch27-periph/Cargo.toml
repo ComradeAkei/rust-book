@@ -1,0 +1,28 @@
+[package]
+name = "ch27-periph"
+version = "0.1.0"
+description = "Глава 27, разделы 27.3–27.5: PAC и HAL — Peripherals::take, выводы с режимом в типе, UART0, драйвер 74HC595 на embedded-hal"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+ch25 = { path = "../../code/ch25", default-features = false }
+ch27 = { path = "../../code/ch27" }
+ch27-hal = { path = "../../code/ch27-hal" }
+# critical-section: Peripherals::take() отмечает выдачу под критической
+# секцией; реализацию для одного ядра даёт cortex-m.
+ch27-pac = { path = "../../code/ch27-pac", features = ["rt", "critical-section"] }
+cortex-m = { workspace = true, features = ["critical-section-single-core"] }
+cortex-m-rt = { workspace = true }
+cortex-m-semihosting = { workspace = true }
+embedded-hal = "1.0.0"
+
+[[bin]]
+name = "ch27-periph"
+test = false
+bench = false

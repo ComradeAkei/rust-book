@@ -1,0 +1,24 @@
+[package]
+name = "ch26-solutions"
+version = "0.1.0"
+description = "Глава 26: эталонные решения задач A, B и D (задача C — прошивка firmware/ch26-boot)"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+# Библиотека — no_std и #![no_builtins]: её memcpy и memset подключает
+# прошивка firmware/ch26-tasks вместо функций из compiler_builtins.
+# Программа задачи B — отдельный крейт в tiny/ со своим workspace.
+
+[features]
+# Счётчики вызовов memcpy и memset для прошивки ch26-tasks.
+count = []
+
+[[test]]
+name = "ch26"
+path = "tests/ch26.rs"
+
+[[test]]
+name = "naive"
+path = "tests/naive.rs"
