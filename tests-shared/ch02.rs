@@ -335,9 +335,10 @@ mod task_b {
     }
 
     /// Прошивки главы 27 — только для Cortex-M3 и старше (BASEPRI, CFSR,
-    /// MPU ARMv7-M, RTIC); тот же список исключает clippy для Cortex-M0 в
+    /// MPU ARMv7-M, RTIC), прошивка главы 30 — тоже: у ARMv6-M нет
+    /// счётчика тактов DWT. Тот же список исключает clippy для Cortex-M0 в
     /// `.github/workflows/ci.yml`.
-    const M3_ONLY: [&str; 8] = [
+    const M3_ONLY: [&str; 9] = [
         "ch27-core",
         "ch27-nvic",
         "ch27-periph",
@@ -346,6 +347,7 @@ mod task_b {
         "ch27-rtic",
         "ch27-station",
         "ch27-tasks",
+        "ch30-cycles",
     ];
 
     /// Собирает все прошивки из `firmware/` под Cortex-M0 и сверяет

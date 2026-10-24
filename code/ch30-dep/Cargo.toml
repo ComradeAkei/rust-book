@@ -1,0 +1,8 @@
+[package]
+name = "ch30-dep"
+version = "0.1.0"
+description = "Глава 30: внешний крейт для опытов со встраиванием между крейтами и LTO"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true

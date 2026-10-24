@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Прогоняет все прошивки глав 0, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 22, 23, 24, 25, 26 и 27 в QEMU и сверяет вывод с ожидаемым.
+# Прогоняет все прошивки глав 0, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 22, 23, 24, 25, 26, 27 и 30 в QEMU и сверяет вывод с ожидаемым.
 # Запуск: ./run-demos.sh (из каталога firmware). Используется и в CI.
 set -u
 cd "$(dirname "$0")"
@@ -127,6 +127,25 @@ fliplink() {
         echo "ok    $what"
     else
         echo "FAIL  $what: вершина стека 0x$top, .data с 0x$data"
+        fail=1
+    fi
+}
+
+# runicount <описание> <ожидаемая подстрока> <профиль> <аргументы cargo run...>
+# Как run, но QEMU ведёт время по выполненным инструкциям (-icount
+# shift=6: 64 нс на инструкцию), и SysTick lm3s6965 на 12,5 МГц отсчитывает
+# 0,8 тика на инструкцию при любой загрузке машины (раздел 30.8).
+runicount() {
+    local what="$1" expect="$2" profile="$3"
+    shift 3
+    local out
+    out=$(CARGO_TARGET_THUMBV7M_NONE_EABI_RUNNER="qemu-system-arm -cpu cortex-m3 -machine lm3s6965evb -nographic -semihosting-config enable=on,target=native -icount shift=6 -kernel" \
+        timeout 60 cargo run --profile "$profile" -q "$@" 2>&1 | grep -v 'Timer with period zero')
+    if grep -qF -- "$expect" <<<"$out"; then
+        echo "ok    $what"
+    else
+        echo "FAIL  $what: нет строки «$expect»"
+        echo "$out" | sed 's/^/      /'
         fail=1
     fi
 }
@@ -283,5 +302,10 @@ run "M3: три сбоя UsageFault и продолжение"  "три сбоя
 # Станцию главы 27 (ch27-station) здесь не запускаем: её UART0 выдаёт
 # двоичные кадры. Её запускает и разбирает на хосте тест
 # code/ch27/tests/station.rs.
+
+runicount "M3: DWT в QEMU не считает"          "DWT: has_cycle_counter() = true, DWT_CTRL = 0x00000000, CYCCNT 0 -> 0" release -p ch30-cycles
+runicount "M3: SysTick под -icount"            "SysTick: пустой замер 0 тиков, spin(1000) 1601 тиков" release -p ch30-cycles
+runicount "M3: O3 — CRC таблицей и так"        "opt-level = 3: CRC по 256 байтам — побитово 1353 тиков, по таблице 1351 тиков" release -p ch30-cycles
+runicount "M3: s — побитовая CRC вдесятеро дольше" "opt-level = s: CRC по 256 байтам — побитово 14349 тиков, по таблице 1447 тиков" release-s -p ch30-cycles
 
 exit $fail

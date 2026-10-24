@@ -28,8 +28,27 @@ jobs:
       # Глава 18 линкуется с zlib (crc32, compress); dev-символ libz.so даёт
       # zlib1g-dev. Ставим до clippy/теста, которые собирают крейты главы 18.
       # strace нужен тестам глав 15 и 28 и задаче 28.A: без него они
-      # пропускаются.
-      - run: sudo apt-get update && sudo apt-get install -y zlib1g-dev strace
+      # пропускаются. valgrind (cachegrind) и perf нужны опытам и задачам
+      # главы 30 — ставим до `cargo test`.
+      - run: |
+          sudo apt-get update
+          sudo apt-get install -y zlib1g-dev strace valgrind linux-tools-generic
+      # Глава 30: /usr/bin/perf — обёртка, которая ищет perf для ядра
+      # раннера и не находит; сам perf из linux-tools-generic с этим ядром
+      # работает. Ubuntu по умолчанию не пускает пользователя к событиям
+      # perf_event_open (kernel.perf_event_paranoid = 4). CH30_REQUIRE_*
+      # превращают пропуск опыта без инструмента в ошибку.
+      - name: perf и valgrind для главы 30
+        run: |
+          sudo sysctl -w kernel.perf_event_paranoid=1
+          perf=$(ls /usr/lib/linux-tools/*/perf | head -n 1)
+          "$perf" --version
+          {
+            echo "PERF=$perf"
+            echo "CH30_REQUIRE_PERF=1"
+            echo "CH30_REQUIRE_PERF_EVENTS=1"
+            echo "CH30_REQUIRE_VALGRIND=1"
+          } >> "$GITHUB_ENV"
       - run: cargo fmt --all --check
       - run: cargo fmt --all --check
         working-directory: firmware
@@ -101,6 +120,9 @@ jobs:
       # на пути ошибки GCC -Wall и clang --analyze не видят, -fanalyzer —
       # только без оптимизации, valgrind --track-fds=yes — всегда.
       - run: bash code/ch28/c/run.sh
+      # Раздел 30.5: PGO программы главы 30. llvm-profdata той же версии
+      # LLVM, что у rustc, даёт компонент llvm-tools.
+      - run: rustup component add llvm-tools && bash code/ch30/pgo/run.sh
       # Заготовки студента не проходят тесты, пока задачи не решены,
       # но обязаны собираться.
       - run: |
@@ -112,7 +134,7 @@ jobs:
             -p ch17-exercises -p ch18-exercises -p ch19-exercises -p ch20-exercises \
             -p ch21-exercises -p ch22-exercises -p ch23-exercises -p ch24-exercises \
             -p ch25-exercises -p ch26-exercises -p ch27-exercises -p ch28-exercises \
-            -p ch29-exercises -p project-frame -p project-store \
+            -p ch29-exercises -p ch30-exercises -p project-frame -p project-store \
             --all-targets
       # Вложенные рабочие пространства глав 7, 8, 24 и 26 корневой cargo не
       # видит: их собирают тесты, а формат и clippy проверяются здесь. В typo
@@ -443,6 +465,11 @@ jobs:
       # проверяет задание kernel); разбор трассы и objdump задачи D2 и
       # служебные функции хоста от раскладки не зависят.
       - run: cargo +nightly test -p ch29 -p ch29-solutions
+      # Глава 30: `rustc_` — ассемблер закреплённого компилятора,
+      # `observed_` — время. valgrind и perf это задание не ставит: опыты
+      # под ними пропускаются. Структуры, байты которых считают опыты, —
+      # repr(C), остальное от раскладки не зависит.
+      - run: cargo +nightly test -p ch30 -p ch30-solutions -- --skip rustc_ --skip observed
 
   # Глава 29: модули ядра Linux 7.0 на Rust. Ядра собираются здесь же
   # (code/ch29/kernel/build.sh), опыты и задачи идут в QEMU под KVM.
@@ -677,14 +704,15 @@ jobs:
           done
       # Прошивки главы 27 — только для Cortex-M3 и старше: BASEPRI, CFSR,
       # MPU ARMv7-M, RTIC с thumbv7-backend и атомарный fetch_add, которых
-      # у Cortex-M0 нет. Под thumbv6m они исключены; тот же список — в
-      # задаче 2.B (tests-shared/ch02.rs, M3_ONLY).
+      # у Cortex-M0 нет. Прошивка главы 30 читает счётчик тактов DWT,
+      # которого нет у ARMv6-M. Под thumbv6m они исключены; тот же список —
+      # в задаче 2.B (tests-shared/ch02.rs, M3_ONLY).
       - name: clippy для прошивок
         working-directory: firmware
         run: |
           m3only=(--exclude ch27-core --exclude ch27-nvic --exclude ch27-periph \
             --exclude ch27-irq --exclude ch27-fault --exclude ch27-rtic \
-            --exclude ch27-station --exclude ch27-tasks)
+            --exclude ch27-station --exclude ch27-tasks --exclude ch30-cycles)
           for t in thumbv7m-none-eabi thumbv7em-none-eabihf; do
             cargo clippy --workspace --target "$t" -- -D warnings
           done
@@ -710,7 +738,7 @@ jobs:
       - run: |
           sudo apt-get update && sudo apt-get install -y qemu-system-arm \
             gdb-multiarch llvm gcc-arm-none-eabi libnewlib-arm-none-eabi
-      - name: Опыты глав 0, 3, 5–13, 15, 22–27 в QEMU
+      - name: Опыты глав 0, 3, 5–13, 15, 22–27, 30 в QEMU
         run: bash firmware/run-demos.sh
       # Станция главы 27 шлёт двоичные кадры в UART0: тест запускает её в
       # QEMU с UART0 в файл и разбирает файл крейтом telemetry-frame.
