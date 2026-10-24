@@ -728,7 +728,7 @@ appa_clz:                   appa_clz:
 | `-fwrapv` | `wrapping_*`, `Wrapping<T>` | |
 | `-fno-strict-aliasing` | не нужен: алиасинг на основе типов в Rust не используется | правила для `&` и `&mut` ([гл. 4](ch04/index.md)) |
 | `-Wall -Wextra -Werror` | `cargo clippy -- -D warnings` | |
-| `-fsanitize=address`, `thread` | `-Zsanitizer=address`, `thread` (nightly) | для `unsafe` — ещё и Miri ([гл. 31](ch31.md)) |
+| `-fsanitize=address`, `thread` | `-Zsanitizer=address`, `thread` (nightly) | для `unsafe` — ещё и Miri ([гл. 31](ch31/06-miri-loom.md)) |
 | скрипт компоновки `-T` | `memory.x` и `-C link-arg=-Tlink.x` | `firmware/.cargo/config.toml` |
 | `.a`, `.so` | `crate-type = ["staticlib"]`, `["cdylib"]` | [гл. 8](ch08/06-crate-types.md), [гл. 18](ch18/04-owned.md) |
 | `pkg-config`, `-lfoo` | `build.rs` и `cargo:rustc-link-lib=foo` | |
