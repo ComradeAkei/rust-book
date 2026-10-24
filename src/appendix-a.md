@@ -687,8 +687,8 @@ appa_clz:                   appa_clz:
 | `volatile int flag` между потоками | `AtomicBool` | `volatile` не синхронизирует ни в C, ни в Rust |
 | `__thread`, `_Thread_local` | `thread_local!` | |
 | гонка данных | ошибка компиляции | `Send` и `Sync` ([гл. 20](ch20/02-marker.md)) |
-| `signal`, `sigaction` | нет в std; `libc::sigaction`, крейт `signal-hook` | [гл. 28](ch28.md) |
-| `fork` | `std::process::Command`; сам `fork` — через libc и `unsafe` | [гл. 28](ch28.md) |
+| `signal`, `sigaction` | нет в std; `libc::sigaction`, крейт `signal-hook` | [28.4](ch28/04-signals.md) |
+| `fork` | `std::process::Command`; сам `fork` — через libc и `unsafe` | [28.3](ch28/03-processes.md) |
 
 ```rust
 {{#include ../code/appendix-a/src/threads.rs:mutex}}
