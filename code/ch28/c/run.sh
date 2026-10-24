@@ -71,10 +71,23 @@ out=$("$tmp/copy-ok" "$tmp/src" "$tmp/нет/dst" 3)
 expect "copy.c: ошибка второго open — errno первой ошибки" есть \
     "попытка 3: ошибка: No such file or directory" "$out"
 
+# Запуск без дескрипторов, унаследованных от родителя: valgrind
+# --track-fds считает и их (`<inherited from parent>`), а раннер CI
+# оставляет открытыми два своих — 142 и 145.
+only_std_fds() {
+    (
+        for fd in /proc/self/fd/*; do
+            fd=${fd##*/}
+            if [ "$fd" -gt 2 ]; then eval "exec $fd>&-"; fi
+        done
+        exec "$@"
+    )
+}
+
 if command -v valgrind >"$tmp/which"; then
-    v=$(valgrind -q --track-fds=yes "$tmp/copy-ok" "$tmp/src" "$tmp/нет/dst" 3 2>&1)
+    v=$(only_std_fds valgrind -q --track-fds=yes "$tmp/copy-ok" "$tmp/src" "$tmp/нет/dst" 3 2>&1)
     expect "copy.c (ok): valgrind — только stdin, stdout, stderr" нет "Open file descriptor" "$v"
-    v=$(valgrind -q --track-fds=yes "$tmp/copy-leak" "$tmp/src" "$tmp/нет/dst" 3 2>&1)
+    v=$(only_std_fds valgrind -q --track-fds=yes "$tmp/copy-leak" "$tmp/src" "$tmp/нет/dst" 3 2>&1)
     expect "copy.c (leak): valgrind — три лишних дескриптора" есть \
         "FILE DESCRIPTORS: 6 open (3 std) at exit." "$v"
     expect "copy.c (leak): открыт источник" есть "Open file descriptor 5: $tmp/src" "$v"
