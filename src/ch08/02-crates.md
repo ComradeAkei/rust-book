@@ -27,11 +27,11 @@
 `.a` в C, но с дополнительным членом:
 
 ```console
-$ ar t target/release/deps/libch08-*.rlib
+$ ar t target/release/libch08.rlib
 lib.rmeta
 lib.rmeta-link
 ch08-dbc3f91b9c39215e.ch08.a82abf8906bb433a-cgu.0.rcgu.o
-$ ar x target/release/deps/libch08-*.rlib && wc -c lib.rmeta lib.rmeta-link ch08-*.o
+$ ar x target/release/libch08.rlib && wc -c lib.rmeta lib.rmeta-link ch08-*.o
 35400 lib.rmeta
   640 lib.rmeta-link
 20880 ch08-dbc3f91b9c39215e.ch08.a82abf8906bb433a-cgu.0.rcgu.o

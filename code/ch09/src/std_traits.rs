@@ -151,9 +151,9 @@ pub fn gain(map: &BTreeMap<String, Q15>, sensor: &str) -> Option<Q15> {
 // ANCHOR_END: borrow
 
 // ANCHOR: default
-/// Настройки опроса. `Default` выведен для всей структуры, потому что он
-/// есть у каждого поля; у `period_ms` разумный ноль быть не может, поэтому
-/// реализация ручная.
+/// Настройки опроса. `Default` можно было бы вывести для всей структуры,
+/// потому что он есть у каждого поля, но у `period_ms` разумный ноль быть
+/// не может, поэтому реализация ручная.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PollConfig {
     pub period_ms: u32,

@@ -149,7 +149,7 @@ Sensor` и реализовывали его в каждом типе одной
 `Actuator`, и от датчика к узлу не добраться:
 
 ```text
-error[E0605]: non-primitive cast: `&dyn Sensor` as `&dyn Node`
+error[E0605]: non-primitive cast: `&dyn Sensor` as `&(dyn Node + 'static)`
  --> l.rs:4:5
   |
 4 |     s as &dyn Node
