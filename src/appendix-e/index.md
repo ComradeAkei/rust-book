@@ -44,3 +44,4 @@
 | 27. Cortex-M на Rust | [разбор](ch27.md), код в `solutions/ch27`, прошивки в `firmware/ch27-tasks` |
 | 28. Системное программирование под Linux | [разбор](ch28.md), код в `solutions/ch28` |
 | 29. Rust в ядре Linux | [разбор](ch29.md), код в `solutions/ch29`, модули ядра в `solutions/ch29/modules` |
+| 30. Производительность и профилирование | [разбор](ch30.md), код в `solutions/ch30` |

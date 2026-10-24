@@ -306,6 +306,7 @@ src/                      текст книги (mdBook)
   ch27/                   глава 27, по файлу на раздел
   ch28/                   глава 28, по файлу на раздел
   ch29/                   глава 29, по файлу на раздел
+  ch30/                   глава 30, по файлу на раздел, и flamegraph.svg раздела 30.3
   appendix-e/             разборы задач всех глав
 code/chNN/                примеры главы; листинги попадают в текст через {{#include}}
 code/ch01/c/ … ch15/c/    те же примеры на C и run.sh, который сверяет их вывод с текстом
@@ -359,6 +360,11 @@ code/ch29/kernel/         build.sh и фрагменты .config: ядра Linux
 code/ch29/modules/        модули ядра главы на Rust и их пары на C; собирает Kbuild, а не cargo
 code/ch29/modules-fail/   модули, которые не должны собраться: pin, Send/Sync, плавающая точка, границы MMIO
 code/ch29/tests/          опыты главы в QEMU, сеанс gdb, .modinfo, разбор трассы oops, цитаты из ядра
+code/ch30/src/bin/        программы опытов главы 30: часы, счётчики, профиль, матрица, проверки, память, станция
+code/ch30/benches/        замеры criterion и divan, счётчик выделений divan
+code/ch30/tests/          ассемблер, модель кэша и предсказателя cachegrind, профиль perf, время с запасом
+code/ch30/pgo/            run.sh: PGO программы inlining и ассемблер check_plain с профилем и без
+code/ch30-dep/            «чужой» крейт для опытов главы 30 со встраиванием между крейтами
 code/ch07/c-size/         программа задачи 7.C: размер при panic = "unwind" и "abort"
 code/ch07/hir/            во что раскрывается `?`: снимок HIR для раздела 7.1
 code/ch08/typo/ unify/ ffi/  отдельные рабочие пространства для опытов главы 8 с cargo
@@ -385,6 +391,7 @@ tests-shared/ch24-ui/     снимки ошибок задач 24.B–24.D дл�
 tests-shared/ch28-ops.rs  программа задачи 28.A: шесть операций std между метками getppid
 tests-shared/ch29/        фрагменты задачи 29.A на C и Rust, эталон счётчика задачи 29.C на C
 tests-shared/ch29-guest.rs  init гостя задач главы 29: сценарии A–D2 в QEMU
+tests-shared/ch30-task.rs  программа замеров задач главы 30: тесты зовут её напрямую и под cachegrind
 project/                  сквозной проект «станция телеметрии»
 firmware/                 прошивки для QEMU (отдельный workspace)
 theme/                    стили врезок: справка, сравнение с C, под капотом, трюк, ловушка
@@ -411,7 +418,11 @@ tools/                    вспомогательные проверки для
 - для главы 29 — clang, lld и llvm 18, flex, bison, bc, libelf, cpio,
   компонент `rust-src` и bindgen-cli 0.72.1 для сборки ядра,
   `qemu-system-x86_64` 8.x и gdb для опытов; без собранного ядра
-  (`bash code/ch29/kernel/build.sh`) тесты главы пропускаются.
+  (`bash code/ch29/kernel/build.sh`) тесты главы пропускаются;
+- для главы 30 — valgrind 3.22 (cachegrind), perf из `linux-tools` (путь
+  можно задать в `PERF`), компонент `llvm-tools` для PGO и inferno для
+  flamegraph; без valgrind и perf их опыты пропускаются, а
+  `CH30_REQUIRE_VALGRIND` и `CH30_REQUIRE_PERF` делают пропуск ошибкой.
 
 ## Задачи
 
@@ -461,6 +472,9 @@ $ cargo test -p ch28-exercises            # задачи A–D главы 28 (A 
 $ bash code/ch29/kernel/build.sh          # ядра Linux 7.0 для главы 29: обычное и отладочное
 $ cargo test -p ch29                      # опыты главы 29 в QEMU, gdb и модули, которые не собираются
 $ cargo test -p ch29-exercises            # задачи A–D2 главы 29 (модули ядра — в exercises/ch29/modules)
+$ cargo test -p ch30                      # опыты главы 30: ассемблер, cachegrind, perf, время
+$ cargo test -p ch30-exercises            # задачи A–D главы 30 (замеры — программа ch30-task)
+$ bash code/ch30/pgo/run.sh               # PGO: горячий путь подряд по профилю (раздел 30.5)
 $ cargo test -p project-frame             # задачи П6, П7, П12 и П13
 $ cargo test -p project-frame p7          # только П7
 $ cargo test -p project-frame p12         # только П12
