@@ -1,0 +1,19 @@
+[package]
+name = "ch28"
+version = "0.1.0"
+description = "Глава 28: системное программирование под Linux — системные вызовы, дескрипторы, процессы, сигналы, mmap, epoll, /proc, журнал кадров"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+# Крейт только для Linux: системные вызовы, fork, сигналы и mmap. Под Miri и
+# под Cortex-M не идёт. Опыты, которые трогают состояние всего процесса
+# (сигналы, fork, счётчики страничных сбоев), — отдельные программы в
+# src/bin: тесты запускают их через CARGO_BIN_EXE_*, иногда под strace.
+
+[dependencies]
+libc = "0.2.191"
+rustix = { version = "1.1.5", features = ["event", "fs", "mm", "pipe", "process", "pty", "stdio", "termios", "time"] }
+nix = { version = "0.31.3", features = ["fs", "mman", "process", "resource", "signal", "term"] }
+telemetry-frame = { path = "../../project/telemetry-frame" }

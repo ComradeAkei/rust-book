@@ -1,0 +1,24 @@
+[package]
+name = "ch28-exercises"
+version = "0.1.0"
+description = "Глава 28: заготовки задач A–D для студента — strace, ls на getdents64, мини-оболочка, поиск через mmap"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+# Крейт только для Linux. Программа операций задачи A — общая для
+# заготовок и решений и лежит в tests-shared; оболочка задачи C и замер
+# задачи D — программы крейта, тесты запускают их через CARGO_BIN_EXE_*.
+[dependencies]
+libc = "0.2.191"
+rustix = { version = "1.1.5", features = ["event", "fs", "mm", "pipe", "process", "pty", "stdio", "termios"] }
+nix = { version = "0.31.3", features = ["process", "resource", "signal"] }
+
+[[bin]]
+name = "ch28-ops"
+path = "../../tests-shared/ch28-ops.rs"
+
+[[test]]
+name = "ch28"
+path = "tests/ch28.rs"

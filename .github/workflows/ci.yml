@@ -27,7 +27,9 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       # Глава 18 линкуется с zlib (crc32, compress); dev-символ libz.so даёт
       # zlib1g-dev. Ставим до clippy/теста, которые собирают крейты главы 18.
-      - run: sudo apt-get update && sudo apt-get install -y zlib1g-dev
+      # strace нужен тестам глав 15 и 28 и задаче 28.A: без него они
+      # пропускаются.
+      - run: sudo apt-get update && sudo apt-get install -y zlib1g-dev strace
       - run: cargo fmt --all --check
       - run: cargo fmt --all --check
         working-directory: firmware
@@ -95,6 +97,10 @@ jobs:
       # из C23 без функций, делитель UART препроцессором и #error. Нужен
       # gcc 13 — он в образе ubuntu-24.04.
       - run: bash code/ch25/c/run.sh
+      # C-пример главы 28: копия файла с errno и goto. Утечку дескриптора
+      # на пути ошибки GCC -Wall и clang --analyze не видят, -fanalyzer —
+      # только без оптимизации, valgrind --track-fds=yes — всегда.
+      - run: bash code/ch28/c/run.sh
       # Заготовки студента не проходят тесты, пока задачи не решены,
       # но обязаны собираться.
       - run: |
@@ -105,7 +111,8 @@ jobs:
             -p ch13-exercises -p ch14-exercises -p ch15-exercises -p ch16-exercises \
             -p ch17-exercises -p ch18-exercises -p ch19-exercises -p ch20-exercises \
             -p ch21-exercises -p ch22-exercises -p ch23-exercises -p ch24-exercises \
-            -p ch25-exercises -p ch26-exercises -p ch27-exercises -p project-frame -p project-store \
+            -p ch25-exercises -p ch26-exercises -p ch27-exercises -p ch28-exercises \
+            -p project-frame -p project-store \
             --all-targets
       # Вложенные рабочие пространства глав 7, 8, 24 и 26 корневой cargo не
       # видит: их собирают тесты, а формат и clippy проверяются здесь. В typo
@@ -428,6 +435,10 @@ jobs:
       # прошивки; остальное от раскладки не зависит, кадры исключений —
       # #[repr(C)]. Тест станции с QEMU помечен ignore.
       - run: cargo +nightly test -p ch27 -p ch27-hal -p ch27-solutions -- --skip rustc_
+      # Глава 28: системные вызовы, процессы, сигналы, mmap и задачи —
+      # от раскладки repr(Rust) не зависят. strace это задание не ставит:
+      # если его нет в образе, тесты под ним пропускаются.
+      - run: cargo +nightly test -p ch28 -p ch28-solutions
 
   thumb:
     name: Cortex-M и QEMU
