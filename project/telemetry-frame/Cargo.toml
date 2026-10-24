@@ -10,3 +10,7 @@ publish.workspace = true
 [[test]]
 name = "frame"
 path = "tests/frame.rs"
+
+# Шаг главы 31: модуль proofs собирает только Kani, он задаёт `cfg(kani)`.
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ["cfg(kani)"] }

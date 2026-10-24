@@ -28,6 +28,10 @@ use core::num::NonZeroU16;
 pub mod parse;
 pub mod stream;
 
+// Шаг главы 31: доказательства Kani, только под `cargo kani`.
+#[cfg(kani)]
+mod proofs;
+
 pub const MAGIC: u8 = 0xA5;
 pub const VERSION: u8 = 1;
 pub const HEADER_LEN: usize = 8;

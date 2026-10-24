@@ -1,0 +1,62 @@
+# Раздел 31.4: цели cargo-fuzz. Свой workspace: cargo fuzz собирает этот
+# крейт nightly-компилятором с инструментированием покрытия и
+# санитайзером. Каталог лежит внутри члена корневого workspace (code/ch31),
+# поэтому `exclude` в корне его не исключил бы — нужна пустая таблица.
+[workspace]
+
+[package]
+name = "ch31-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2024"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4.13"
+ch31 = { path = "..", features = ["arbitrary"] }
+telemetry-frame = { path = "../../../project/telemetry-frame" }
+arbitrary = { version = "1.5.0", features = ["derive"] }
+
+[[bin]]
+name = "cmd_v1"
+path = "fuzz_targets/cmd_v1.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "cmd_v1_shape"
+path = "fuzz_targets/cmd_v1_shape.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "cmd"
+path = "fuzz_targets/cmd.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "cmd_round_trip"
+path = "fuzz_targets/cmd_round_trip.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "slip"
+path = "fuzz_targets/slip.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "frames"
+path = "fuzz_targets/frames.rs"
+test = false
+doc = false
+bench = false

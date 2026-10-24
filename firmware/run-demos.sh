@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Прогоняет все прошивки глав 0, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 22, 23, 24, 25, 26, 27 и 30 в QEMU и сверяет вывод с ожидаемым.
+# Прогоняет все прошивки глав 0, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 22, 23, 24, 25, 26, 27, 30 и 31 в QEMU и сверяет вывод с ожидаемым.
 # Запуск: ./run-demos.sh (из каталога firmware). Используется и в CI.
 set -u
 cd "$(dirname "$0")"
@@ -307,5 +307,8 @@ runicount "M3: DWT в QEMU не считает"          "DWT: has_cycle_counter
 runicount "M3: SysTick под -icount"            "SysTick: пустой замер 0 тиков, spin(1000) 1601 тиков" release -p ch30-cycles
 runicount "M3: O3 — CRC таблицей и так"        "opt-level = 3: CRC по 256 байтам — побитово 1353 тиков, по таблице 1351 тиков" release -p ch30-cycles
 runicount "M3: s — побитовая CRC вдесятеро дольше" "opt-level = s: CRC по 256 байтам — побитово 14349 тиков, по таблице 1447 тиков" release-s -p ch30-cycles
+
+run "M3: take_v1 теряет отсчёт при SysTick"   "take_v1, прерывание перед обращением 3: Outcome { taken: (100, 10), left: (7, 0) }" -p ch31-tests
+run "M3: тесты главы 31 без std в QEMU"       "test result: ok. 4 passed; 0 failed" -p ch31-tests
 
 exit $fail

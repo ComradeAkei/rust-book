@@ -1,0 +1,14 @@
+# Раздел 31.9: приложение с двумя безобидными зависимостями, которые
+# запускают свой код при сборке. Пустая таблица [workspace]: крейт лежит
+# внутри рабочего пространства учебника, но в него не входит.
+[workspace]
+
+[package]
+name = "ch31-supply-app"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+ch31-supply-dep = { path = "../dep" }
+ch31-supply-mac = { path = "../mac" }

@@ -1,0 +1,12 @@
+[package]
+name = "ch31-irq"
+version = "0.1.0"
+description = "Глава 31, раздел 31.2: логика прерывания АЦП без железа и без std — её проверяют и тесты на хосте, и прошивка firmware/ch31-tests в QEMU"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[[test]]
+name = "preempt"
+path = "tests/preempt.rs"

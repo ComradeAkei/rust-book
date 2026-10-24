@@ -155,10 +155,12 @@ jobs:
             -p ch17-exercises -p ch18-exercises -p ch19-exercises -p ch20-exercises \
             -p ch21-exercises -p ch22-exercises -p ch23-exercises -p ch24-exercises \
             -p ch25-exercises -p ch26-exercises -p ch27-exercises -p ch28-exercises \
-            -p ch29-exercises -p ch30-exercises -p project-frame -p project-store \
-            --all-targets
-      # Вложенные рабочие пространства глав 7, 8, 24 и 26 корневой cargo не
-      # видит: их собирают тесты, а формат и clippy проверяются здесь. В typo
+            -p ch29-exercises -p ch30-exercises -p ch31-exercises -p project-frame \
+            -p project-store --all-targets
+      # Вложенные рабочие пространства глав 7, 8, 24, 26 и 31 корневой cargo
+      # не видит: их собирают тесты и скрипты, а формат и clippy проверяются
+      # здесь. Цели фаззинга главы 31 clippy проверяет и без nightly: сборки
+      # с инструментированием для этого не нужно. В typo
       # предупреждения о cfg — предмет опыта, в заготовке d-station ошибка
       # сборки — условие задачи 8.D, поэтому clippy их не проверяет. В
       # code/ch24/renamed ошибка сборки — под feature broken, которую clippy
@@ -168,12 +170,16 @@ jobs:
           for ws in code/ch07/c-size code/ch08/typo code/ch08/unify code/ch08/ffi \
               exercises/ch08/c/station solutions/ch08/c/station \
               exercises/ch08/d-station solutions/ch08/d-station code/ch24/renamed \
-              code/ch26/start solutions/ch26/tiny exercises/ch26/tiny; do
+              code/ch26/start solutions/ch26/tiny exercises/ch26/tiny \
+              code/ch31/fuzz exercises/ch31/fuzz solutions/ch31/fuzz \
+              code/ch31/supply/build/app code/ch31/supply/vet; do
             cargo fmt --all --check --manifest-path "$ws/Cargo.toml"
           done
           for ws in code/ch07/c-size code/ch08/unify code/ch08/ffi \
               exercises/ch08/c/station solutions/ch08/c/station solutions/ch08/d-station \
-              code/ch24/renamed code/ch26/start solutions/ch26/tiny exercises/ch26/tiny; do
+              code/ch24/renamed code/ch26/start solutions/ch26/tiny exercises/ch26/tiny \
+              code/ch31/fuzz exercises/ch31/fuzz solutions/ch31/fuzz \
+              code/ch31/supply/build/app code/ch31/supply/vet; do
             cargo clippy --manifest-path "$ws/Cargo.toml" --all-targets -- -D warnings
           done
 
@@ -709,6 +715,13 @@ jobs:
           for t in thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabihf; do
             cargo build -p ch27 -p ch27-pac -p ch27-hal -p ch27-solutions -p ch27-exercises --target "$t"
           done
+      # Глава 31: логика прерывания АЦП без std — та же, что тесты хоста и
+      # прошивка ch31-tests в QEMU.
+      - name: Глава 31 (логика прерывания) без std под три цели Cortex-M
+        run: |
+          for t in thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabihf; do
+            cargo build -p ch31-irq --target "$t"
+          done
       - name: Главы 0–2 без std под три цели Cortex-M
         run: |
           for t in thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabihf; do
@@ -761,7 +774,7 @@ jobs:
       - run: |
           sudo apt-get update && sudo apt-get install -y qemu-system-arm \
             gdb-multiarch llvm gcc-arm-none-eabi libnewlib-arm-none-eabi
-      - name: Опыты глав 0, 3, 5–13, 15, 22–27, 30 в QEMU
+      - name: Опыты глав 0, 3, 5–13, 15, 22–27, 30, 31 в QEMU
         run: bash firmware/run-demos.sh
       # Станция главы 27 шлёт двоичные кадры в UART0: тест запускает её в
       # QEMU с UART0 в файл и разбирает файл крейтом telemetry-frame.
@@ -779,6 +792,92 @@ jobs:
       # memset циклом при -O2 без -ffreestanding зовёт саму себя.
       - name: C-примеры главы 26 с arm-none-eabi-gcc и newlib
         run: bash code/ch26/c/run.sh
+
+  # Глава 31, инструменты, которые исполняют код: фаззеры, санитайзеры,
+  # Miri и loom. Каждый скрипт сверяет вердикты и строки отчётов с текстом.
+  ch31-dynamic:
+    name: Глава 31 — фаззинг, санитайзеры, Miri, loom
+    runs-on: ubuntu-24.04
+    env:
+      # Без nightly с rust-src опыты с санитайзерами не пропускаются, а
+      # падают.
+      CH31_REQUIRE_SANITIZERS: 1
+    steps:
+      - uses: actions/checkout@v4
+      # Санитайзерам нужен -Zbuild-std, то есть исходники std.
+      - run: |
+          rustup toolchain install
+          rustup toolchain install nightly --profile minimal --component miri,rust-src
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ch31-dynamic
+          workspaces: |
+            . -> target
+            code/ch31/fuzz -> target
+            solutions/ch31/fuzz -> target
+      - name: Установить cargo-fuzz 0.13.2
+        run: cargo install --locked cargo-fuzz@0.13.2
+      - run: cargo +nightly miri setup
+      # Раздел 31.5: ASan и TSan над программой san, с -Zbuild-std и без.
+      - run: cargo test -p ch31 --test sanitizers
+      # Раздел 31.4 и задача 31.B: падения и их число запусков при одном
+      # зерне, чистые прогоны исправленных разборов.
+      - run: bash code/ch31/fuzz/run.sh
+      - run: bash solutions/ch31/fuzz/run.sh
+      # Раздел 31.6: опыты san под Miri и тесты главы под обеими моделями
+      # алиасинга. Тесты, которые запускают cargo и дочерние процессы, и
+      # свойства proptest (файлу регрессий нужен getcwd, которого в
+      # изоляции Miri нет, а сотни случаев шли бы минуты) под Miri
+      # помечены ignore.
+      - run: bash code/ch31/miri/run.sh
+      - run: cargo +nightly miri test -p ch31 -p ch31-irq -p ch31-solutions
+      - run: cargo +nightly miri test -p ch31 -p ch31-irq -p ch31-solutions
+        env:
+          MIRIFLAGS: -Zmiri-tree-borrows
+      # Раздел 31.6: loom перебирает чередования очереди главы 21. Свой
+      # каталог сборки: --cfg loom меняет все крейты.
+      - run: RUSTFLAGS="--cfg loom" cargo test -p ch31 --release --test loom --target-dir target/loom
+
+  # Глава 31, инструменты, которые рассуждают о коде или о зависимостях:
+  # Kani, CBMC, cargo-mutants, cargo-deny, cargo-audit, cargo-vet, — и
+  # C-примеры главы: им нужен CBMC из пакета Kani.
+  ch31-static:
+    name: Глава 31 — Kani, мутанты, цепочка поставок
+    runs-on: ubuntu-24.04
+    env:
+      # Без cargo-mutants прогон задачи D пропускается, с этим флагом —
+      # падает.
+      CH31_REQUIRE_MUTANTS: 1
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup toolchain install
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ch31-static
+      # Версии — те, с которых снят вывод в тексте главы.
+      - name: Установить Kani 0.68.0, cargo-mutants, cargo-deny, cargo-audit и cargo-vet
+        run: |
+          cargo install --locked kani-verifier@0.68.0 cargo-mutants@27.1.0 \
+            cargo-deny@0.20.2 cargo-audit@0.22.2 cargo-vet@0.10.3
+          cargo kani setup
+      # Разделы 31.7 и 31.10, задачи C и D: вердикты всех доказательств,
+      # контрпример parse_v1, граница развёртки, пустое доказательство.
+      - run: bash code/ch31/kani/run.sh
+      # «Как в C» разделов 31.4 и 31.7: libFuzzer и ASan на той же ошибке в
+      # C и CBMC из пакета Kani. libclang-rt-18-dev — рантаймы compiler-rt
+      # для clang (gcc с libasan и clang 18 есть в образе); без них и без
+      # CBMC скрипт пропускал бы эти части.
+      - run: sudo apt-get update && sudo apt-get install -y libclang-rt-18-dev
+      - run: bash code/ch31/c/run.sh
+      # Разделы 31.8 и 31.10: два выживших мутанта до тестов проекта, ни
+      # одного — после.
+      - run: bash code/ch31/mutants/run.sh
+      # Задача D: тесты решения убивают всех мутантов хранилища проекта.
+      - run: cargo test -p ch31-solutions
+      # Раздел 31.9: политика deny.toml на пяти рабочих пространствах, код
+      # при сборке, cargo audit на Cargo.lock учебника и на старом smallvec,
+      # cargo vet. Нужна сеть: база RustSec и сведения crates.io.
+      - run: bash code/ch31/supply/run.sh
 
   book:
     name: mdBook

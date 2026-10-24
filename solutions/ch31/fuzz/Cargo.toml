@@ -1,0 +1,45 @@
+# Задача 31.B, решение: цели cargo-fuzz для оракулов из src/b_fuzz — на
+# исправленных копиях (packet, config) и на копиях заготовки с внедрёнными
+# ошибками (*_injected). Свой workspace, как у code/ch31/fuzz.
+[workspace]
+
+[package]
+name = "ch31-solutions-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2024"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4.13"
+ch31-solutions = { path = ".." }
+
+[[bin]]
+name = "packet"
+path = "fuzz_targets/packet.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "config"
+path = "fuzz_targets/config.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "packet_injected"
+path = "fuzz_targets/packet_injected.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "config_injected"
+path = "fuzz_targets/config_injected.rs"
+test = false
+doc = false
+bench = false

@@ -15,3 +15,7 @@
 /code/ch26/start/target
 /exercises/ch26/tiny/target
 /solutions/ch26/tiny/target
+/code/ch31/supply/build/app/target
+/code/ch31/supply/vet/target
+/code/ch31/supply/build/build-rs-ran
+/code/ch31/supply/build/proc-macro-ran
