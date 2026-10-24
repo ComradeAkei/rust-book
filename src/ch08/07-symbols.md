@@ -20,7 +20,7 @@
 ```
 
 ```console
-$ nm target/release/deps/libch08-*.rlib | grep -E ' [TD] '
+$ nm target/release/libch08.rlib | grep -E ' [TD] '
 0000000000000000 T _RINvNtCser9eqLlbKoo_4ch087symbols8checksumAhj4_EB4_
 0000000000000000 T _RINvNtCser9eqLlbKoo_4ch087symbols8checksumRShEB4_
 0000000000000000 T _RNvMNtCser9eqLlbKoo_4ch087symbolsNtB2_4Uart4send
@@ -30,7 +30,7 @@ $ nm target/release/deps/libch08-*.rlib | grep -E ' [TD] '
 0000000000000000 T ch08_bump
 0000000000000000 T station_reset
 0000000000000000 T station_version
-$ nm -C target/release/deps/libch08-*.rlib | grep -E ' [TD] '
+$ nm -C target/release/libch08.rlib | grep -E ' [TD] '
 0000000000000000 T ch08::symbols::checksum::<[u8; 4]>
 0000000000000000 T ch08::symbols::checksum::<&[u8]>
 0000000000000000 T <ch08::symbols::Uart>::send
@@ -54,7 +54,7 @@ _R                                 символ Rust, схема v0
 Nv                                 имя из пространства значений (функция) внутри …
   M                                … собственной реализации, impl Uart { … }:
     NtCser9eqLlbKoo_4ch087symbols  где написан impl: модуль ch08::symbols
-    NtB2_4Uart                     для какого типа: Uart в пути со смещения 2
+    NtB2_4Uart                     для какого типа: Uart в пути со смещения 3
   4send                            имя функции
 ```
 
@@ -64,7 +64,8 @@ Nv                                 имя из пространства знач
 версии и источника пакета и настроек сборки, поэтому две версии одного
 крейта в одной программе получают разные дизамбигуаторы (у отладочной
 сборки `ch08` он тоже другой, `s2zcVwUOuYdq_`).
-`B2_` — ссылка назад: «то же, что начинается со смещения 2 после `_R`»,
+`B2_` — ссылка назад: «то же, что начинается со смещения 3 после `_R`»
+(числа в base-62 сдвинуты на единицу: `_` — 0, `0_` — 1, `2_` — 3),
 то есть уже записанный путь `ch08::symbols`. Ссылки делают имена
 обобщённого кода короче, ведь путь `core::iter::traits::iterator`
 встречается в них снова и снова.
@@ -95,13 +96,13 @@ _RINvNtCser9eqLlbKoo_4ch087symbols8checksumAhj4_EB4_
 
 ```console
 $ cargo +nightly rustc --release -p ch08 --lib -- -Zunstable-options -Csymbol-mangling-version=legacy
-$ nm libch08.rlib | grep -E ' [TD] '
+$ nm target/release/libch08.rlib | grep -E ' [TD] '
 0000000000000000 T _ZN4ch087symbols4Uart4send17h6c33827056ee2774E
 0000000000000000 T _ZN4ch087symbols4both17h24d8b2b2eef48db3E
 0000000000000000 T _ZN4ch087symbols8checksum17h795711b048e42a49E
 0000000000000000 T _ZN4ch087symbols8checksum17h932408d09e2c7265E
 …
-$ nm -C libch08.rlib | grep checksum
+$ nm -C target/release/libch08.rlib | grep checksum
 0000000000000000 T ch08::symbols::checksum
 0000000000000000 T ch08::symbols::checksum
 ```

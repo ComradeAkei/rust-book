@@ -40,8 +40,8 @@
 
 ```console
 $ cargo +nightly clean -p ch06    # иначе cargo возьмёт готовую сборку и ничего не напечатает
-$ cargo +nightly rustc -p ch06 --lib -- -Zprint-type-sizes 2>&1 | grep -A5 '`layout::Sample`'
-print-type-size type: `Sample`: 8 bytes, alignment: 4 bytes
+$ cargo +nightly rustc -p ch06 --lib -- -Zprint-type-sizes 2>&1 | grep -A4 '`layout::Sample`'
+print-type-size type: `layout::Sample`: 8 bytes, alignment: 4 bytes
 print-type-size     field `.value`: 4 bytes
 print-type-size     field `.channel`: 1 bytes
 print-type-size     field `.flags`: 1 bytes
@@ -104,16 +104,23 @@ Reference обещает для `repr(Rust)` совсем немного: пол
 
 ```console
 $ RUSTFLAGS="-Zrandomize-layout -Zlayout-seed=1" cargo +nightly test -p ch06 --lib layout
-thread 'layout::tests::observed::rustc_reorders_sample' panicked at code/ch06/src/layout.rs:117:13:
+thread 'layout::tests::observed::rustc_reorders_sample' (20091) panicked at code/ch06/src/layout.rs:116:13:
 assertion `left == right` failed
-  left: [0, 4, 1]
- right: [4, 0, 5]
+  left: 12
+ right: 8
 test result: FAILED. 6 passed; 1 failed
 ```
 
-С `-Zlayout-seed=2` падает и второй тест: `Record` вырастает до 24 байт.
-Тесты из группы `guaranteed` проходят при любом зерне. Если ваш код
-переживает `-Zrandomize-layout`, он не зависит от раскладки по умолчанию.
+`Sample` вырос до 12 байт: `value` оказался между двумя байтами, и
+вокруг него снова дыры. С `-Zlayout-seed=2` падают оба наблюдения:
+`Record` вырастает до 24 байт, а смещения полей `Sample` становятся
+`[0, 4, 1]`. Какое наблюдение упадёт при данном зерне, зависит и от
+версии nightly: зерно смешивается с хешем пути типа, а в этот хеш
+входит идентификатор крейта, который rustc вычисляет из имени крейта,
+флага `-C metadata` от cargo и своей версии. Листинг снят на nightly
+1.101.0 от 2026-10-23. Тесты из группы `guaranteed` проходят при любом
+зерне. Если ваш код переживает `-Zrandomize-layout`, он не зависит от
+раскладки по умолчанию.
 
 </div>
 

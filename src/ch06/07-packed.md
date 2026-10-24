@@ -247,8 +247,8 @@ UFSR.UNALIGNED: невыровненный доступ
 Падает сама печать `{:#010x}`, а не наш код. Дизассемблер показывает, где:
 
 ```text
-$ llvm-objdump -d target/thumbv7m-none-eabi/release/trap_fmt | grep -B1 ' efc:'
-     efa: e067         	b	0xfcc <core::fmt::write+0x1dc>
+$ llvm-objdump -d -C target/thumbv7m-none-eabi/release/trap_fmt | grep -B1 ' efc:'
+     efa: e067         	b	0xfcc <core::fmt::write+0x1dc> @ imm = #0xce
      efc: f8d6 0001    	ldr.w	r0, [r6, #0x1]
 ```
 

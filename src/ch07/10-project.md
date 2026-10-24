@@ -142,10 +142,11 @@ $ cargo run --release -q -p ch07-frame --bin quiet
 кадр отвергнут
 ```
 
-`direct` печатает то же, что `verbose`. А размеры кода (`llvm-size`,
-release, rustc 1.97.0) на Cortex-M3 различаются почти вчетверо:
+`direct` печатает то же, что `verbose`. А размеры кода (столбец `text` у
+`llvm-size`, как в разделе [7.8](08-nostd.md), release, rustc 1.97.0)
+на Cortex-M3 различаются почти вчетверо:
 
-| Прошивка | Cortex-M3, `.text` | Cortex-M0, `.text` | Cortex-M4F, `.text` |
+| Прошивка | Cortex-M3, `text` | Cortex-M0, `text` | Cortex-M4F, `text` |
 |---|---|---|---|
 | `quiet` | 2536 | 1656 | 2568 |
 | `direct` | 5792 | 5340 | 5904 |
