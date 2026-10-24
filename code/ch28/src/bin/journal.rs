@@ -11,6 +11,7 @@ use ch28::signals::signal_fd;
 use nix::sys::signal::Signal;
 use rustix::buffer::spare_capacity;
 use rustix::event::epoll::{self, CreateFlags, EventData, EventFlags};
+use rustix::io::Errno;
 use std::num::NonZeroU16;
 use std::path::Path;
 use std::time::Instant;
@@ -65,7 +66,13 @@ fn run(path: &Path) -> i32 {
     let mut events = Vec::with_capacity(2);
     loop {
         events.clear();
-        epoll::wait(&ep, spare_capacity(&mut events), None).unwrap();
+        // Обработчиков нет, но epoll_wait вернёт EINTR и после Ctrl-Z и
+        // `fg`: остановка и SIGCONT прерывают его (signal(7)).
+        match epoll::wait(&ep, spare_capacity(&mut events), None) {
+            Ok(_) => {}
+            Err(Errno::INTR) => continue,
+            Err(e) => panic!("epoll_wait: {e}"),
+        }
         for ev in &events {
             match ev.data.u64() {
                 SIGNALS => {

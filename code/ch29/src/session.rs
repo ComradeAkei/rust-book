@@ -44,14 +44,27 @@ pub struct Session {
     quiet: Vec<String>,
 }
 
+/// Записи, которые ядро печатает само, в своё время, а не в ответ на
+/// команду сеанса: уточнение частоты TSC и смена источника времени через
+/// секунду-другую после загрузки, жалобы таймеров и workqueue на
+/// медленную машину-хозяина. Когда хозяин нагружен (параллельные тесты,
+/// CI), они попадают между `insmod` и откликом модуля.
+const NOISE: [&str; 4] = [
+    "tsc: Refined TSC clocksource calibration",
+    "clocksource: ",
+    "hrtimer: interrupt took",
+    "hogged CPU for",
+];
+
 impl Session {
-    /// Открывает журнал и пропускает всё, что ядро напечатало при загрузке.
+    /// Открывает журнал и пропускает всё, что ядро напечатало при загрузке,
+    /// а потом — записи из `NOISE`.
     pub fn start() -> io::Result<Session> {
         crate::guest::setup()?;
         let mut kmsg = Kmsg::open()?;
         kmsg.drain();
         println!("{START}");
-        Ok(Session { kmsg, quiet: Vec::new() })
+        Ok(Session { kmsg, quiet: NOISE.map(String::from).to_vec() })
     }
 
     /// Не печатать записи, текст которых содержит `s`.

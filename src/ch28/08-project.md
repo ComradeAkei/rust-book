@@ -146,6 +146,10 @@
 SIGTERM и SIGINT — `msync` и выход с кодом 0, конец stdin — то же.
 Ни одного обработчика сигнала: SIGTERM, пришедший во время записи кадра,
 подождёт, пока цикл не дойдёт до `epoll_wait`, и кадр не порвётся.
+`EINTR` при этом всё равно бывает: по `signal(7)` остановка процесса
+(Ctrl-Z) и `SIGCONT` (`fg`) прерывают `epoll_wait` и без обработчиков.
+Первая версия демона делала здесь `unwrap()` и падала после Ctrl-Z и
+`fg`; ветка `Errno::INTR` просто ждёт снова.
 
 ```rust,ignore
 {{#include ../../code/ch28/src/bin/journal.rs:record}}
@@ -233,6 +237,7 @@ $ journal dump j.bin
 | `sigkill_keeps_committed_frames` | три кадра, SIGKILL без `msync` — `read_committed` и `Frames` находят все три со значениями |
 | `sighup_reports_sigterm_syncs_and_exits` | сводка по SIGHUP, строка не по формату — в stderr, SIGTERM — `msync` и код 0 |
 | `restart_continues_the_journal` | конец ввода, перезапуск, номер следующего кадра, SIGINT |
+| `stop_and_continue_do_not_break_the_loop` | три раза SIGSTOP и SIGCONT в `epoll_wait` — демон принимает кадры дальше |
 | `second_daemon_on_same_journal_is_refused` | второй демон — код 1 и `Resource temporarily unavailable` |
 | `frames_survive_reopen_and_are_seen_by_read` | `read` видит те же байты, что журнал; переоткрытие считает кадры |
 | `second_writer_is_refused`, `full_journal_refuses_and_keeps_frames`, `uncommitted_bytes_are_not_frames`, `foreign_file_is_rejected` | `flock`, полный журнал, незафиксированный кадр, чужой файл |

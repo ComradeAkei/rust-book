@@ -131,8 +131,16 @@ impl Kernel {
 
 /// Программа гостя: `cargo build --release` статически, с crt-static, в
 /// отдельный каталог target — у вложенной сборки свои RUSTFLAGS.
+///
+/// `cargo` — через прокси rustup из `PATH`, а не сам `env!("CARGO")`:
+/// прокси выбирает toolchain по rust-toolchain.toml и передаёт его
+/// вызовам `rustc` в `RUSTUP_TOOLCHAIN`. Прямой вызов cargo без
+/// `RUSTUP_TOOLCHAIN` отдал бы выбор каждому `rustc`, а крейты из реестра
+/// cargo компилирует в их каталоге, вне книги, — rustup взял бы для них
+/// toolchain по умолчанию. На машине CI это другая версия, и сборка
+/// падает с E0514: `nix` собран другим rustc.
 pub fn guest_binary(package: &str, bin: &str, target_dir: &Path) -> PathBuf {
-    let out = Command::new(env!("CARGO"))
+    let out = Command::new("cargo")
         .current_dir(repo_root())
         .args(["build", "--release", "-q", "-p", package, "--bin", bin, "--target-dir"])
         .arg(target_dir)

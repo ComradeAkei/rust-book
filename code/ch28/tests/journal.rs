@@ -9,6 +9,8 @@ use std::io::{BufRead, BufReader, Read, Write};
 use std::os::unix::process::ExitStatusExt;
 use std::path::{Path, PathBuf};
 use std::process::{Child, ChildStdin, ChildStdout, Command, Stdio};
+use std::thread::sleep;
+use std::time::Duration;
 use telemetry_frame::Measurement;
 use telemetry_frame::stream::{Frames, stats};
 
@@ -121,6 +123,26 @@ fn restart_continues_the_journal() {
     assert_eq!(d.send("5 2"), "кадр 1: датчик 5 = 2");
     d.signal(Signal::SIGINT);
     assert_eq!(d.line(), "SIGINT: msync, кадров 2");
+    assert!(d.child.wait().unwrap().success());
+}
+
+#[test]
+fn stop_and_continue_do_not_break_the_loop() {
+    // Ctrl-Z и `fg`: остановка и SIGCONT прерывают epoll_wait с EINTR и
+    // без обработчиков (signal(7)). Паузы — чтобы демон успел дойти до
+    // epoll_wait и успел остановиться.
+    let path = journal_path("stop");
+    let (mut d, _) = Daemon::start(&path);
+    assert_eq!(d.send("4 1"), "кадр 0: датчик 4 = 1");
+    for _ in 0..3 {
+        sleep(Duration::from_millis(50));
+        d.signal(Signal::SIGSTOP);
+        sleep(Duration::from_millis(50));
+        d.signal(Signal::SIGCONT);
+    }
+    assert_eq!(d.send("4 2"), "кадр 1: датчик 4 = 2");
+    drop(d.stdin.take());
+    assert_eq!(d.line(), "конец ввода: msync, кадров 2");
     assert!(d.child.wait().unwrap().success());
 }
 

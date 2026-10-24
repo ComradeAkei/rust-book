@@ -78,9 +78,12 @@ fn closed_stdout_is_reopened_as_dev_null() {
     use std::os::unix::process::CommandExt;
     let log = Path::new(env!("CARGO_TARGET_TMPDIR")).join("ch28-closed-stdout.strace");
     let mut cmd = Command::new("strace");
+    // stdin — /dev/null, а не stdin теста: в CI poll находит на том
+    // POLLHUP, и в ответе было бы два дескриптора.
     cmd.args(["-qq", "-e", "trace=poll,openat,write", "-o"])
         .arg(&log)
-        .arg(env!("CARGO_BIN_EXE_layers"));
+        .arg(env!("CARGO_BIN_EXE_layers"))
+        .stdin(std::process::Stdio::null());
     // SAFETY: close — async-signal-safe системный вызов.
     unsafe {
         cmd.pre_exec(|| {

@@ -6,7 +6,7 @@ use rustix::event::epoll::{self, CreateFlags, EventData, EventFlags};
 use rustix::io::Errno;
 use std::io;
 use std::os::fd::OwnedFd;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 // ANCHOR: drain
 /// Читать все дескрипторы, пока каждый не закроется. Возвращает куски в
@@ -22,7 +22,13 @@ pub fn drain_all(sources: &[OwnedFd]) -> io::Result<Vec<(usize, Vec<u8>)>> {
     let mut buf = [0u8; 4096];
     while open > 0 {
         events.clear();
-        epoll::wait(&ep, spare_capacity(&mut events), None)?;
+        match epoll::wait(&ep, spare_capacity(&mut events), None) {
+            Ok(_) => {}
+            // Сигнал прерывает epoll_wait и при SA_RESTART (раздел 28.4):
+            // событий нет, ждём снова.
+            Err(Errno::INTR) => continue,
+            Err(e) => return Err(e.into()),
+        }
         for ev in &events {
             let i = ev.data.u64() as usize;
             // Уровневый режим: если прочитаем не всё, epoll сообщит снова.
@@ -49,12 +55,22 @@ pub fn events_for_one_byte_reads(pending: usize, edge: bool) -> io::Result<usize
     let ep = epoll::create(CreateFlags::CLOEXEC)?;
     let flags = if edge { EventFlags::IN | EventFlags::ET } else { EventFlags::IN };
     epoll::add(&ep, &r, EventData::new_u64(0), flags)?;
-    let timeout = rustix::time::Timespec::try_from(Duration::from_millis(50)).unwrap();
     let mut events = Vec::with_capacity(1);
     let mut reported = 0;
     loop {
         events.clear();
-        epoll::wait(&ep, spare_capacity(&mut events), Some(&timeout))?;
+        // 50 мс тишины — событий больше не будет. Прерванное сигналом
+        // ожидание (EINTR) продолжаем на остаток срока, а не заново.
+        let deadline = Instant::now() + Duration::from_millis(50);
+        loop {
+            let left = deadline.saturating_duration_since(Instant::now());
+            let timeout = rustix::time::Timespec::try_from(left).unwrap();
+            match epoll::wait(&ep, spare_capacity(&mut events), Some(&timeout)) {
+                Ok(_) => break,
+                Err(Errno::INTR) => continue,
+                Err(e) => return Err(e.into()),
+            }
+        }
         if events.is_empty() {
             return Ok(reported);
         }
