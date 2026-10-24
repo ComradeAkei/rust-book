@@ -4,7 +4,7 @@
 //!   игла `иголка-в-стоге` — в последней строке.
 //! - `ch28-search run PATH [ИГЛА]` — read с буфером 64 КиБ, mmap и mmap с
 //!   MADV_HUGEPAGE: время и страничные сбои процесса. Каждый способ —
-//!   дважды: с холодным кешем (страницы файла выгнаны через
+//!   дважды: с холодным кэшем (страницы файла выгнаны через
 //!   `posix_fadvise(DONTNEED)`) и с тёплым.
 
 use ch28_exercises::d_search::{find_mmap, find_read};
@@ -46,7 +46,7 @@ fn measure(name: &str, path: &str, cold: bool, search: impl FnOnce(&mut File) ->
     let mut file = File::open(path).unwrap();
     let len = file.metadata().unwrap().len();
     if cold {
-        // Чистые страницы файла ядро выбрасывает из кеша по просьбе
+        // Чистые страницы файла ядро выбрасывает из кэша по просьбе
         // любого, кто может файл открыть; грязные сначала записало бы.
         fadvise(&file, 0, None, Advice::DontNeed).unwrap();
     }
@@ -69,7 +69,7 @@ fn measure(name: &str, path: &str, cold: bool, search: impl FnOnce(&mut File) ->
 
 fn run(path: &str, needle: &str) {
     let needle = needle.as_bytes();
-    // Тёплый замер — сразу после холодного тем же способом: кеш устроен
+    // Тёплый замер — сразу после холодного тем же способом: кэш устроен
     // так, как его заполнил этот способ.
     for cold in [true, false] {
         measure("read, буфер 64 КиБ", path, cold, |f| {

@@ -139,7 +139,7 @@ fn branch_model_sees_mispredictions() {
 #[test]
 fn layout_misses_follow_bytes_read() {
     let Some(c) = cachegrind("cache", "memory", &["layout"]) else { return };
-    // Двенадцать проходов по 4 Мi записей: прогрев и одиннадцать выборок.
+    // Двенадцать проходов по 4 Ми записей: прогрев и одиннадцать выборок.
     let records = 12u64 << 22;
     let aos = c["ch30::memory::sum_aos"]["D1mr"];
     let soa = c["ch30::memory::sum_soa"]["D1mr"];

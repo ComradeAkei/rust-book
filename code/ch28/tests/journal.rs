@@ -77,7 +77,7 @@ fn sigkill_keeps_committed_frames() {
     let status = d.child.wait().unwrap();
     assert_eq!(status.signal(), Some(libc::SIGKILL));
 
-    // msync не было, процесса нет — кадры в страничном кеше.
+    // msync не было, процесса нет — кадры в страничном кэше.
     let bytes = read_committed(&path).unwrap();
     let s = stats(&bytes);
     assert_eq!((s.frames, s.errors, s.junk), ([3, 0, 0], 0, 0));

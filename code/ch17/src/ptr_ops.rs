@@ -56,7 +56,7 @@ pub fn read_u32_le_at(buf: &[u8], off: usize) -> Option<u32> {
     if off.checked_add(4)? > buf.len() {
         return None;
     }
-    // SAFETY: проверили, что 4 байта от off в границах среза; провенанс
+    // SAFETY: проверили, что 4 байта от off в границах среза; provenance
     // идёт от buf. read_unaligned не требует кратности адреса.
     let raw = unsafe { (buf.as_ptr().add(off) as *const u32).read_unaligned() };
     Some(u32::from_le(raw))

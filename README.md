@@ -679,6 +679,7 @@ $ CH31_REQUIRE_MUTANTS=1 cargo test -p ch31-solutions   # задача D: мут
 $ bash code/ch31/supply/run.sh            # cargo-deny, cargo-audit, cargo-vet (раздел 31.9)
 $ python3 tools/check-includes.py         # все {{#include}} указывают на существующие якоря, ссылки — на страницы
 $ mdbook build
+$ python3 tools/check-links.py book       # в собранной книге якоря ссылок существуют, номера разделов в тексте ссылок верны
 ```
 
 Задание CI со случайной раскладкой полей прогоняет решения под тремя

@@ -191,7 +191,7 @@
     - [18.7. Задачи](ch18/07-tasks.md)
 - [19. Встроенный ассемблер, интринсики и SIMD](ch19/index.md)
     - [19.1. asm!: операнды и опции](ch19/01-asm.md)
-    - [19.2. global_asm! и naked-функции](ch19/02-naked.md)
+    - [19.2. global_asm!, naked-функции и переключение контекста](ch19/02-naked.md)
     - [19.3. Интринсики core::arch и target_feature](ch19/03-intrinsics.md)
     - [19.4. Выбор реализации во время выполнения](ch19/04-dispatch.md)
     - [19.5. Переносимый SIMD](ch19/05-portable.md)
