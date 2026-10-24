@@ -45,6 +45,8 @@ jobs:
           sudo sysctl -w kernel.perf_event_paranoid=1
           perf=$(ls /usr/lib/linux-tools/*-generic/perf | head -n 1)
           "$perf" --version
+          # Процессор раннера — для чисел тестов `observed_`.
+          grep -m 1 'model name' /proc/cpuinfo
           {
             echo "PERF=$perf"
             echo "CH30_REQUIRE_PERF=1"

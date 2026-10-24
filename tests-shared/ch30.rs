@@ -227,7 +227,12 @@ fn observed_task_a_numbers() {
     assert!(setup > 1.5 * hash);
     // В debug перебор по индексам и итератор различаются, в release — нет.
     let debug = sut::a_bench::bench_3(20);
-    let release = a("fixed_3", "1000");
+    // Два цикла по 4096 элементов — миллисекунды: прерывание или сосед по
+    // машине удваивает один из двух замеров. Берём медиану пяти запусков.
+    let mut runs: Vec<f64> = (0..5).map(|_| a("fixed_3", "10000")).collect();
+    runs.sort_by(f64::total_cmp);
+    let release = runs[2];
+    eprintln!("A3: release по запускам {runs:.2?}");
     eprintln!("A3: индексы / итератор — debug {debug:.2}, release {release:.2}");
     if cfg!(debug_assertions) {
         assert!(debug > 1.5, "{debug}");
