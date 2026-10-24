@@ -2,7 +2,7 @@
 //! строку `# команда`, свой результат и новые записи журнала ядра.
 //! Такой вывод и попадает в текст главы.
 
-use crate::guest::{Kmsg, insmod, rmmod};
+use crate::guest::{Kmsg, drain_console, insmod, rmmod};
 use crate::kmsg::level_name;
 use std::fs;
 use std::io;
@@ -95,6 +95,7 @@ impl Session {
     pub fn insmod(&mut self, module: &str, params: &str) -> io::Result<()> {
         let path = format!("/lib/{module}.ko");
         println!("# insmod {path}{}{params}", if params.is_empty() { "" } else { " " });
+        drain_console();
         let r = insmod(&path, params);
         if let Err(e) = &r {
             println!("insmod: {e}");
@@ -105,6 +106,7 @@ impl Session {
 
     pub fn rmmod(&mut self, module: &str) -> io::Result<()> {
         println!("# rmmod {module}");
+        drain_console();
         let r = rmmod(module);
         if let Err(e) = &r {
             println!("rmmod: {e}");

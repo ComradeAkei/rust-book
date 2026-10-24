@@ -15,7 +15,7 @@ publish.workspace = true
 # пропускаются.
 
 [dependencies]
-nix = { version = "0.31.3", features = ["fs", "ioctl", "kmod", "mount", "process", "reboot", "signal"] }
+nix = { version = "0.31.3", features = ["fs", "ioctl", "kmod", "mount", "process", "reboot", "signal", "term"] }
 
 [[bin]]
 name = "ch29-guest"

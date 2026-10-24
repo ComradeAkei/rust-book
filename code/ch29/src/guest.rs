@@ -118,6 +118,7 @@ impl Kmsg {
 /// который может уронить процесс — oops в модуле убивает текущую задачу,
 /// — нельзя ставить в процессе 1: его гибель — паника ядра.
 pub fn in_child(f: impl FnOnce() -> i32) -> WaitStatus {
+    drain_console();
     // SAFETY: гость однопоточный — других потоков, которые держали бы
     // блокировки в момент fork, нет.
     match unsafe { fork() }.expect("fork") {
@@ -126,11 +127,21 @@ pub fn in_child(f: impl FnOnce() -> i32) -> WaitStatus {
     }
 }
 
+/// Ждёт, пока последовательный порт допечатает вывод init. `write` в
+/// консоль возвращается, как только байты легли в буфер tty, а сообщения
+/// ядра идут на порт мимо этого буфера. Без ожидания отклик модуля или
+/// сообщение о перезагрузке рвёт строку посередине: `### ch29: кон[
+/// 6.37] ACPI: PM: …`, и `ец` — уже на следующей строке.
+pub fn drain_console() {
+    use std::io::Write;
+    io::stdout().flush().ok();
+    let _ = nix::sys::termios::tcdrain(io::stdout());
+}
+
 /// Конец сценария: сбросить буферы и перезагрузить машину. QEMU запущен с
 /// `-no-reboot`, поэтому перезагрузка для него — выход.
 pub fn poweroff() -> ! {
-    use std::io::Write;
-    io::stdout().flush().ok();
+    drain_console();
     nix::unistd::sync();
     let _ = nix::sys::reboot::reboot(nix::sys::reboot::RebootMode::RB_AUTOBOOT);
     unreachable!("reboot вернулся");
