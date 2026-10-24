@@ -31,6 +31,25 @@ pub fn release_bin(name: &str) -> PathBuf {
     release_dir().join(name)
 }
 
+/// Путь к release-программе главы, слинкованной системным компоновщиком
+/// (`cc` и GNU ld), а не rust-lld: `-C linker-features=-lld`, свой каталог
+/// сборки. GNU ld кладёт сегмент кода по адресу, равному смещению в
+/// файле, rust-lld — на страницу дальше, и раскрутка стека через libdw в
+/// perf ищет таблицы `.eh_frame` не там (раздел 30.3).
+pub fn system_ld_bin(name: &str) -> PathBuf {
+    let out = PathBuf::from(env!("CARGO_TARGET_TMPDIR")).join("ch30-release-ld");
+    let st = Command::new("cargo")
+        .current_dir(env!("CARGO_MANIFEST_DIR"))
+        .env_remove("CARGO_ENCODED_RUSTFLAGS")
+        .env("RUSTFLAGS", "-Clinker-features=-lld")
+        .args(["build", "--release", "--bin", name, "--target-dir"])
+        .arg(&out)
+        .status()
+        .unwrap();
+    assert!(st.success());
+    out.join("release").join(name)
+}
+
 // ANCHOR: no_thp
 /// Команда, процессу которой ядро не даст огромных страниц (THP):
 /// `prctl(PR_SET_THP_DISABLE)` в дочернем процессе перед `exec`. Запрет

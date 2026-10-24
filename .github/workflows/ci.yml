@@ -35,13 +35,15 @@ jobs:
           sudo apt-get install -y zlib1g-dev strace valgrind linux-tools-generic
       # Глава 30: /usr/bin/perf — обёртка, которая ищет perf для ядра
       # раннера и не находит; сам perf из linux-tools-generic с этим ядром
-      # работает. Ubuntu по умолчанию не пускает пользователя к событиям
+      # работает. Его и берём явно: в образе есть и perf 6.17 для ядер
+      # azure, а `ls … | head` выбирал его — 6.17 в списке раньше 6.8.
+      # Ubuntu по умолчанию не пускает пользователя к событиям
       # perf_event_open (kernel.perf_event_paranoid = 4). CH30_REQUIRE_*
       # превращают пропуск опыта без инструмента в ошибку.
       - name: perf и valgrind для главы 30
         run: |
           sudo sysctl -w kernel.perf_event_paranoid=1
-          perf=$(ls /usr/lib/linux-tools/*/perf | head -n 1)
+          perf=$(ls /usr/lib/linux-tools/*-generic/perf | head -n 1)
           "$perf" --version
           {
             echo "PERF=$perf"
@@ -56,6 +58,22 @@ jobs:
       # Корневой `cargo test` проверяет примеры глав и эталонные решения.
       # --no-fail-fast: упавший тест одного крейта не прячет остальные.
       - run: cargo test --no-fail-fast
+      # Глава 30: опыты под perf — ещё раз с каждым другим perf образа.
+      # perf 6.17 для ядер azure собран без libunwind (стек по DWARF
+      # раскручивает libdw) и сам разбирает имена v0: на нём тесты
+      # проверяют оба случая из раздела 30.3.
+      - name: Глава 30 с другими perf образа
+        run: |
+          n=0
+          for p in /usr/lib/linux-tools/*/perf; do
+            [ "$p" = "$PERF" ] && continue
+            "$p" --version || continue
+            PERF="$p" cargo test -p ch30 --test perf
+            n=$((n + 1))
+          done
+          if [ "$n" -eq 0 ]; then
+            echo "::warning::других perf в образе нет: путь libdw не проверен"
+          fi
       # Часть поведения в приложении A зависит от профиля сборки.
       - run: cargo test -p appendix-a --release
       # C-примеры приложения A под UBSan: gcc с libubsan есть в образе.

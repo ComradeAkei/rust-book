@@ -175,7 +175,7 @@ $ perf report --stdio --no-children | llvm-cxxfilt
 каждый, кто видел восемь шагов на байт. `llvm-cxxfilt` в конвейере не
 для красоты: rustc 1.97 декорирует имена по схеме v0 (`_RNvNtCs…`),
 а perf 6.8 из Ubuntu их не разбирает. Бывает perf, который разбирает
-их сам, — такой стоит на машине CI книги, и тогда `llvm-cxxfilt` в
+их сам, — например, perf 6.17 на машине CI книги, и тогда `llvm-cxxfilt` в
 конвейере ничего не меняет, а тесты узнают функцию в обоих видах.
 `llvm-cxxfilt` разбирает (здесь — из LLVM
 18; его же даёт `rustup component add llvm-tools`); `c++filt` из
@@ -266,6 +266,47 @@ $ perf report --stdio --children | llvm-cxxfilt | grep -E 'ch30::|profile::main|
 Тест `perf_record_finds_sort_hottest` записывает профиль с DWARF и
 проверяет: в стеках больше половины выборок есть `sorted`, гистограмма
 дешевле и CRC, и шума.
+
+<div class="box trap">
+
+**Ловушка: perf без libunwind и rust-lld.** Если в профиле с DWARF у
+сортировки снова нет вызывающих, а `sorted` набирает пару процентов,
+посмотрите `perf version --build-options`. В свежих исходниках perf
+libunwind выключена по умолчанию (`libunwind: [ OFF ]` с подсказкой
+«Deprecated, use LIBUNWIND=1»), и стек по DWARF раскручивает libdw.
+Так собран, например, perf 6.17 из Ubuntu для ядер azure; на машине CI
+книги он стоит рядом с perf 6.8. Адрес загрузки программы perf
+сообщает libdw как начало отображения кода минус его смещение в файле.
+Это верно, когда адрес сегмента кода равен смещению, — так раскладывает
+GNU ld. А rustc 1.97 на x86-64 Linux линкует своим rust-lld, и тот
+кладёт сегмент на страницу дальше:
+
+```console
+$ readelf -lW target/release/profile | grep 'R E'
+  LOAD           0x013960 0x0000000000014960 0x0000000000014960 0x03f030 0x03f030 R E 0x1000
+```
+
+Правила `.eh_frame` libdw ищет на 4 КиБ раньше настоящего адреса. Для
+сортировки она находит правила `main` (CFA = `rsp+16` вместо
+`rsp+160`) и читает адрес возврата не оттуда: стек кончается мусорным
+«вызывающим», например `main_arena+0x5f` — адресом в данных libc. Ту же
+ошибку в пути libunwind исправили в 2022 году; путь libdw считает адрес
+по-старому. Выходов три: perf с libunwind (perf 6.8 из
+`linux-tools-generic`), указатель кадра с `-g` или сборка системным
+компоновщиком:
+
+```console
+$ RUSTFLAGS="-C linker-features=-lld" cargo build -q -p ch30 --release --bin profile --target-dir target/ld
+$ readelf -lW target/ld/release/profile | grep 'R E'
+  LOAD           0x005000 0x0000000000005000 0x0000000000005000 0x03f33d 0x03f33d R E 0x1000
+```
+
+С такой сборкой perf 6.17 находит `sorted` в 60–63 % стеков. Тест
+`perf_record_finds_sort_hottest` с perf без libunwind сначала
+убеждается, что стеки сортировки оборваны все до одного, и повторяет
+опыт на сборке GNU ld.
+
+</div>
 
 ## flamegraph
 

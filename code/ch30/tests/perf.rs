@@ -163,37 +163,76 @@ fn stacks(script: &str) -> Vec<Vec<&str>> {
         .collect()
 }
 
-#[test]
-fn perf_record_finds_sort_hottest() -> io::Result<()> {
-    let Some(perf) = perf() else { return Ok(()) };
-    let exe = common::release_bin("profile");
-    let data = std::path::PathBuf::from(env!("CARGO_TARGET_TMPDIR")).join("ch30-perf.data");
-    let st = Command::new(&perf)
+/// Собран ли perf с libunwind (`perf version --build-options`). Без неё
+/// стек по DWARF раскручивает libdw.
+fn has_libunwind(perf: &std::path::Path) -> bool {
+    let out = Command::new(perf).args(["version", "--build-options"]).output().unwrap();
+    String::from_utf8_lossy(&out.stdout)
+        .lines()
+        .any(|l| l.split_whitespace().take(3).eq(["libunwind:", "[", "on"]))
+}
+
+/// `perf record --call-graph dwarf` программы `exe 16` и текст
+/// `perf script` с её стеками.
+fn dwarf_script(perf: &std::path::Path, exe: &std::path::Path, tag: &str) -> io::Result<String> {
+    let data =
+        std::path::PathBuf::from(env!("CARGO_TARGET_TMPDIR")).join(format!("ch30-{tag}.data"));
+    let st = Command::new(perf)
         .args(["record", "-q", "-e", "cpu-clock", "--call-graph", "dwarf", "-o"])
         .arg(&data)
-        .arg(&exe)
+        .arg(exe)
         .arg("16")
         .stdout(std::process::Stdio::null())
         .status()?;
     assert!(st.success());
-    let out = Command::new(&perf).arg("script").arg("-i").arg(&data).output()?;
+    let out = Command::new(perf).arg("script").arg("-i").arg(&data).output()?;
     assert!(out.status.success());
-    let script = String::from_utf8_lossy(&out.stdout);
-    let all = stacks(&script);
-    // Доля выборок, в стеке которых есть фаза: включающее время, как
-    // ширина полосы на flamegraph.
-    let share = |path: &str| {
-        let (plain, mangled) = (path, v0(path));
-        let has = |f: &&str| f.contains(plain) || f.contains(&mangled);
-        all.iter().filter(|s| s.iter().any(has)).count() as f64 / all.len() as f64
+    Ok(String::from_utf8_lossy(&out.stdout).into_owned())
+}
+
+/// Доли выборок, в стеке которых есть фаза `sorted`, `crc_bitwise`,
+/// `noise`, `histogram`: включающее время, как ширина полосы на
+/// flamegraph. И доля выборок сортировки, стек которых не дошёл до
+/// `main`.
+fn phase_shares(script: &str) -> ([f64; 4], f64) {
+    let all = stacks(script);
+    let has = |s: &[&str], path: &str| {
+        let mangled = v0(path);
+        s.iter().any(|f| f.contains(path) || f.contains(&mangled))
     };
-    let (sort, crc, noise, hist) = (
-        share("hot::sorted"),
-        share("hot::crc_bitwise"),
-        share("hot::noise"),
-        share("hot::histogram"),
+    let share = |path: &str| all.iter().filter(|s| has(s, path)).count() as f64 / all.len() as f64;
+    let phases = ["hot::sorted", "hot::crc_bitwise", "hot::noise", "hot::histogram"].map(share);
+    let sorting: Vec<_> = all.iter().filter(|s| has(s, "quicksort::quicksort")).collect();
+    let cut = sorting.iter().filter(|s| !s.contains(&"main")).count();
+    (phases, cut as f64 / sorting.len().max(1) as f64)
+}
+
+#[test]
+fn perf_record_finds_sort_hottest() -> io::Result<()> {
+    let Some(perf) = perf() else { return Ok(()) };
+    let script = dwarf_script(&perf, &common::release_bin("profile"), "perf")?;
+    let (mut phases, cut) = phase_shares(&script);
+    let [sort, crc, noise, hist] = phases;
+    eprintln!(
+        "sorted {sort:.3}, crc {crc:.3}, noise {noise:.3}, histogram {hist:.3}; \
+         стеков сортировки без main {cut:.3}"
     );
-    eprintln!("sorted {sort:.3}, crc {crc:.3}, noise {noise:.3}, histogram {hist:.3}");
+    if sort <= 0.5 && !has_libunwind(&perf) {
+        // perf без libunwind раскручивает DWARF через libdw, а та у
+        // программы, слинкованной rust-lld, ищет таблицы `.eh_frame` на
+        // страницу раньше (раздел 30.3): стеки сортировки обрываются, не
+        // дойдя до `main`. Тот же опыт на сборке GNU ld.
+        assert!(cut > 0.9, "perf без libunwind, но стеки сортировки целы: {cut}");
+        let script = dwarf_script(&perf, &common::system_ld_bin("profile"), "perf-ld")?;
+        let (ld, cut) = phase_shares(&script);
+        phases = ld;
+        let [sort, crc, noise, hist] = phases;
+        eprintln!(
+            "GNU ld: sorted {sort:.3}, crc {crc:.3}, noise {noise:.3}, histogram {hist:.3}; \
+             стеков сортировки без main {cut:.3}"
+        );
+    }
+    let [sort, crc, noise, hist] = phases;
     assert!(sort > 0.5, "{sort}");
     assert!(hist < crc.min(noise), "{hist}");
     Ok(())
