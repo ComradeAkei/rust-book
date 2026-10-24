@@ -137,6 +137,18 @@ $ perf stat -e task-clock,page-faults,context-switches,cycles,instructions targe
 это они: обнулить и отобразить 128 МиБ. Тест
 `perf_stat_page_faults_of_profile` проверяет то же на 16 МиБ.
 
+Сбой на каждые 4 КиБ — потому что THP здесь в режиме `madvise`, а
+`profile` огромных страниц не просит (раздел [28.5](../ch28/05-mmap.md)).
+В режиме `always` — так настроена, например, машина CI книги — те же
+вектора легли бы на страницы по 2 МиБ, по сбою на каждую. Поэтому тесты
+запускают программы главы так, как сняты числа текста, — с запретом THP
+для процесса. Запрет `PR_SET_THP_DISABLE` наследуется через fork и exec
+и действует и на программу, которую запускает perf:
+
+```rust,ignore
+{{#include ../../code/ch30/tests/common/mod.rs:no_thp}}
+```
+
 ## perf record: где идёт время
 
 `perf record` просит ядро прерывать программу по таймеру `cpu-clock`

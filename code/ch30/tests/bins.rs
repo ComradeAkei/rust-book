@@ -7,11 +7,16 @@ mod common;
 use std::process::Command;
 use std::sync::Mutex;
 
-/// Программы меряют время — по одной за раз, чтобы не мешать друг другу.
+/// Программы меряют время — по одной за раз, чтобы не мешать друг другу,
+/// и без огромных страниц, как при замерах текста
+/// ([`common::without_thp`]).
 fn run(name: &str, args: &[&str]) -> String {
     static SERIAL: Mutex<()> = Mutex::new(());
     let _one = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
-    let out = Command::new(common::release_bin(name)).args(args).output().unwrap();
+    let out = common::without_thp(&mut Command::new(common::release_bin(name)))
+        .args(args)
+        .output()
+        .unwrap();
     assert!(out.status.success(), "{}", String::from_utf8_lossy(&out.stderr));
     String::from_utf8(out.stdout).unwrap()
 }
@@ -84,11 +89,21 @@ fn observed_branches_random_vs_sorted() {
 
 #[test]
 fn observed_station_speedups() {
-    let text = run("station", &["262144"]);
-    let store = number_after(&text, "store: медиана");
-    let hash = number_after(&text, " hash: медиана");
-    let x2 = number_after(&text, "   x2: медиана");
-    assert!(hash < store && x2 < 0.8 * hash, "{text}");
+    // Сосед по машине иногда замедляет целую серию вызовов одного
+    // варианта (раздел 30.9), поэтому у каждого варианта — лучшая медиана
+    // из трёх запусков программы.
+    let mut best = [f64::INFINITY; 3];
+    let mut texts = String::new();
+    for _ in 0..3 {
+        let text = run("station", &["262144"]);
+        let prefixes = ["store: медиана", " hash: медиана", "   x2: медиана"];
+        for (b, prefix) in best.iter_mut().zip(prefixes) {
+            *b = b.min(number_after(&text, prefix));
+        }
+        texts += &text;
+    }
+    let [store, hash, x2] = best;
+    assert!(hash < store && x2 < 0.8 * hash, "{texts}");
 }
 
 #[test]

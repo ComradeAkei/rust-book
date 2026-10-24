@@ -39,7 +39,9 @@ impl Mapped {
     }
 
     /// Анонимная память, обнулённая ядром. `huge` — попросить огромные
-    /// страницы (THP) через `madvise(MADV_HUGEPAGE)`.
+    /// страницы (THP) через `madvise(MADV_HUGEPAGE)`; без `huge` —
+    /// отказаться от них (`MADV_NOHUGEPAGE`): в режиме THP `always` ядро
+    /// дало бы огромные страницы и без просьбы.
     pub fn anonymous(len: usize, huge: bool) -> io::Result<Mapped> {
         assert!(len > 0);
         // SAFETY: анонимное отображение — новая память, ни с чем не
@@ -52,10 +54,9 @@ impl Mapped {
                 MapFlags::PRIVATE,
             )?
         };
-        if huge {
-            // SAFETY: совет ядру о только что созданном отображении.
-            unsafe { madvise(p, len, Advice::LinuxHugepage)? };
-        }
+        let advice = if huge { Advice::LinuxHugepage } else { Advice::LinuxNoHugepage };
+        // SAFETY: совет ядру о только что созданном отображении.
+        unsafe { madvise(p, len, advice)? };
         Ok(Mapped { ptr: NonNull::new(p.cast()).unwrap(), len })
     }
 

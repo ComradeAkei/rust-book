@@ -14,6 +14,10 @@ publish.workspace = true
 [dependencies]
 ch30 = { path = "../../code/ch30" }
 
+# Тесты запускают ch30-task без огромных страниц: prctl(PR_SET_THP_DISABLE).
+[dev-dependencies]
+libc = "0.2.191"
+
 [[test]]
 name = "ch30"
 path = "tests/ch30.rs"

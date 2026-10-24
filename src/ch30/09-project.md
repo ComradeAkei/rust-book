@@ -202,7 +202,7 @@ release `decode_fast` — отдельная функция; с LTO профил
 | `crc_x2_matches_bytewise` | CRC по два байта совпадает с побайтовой на всех префиксах 1000 байт и на контрольной строке |
 | `fast_stores_behave_like_store` | три варианта `FastStore` и `Store` дают один отчёт, одну сводку и одинаковые выборки по времени — на чистом потоке и на двадцати испорченных: перевёрнутые биты, вставленный мусор, обрыв |
 | `stream_ingests_cleanly` | поток для замера разбирается без ошибок |
-| `observed_station_speedups` | `hash` быстрее `store`, `x2` быстрее `hash` хотя бы на 20 % |
+| `observed_station_speedups` | `hash` быстрее `store`, `x2` быстрее `hash` хотя бы на 20 % — по лучшей медиане из трёх запусков |
 | `perf_record_station_hot_functions` | в профиле `store` первая — `telemetry_frame::decode` (больше 40 %), в профиле `x2` — `crc16_update_x2` |
 
 Главный из них — второй. Ускорение, которое меняет поведение на

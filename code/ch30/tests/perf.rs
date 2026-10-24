@@ -100,10 +100,14 @@ fn perf() -> Option<std::path::PathBuf> {
 }
 
 /// perf stat в машиночитаемом виде (`-x,`): событие → значение или
-/// `<not supported>`.
+/// `<not supported>`. perf и программа идут без огромных страниц
+/// ([`common::without_thp`]).
 fn perf_stat(perf: &std::path::Path, events: &str, args: &[&str]) -> HashMap<String, String> {
-    let out =
-        Command::new(perf).args(["stat", "-x,", "-e", events, "--"]).args(args).output().unwrap();
+    let out = common::without_thp(&mut Command::new(perf))
+        .args(["stat", "-x,", "-e", events, "--"])
+        .args(args)
+        .output()
+        .unwrap();
     assert!(out.status.success(), "{}", String::from_utf8_lossy(&out.stderr));
     String::from_utf8(out.stderr)
         .unwrap()
@@ -121,7 +125,8 @@ fn perf_stat_page_faults_of_profile() {
     let exe = common::release_bin("profile");
     let s = perf_stat(&perf, "task-clock,page-faults,cycles", &[exe.to_str().unwrap(), "16"]);
     // 16 МиБ данных и 16 МиБ отсортированной копии — по сбою на каждую
-    // из 2 × 4096 страниц, и несколько десятков на запуск программы.
+    // из 2 × 4096 страниц по 4 КиБ, и несколько десятков на запуск
+    // программы. Огромных страниц perf_stat программе не даёт.
     let faults: u64 = s["page-faults"].parse().unwrap();
     assert!((8192..8192 + 400).contains(&faults), "{faults}");
     let cycles = &s["cycles"];

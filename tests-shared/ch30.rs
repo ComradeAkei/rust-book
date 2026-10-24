@@ -13,6 +13,7 @@
 // задачи D2 — наблюдение для rustc 1.97 (префикс `rustc_`).
 
 use std::collections::HashMap;
+use std::os::unix::process::CommandExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::{Mutex, MutexGuard, OnceLock};
@@ -46,11 +47,27 @@ fn serial() -> MutexGuard<'static, ()> {
     SERIAL.lock().unwrap_or_else(|e| e.into_inner())
 }
 
-/// Вывод `ch30-task` с аргументами `args`.
+/// Вывод `ch30-task` с аргументами `args`. Программа идёт без огромных
+/// страниц (THP), как при замерах разборов: `prctl(PR_SET_THP_DISABLE)`
+/// перед `exec`. В режиме THP `always` 64 МиБ задачи A5 легли бы на
+/// страницы по 2 МиБ — десятки сбоев вместо 32 768, — и холодный проход
+/// бывал бы медленнее прогретого всего в два-три раза.
 fn task(args: &[&str]) -> String {
     let bin = task_bin();
     let _one = serial();
-    let out = Command::new(bin).args(args).output().unwrap();
+    let mut cmd = Command::new(bin);
+    // SAFETY: между fork и exec — только системный вызов, без выделений
+    // памяти и блокировок.
+    unsafe {
+        cmd.pre_exec(|| {
+            let (on, zero): (libc::c_ulong, libc::c_ulong) = (1, 0);
+            match libc::prctl(libc::PR_SET_THP_DISABLE, on, zero, zero, zero) {
+                0 => Ok(()),
+                _ => Err(std::io::Error::last_os_error()),
+            }
+        })
+    };
+    let out = cmd.args(args).output().unwrap();
     assert!(out.status.success(), "{args:?}: {}", String::from_utf8_lossy(&out.stderr));
     String::from_utf8(out.stdout).unwrap()
 }
