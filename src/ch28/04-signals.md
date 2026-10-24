@@ -120,7 +120,7 @@ panic in a function that cannot unwind
 stack backtrace:
 …
   19:     0x55674339e14a - signals[ac9861924e70592]::on_alarm_print
-                               at …/code/ch28/src/bin/signals.rs:122:1
+                               at …/code/ch28/src/bin/signals.rs:125:1
   20:     0x7f9184445330 - <unknown>
   21:     0x7f918451c844 - __GI___libc_write
                                at ./io/../sysdeps/unix/sysv/linux/write.c:26:10
@@ -129,7 +129,7 @@ stack backtrace:
   30:     0x5567433e6be7 - <std[bcb96dfbba0ab899]::io::stdio::StdoutLock as std[bcb96dfbba0ab899]::io::Write>::write_all
 …
   33:     0x55674339e309 - signals[ac9861924e70592]::println_in_handler
-                               at …/code/ch28/src/bin/signals.rs:133:18
+                               at …/code/ch28/src/bin/signals.rs:136:18
 …
 thread caused non-unwinding panic. aborting.
 $ echo ${PIPESTATUS[0]}
