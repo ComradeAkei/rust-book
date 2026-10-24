@@ -137,8 +137,17 @@ fn perf_stat_page_faults_of_profile() {
     assert!(cycles == "<not supported>" || cycles.parse::<u64>().is_ok(), "{cycles}");
 }
 
+/// Хвост имени `path` (`модуль::имя`) в декорировании v0: длина и
+/// байты каждой части подряд, `hot::sorted` → `3hot6sorted`. perf 6.8 из
+/// Ubuntu имена v0 не разбирает и печатает декорированными
+/// (`_RNvNtCs…_4ch303hot6sorted`), а perf машины CI разбирает сам
+/// (`ch30::hot::sorted`); тесты узнают функцию в обоих видах.
+fn v0(path: &str) -> String {
+    path.split("::").map(|s| format!("{}{s}", s.len())).collect()
+}
+
 /// Стеки `perf script`: кадры от листа к корню, кадр — имя функции без
-/// смещения. Имена v0 тест не разбирает: ищет куски декорированного имени.
+/// смещения.
 fn stacks(script: &str) -> Vec<Vec<&str>> {
     script
         .split("\n\n")
@@ -173,14 +182,16 @@ fn perf_record_finds_sort_hottest() -> io::Result<()> {
     let all = stacks(&script);
     // Доля выборок, в стеке которых есть фаза: включающее время, как
     // ширина полосы на flamegraph.
-    let share = |part: &str| {
-        all.iter().filter(|s| s.iter().any(|f| f.contains(part))).count() as f64 / all.len() as f64
+    let share = |path: &str| {
+        let (plain, mangled) = (path, v0(path));
+        let has = |f: &&str| f.contains(plain) || f.contains(&mangled);
+        all.iter().filter(|s| s.iter().any(has)).count() as f64 / all.len() as f64
     };
     let (sort, crc, noise, hist) = (
-        share("3hot6sorted"),
-        share("3hot11crc_bitwise"),
-        share("3hot5noise"),
-        share("3hot9histogram"),
+        share("hot::sorted"),
+        share("hot::crc_bitwise"),
+        share("hot::noise"),
+        share("hot::histogram"),
     );
     eprintln!("sorted {sort:.3}, crc {crc:.3}, noise {noise:.3}, histogram {hist:.3}");
     assert!(sort > 0.5, "{sort}");
@@ -230,11 +241,12 @@ fn perf_record_station_hot_functions() {
     let exe = common::release_bin("station");
     // Хранилище проекта: больше половины времени — разбор кадра, и в нём
     // CRC (раздел 30.9).
+    let is = |name: &str, path: &str| name.ends_with(path) || name.ends_with(&v0(path));
     let store = flat_profile(&perf, &exe, &["262144", "store"], "station-store");
     eprintln!("{:?}", &store[..3]);
-    assert!(store[0].1.ends_with("15telemetry_frame6decode") && store[0].0 > 40.0, "{store:?}");
+    assert!(is(&store[0].1, "telemetry_frame::decode") && store[0].0 > 40.0, "{store:?}");
     // CRC по два байта — отдельная функция и самая горячая.
     let x2 = flat_profile(&perf, &exe, &["262144", "x2"], "station-x2");
     eprintln!("{:?}", &x2[..3]);
-    assert!(x2[0].1.ends_with("15crc16_update_x2") && x2[0].0 > 30.0, "{x2:?}");
+    assert!(is(&x2[0].1, "station::crc16_update_x2") && x2[0].0 > 30.0, "{x2:?}");
 }
