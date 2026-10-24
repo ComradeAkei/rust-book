@@ -14,10 +14,12 @@ fn require() -> bool {
     std::env::var_os("CH31_REQUIRE_SANITIZERS").is_some()
 }
 
-/// `cargo +nightly` без переменных, которые внешний cargo задал тесту.
+/// `cargo +nightly` без переменных, которые внешний cargo задал тесту, и
+/// без кодов цвета: текст ошибок сборки сравнивается, а в CI задан
+/// CARGO_TERM_COLOR=always.
 fn nightly_cargo() -> Command {
     let mut c = Command::new("cargo");
-    c.arg("+nightly").current_dir(env!("CARGO_MANIFEST_DIR"));
+    c.arg("+nightly").current_dir(env!("CARGO_MANIFEST_DIR")).env("CARGO_TERM_COLOR", "never");
     for v in ["CARGO_ENCODED_RUSTFLAGS", "RUSTFLAGS", "RUSTUP_TOOLCHAIN", "RUSTC", "RUSTDOC"] {
         c.env_remove(v);
     }

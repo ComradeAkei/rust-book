@@ -436,8 +436,9 @@ deny.toml                 политика зависимостей для cargo
   и при `kernel.perf_event_paranoid` выше 2), а `CH30_REQUIRE_VALGRIND`,
   `CH30_REQUIRE_PERF` и `CH30_REQUIRE_PERF_EVENTS` делают пропуск ошибкой;
 - для главы 31 — nightly с компонентами miri и rust-src (санитайзеры
-  собирают std с `-Zbuild-std`), cargo-fuzz 0.13.2, рантаймы compiler-rt
-  для clang (пакет `libclang-rt-18-dev`), Kani 0.68.0
+  собирают std с `-Zbuild-std`), llvm-symbolizer (пакет `llvm`: без него
+  ASan печатает адреса вместо имён функций), cargo-fuzz 0.13.2, рантаймы
+  compiler-rt для clang (пакет `libclang-rt-18-dev`), Kani 0.68.0
   (`cargo install --locked kani-verifier@0.68.0 && cargo kani setup`, он
   же ставит CBMC), cargo-mutants 27.1.0, cargo-deny 0.20.2, cargo-audit
   0.22.2, cargo-vet 0.10.3 и сеть для базы RustSec; без nightly опыты с

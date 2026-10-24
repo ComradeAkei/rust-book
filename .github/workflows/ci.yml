@@ -808,6 +808,9 @@ jobs:
       - run: |
           rustup toolchain install
           rustup toolchain install nightly --profile minimal --component miri,rust-src
+      # llvm-symbolizer из пакета llvm: без него ASan печатает в отчёте
+      # адреса, а не имена функций и строки, и тест сверить их не может.
+      - run: sudo apt-get update && sudo apt-get install -y llvm
       - uses: Swatinem/rust-cache@v2
         with:
           key: ch31-dynamic

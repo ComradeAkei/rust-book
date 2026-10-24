@@ -10,7 +10,9 @@
 # файл исключён. Запуск: bash code/ch31/mutants/run.sh [флаги cargo
 # mutants, например -j 4]. Нужен cargo-mutants 27.1.0.
 set -u
-export LC_ALL=C
+# Вывод cargo сверяется с текстом: без кодов цвета, даже если снаружи
+# задан CARGO_TERM_COLOR=always (так в CI).
+export LC_ALL=C CARGO_TERM_COLOR=never
 cd "$(dirname "$0")/../../.." || exit 2
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT

@@ -16,7 +16,9 @@
 # Запуск: bash code/ch31/c/run.sh. Нужны gcc с libasan и clang с
 # рантаймами compiler-rt (в Ubuntu — пакет libclang-rt-18-dev).
 set -u
-export LC_ALL=C
+# Вывод cargo сверяется с текстом: без кодов цвета, даже если снаружи
+# задан CARGO_TERM_COLOR=always (так в CI).
+export LC_ALL=C CARGO_TERM_COLOR=never
 cd "$(dirname "$0")" || exit 2
 CC=${CC:-gcc}
 CLANG=${CLANG:-clang}

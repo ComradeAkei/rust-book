@@ -11,7 +11,9 @@
 # запусков, один поток. Другой компилятор — другие числа запусков.
 # Запуск: bash solutions/ch31/fuzz/run.sh. Нужны nightly и cargo-fuzz.
 set -u
-export LC_ALL=C
+# Вывод cargo сверяется с текстом: без кодов цвета, даже если снаружи
+# задан CARGO_TERM_COLOR=always (так в CI).
+export LC_ALL=C CARGO_TERM_COLOR=never
 cd "$(dirname "$0")" || exit 2
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
