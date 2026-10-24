@@ -903,3 +903,6 @@ jobs:
           if grep -E "WARN|ERROR" mdbook.log | grep -qv "search index is very large"; then
             echo "mdBook: неожиданные WARN/ERROR в журнале"; exit 1
           fi
+      # Якоря после `#` и номера разделов в тексте ссылок проверяются уже
+      # по собранному HTML: id заголовков выводит mdBook.
+      - run: python3 tools/check-links.py book

@@ -87,7 +87,7 @@ Borrows, объясните разницу моделей и что она зн�
 `unsafe`-кода. Готовый пример и его разбор — `d_tree_ok_stack_ub` в
 каталоге и [приложение E](../appendix-e/ch16.md); сначала попробуйте
 построить свой из правила «сырой указатель из `&mut`, затем
-переодалживание той же `&mut`».
+перезаимствование той же `&mut`».
 
 ```console
 $ cargo +nightly miri test -p ch16-solutions --test ch16-ub d_tree_ok_stack_ub -- --ignored
