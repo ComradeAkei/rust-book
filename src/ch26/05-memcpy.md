@@ -119,7 +119,7 @@ $ llvm-nm -S target/thumbv7m-none-eabi/release/mem | grep -E 'mem|aeabi|strlen'
 `__aeabi_memcpy` на 12 байт — переход к общей `memcpy` на 744 байта,
 которая копирует словами, когда может. `memmove` нет — его никто не
 вызвал, и `--gc-sections` его выбросил. В строке «станция» 14 байт:
-кириллица в UTF-8 — по два. Тест `symbols` в run-demos.sh проверяет,
+кириллица в UTF-8 — по два. Тест `symbols` в `run-demos.sh` проверяет,
 что `__aeabi_memcpy` здесь — локальный символ из `compiler_builtins`.
 
 ## Своя memcpy, которая зовёт сама себя

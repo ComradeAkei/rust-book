@@ -29,9 +29,10 @@ pub struct Journal {
     /// Длина отображения и файла: заголовок и ёмкость.
     len: usize,
     frames: usize,
-    /// Дескриптор держит flock: второй писатель того же файла получит
-    /// EWOULDBLOCK. Для отображения дескриптор не нужен — оно держит
-    /// файл само.
+    /// Дескриптор с замком flock: второй писатель того же файла получит
+    /// EWOULDBLOCK. Замок — на открытом файле, а его держит и
+    /// отображение, так что ядру дескриптор уже не нужен: поле — чтобы
+    /// срок замка был виден из типа.
     _lock: File,
 }
 
@@ -216,6 +217,28 @@ mod tests {
         p
     }
 
+    /// Открыть журнал снова после `drop`. Замок держит открытый файл, а
+    /// ссылку на него получает и ребёнок соседнего теста (`wc` в fd.rs,
+    /// `sleep` и `true` в process.rs): у него копия таблицы дескрипторов,
+    /// а после `fork` — и отображений, и до `exec` замок держит и он.
+    /// Окно — доли миллисекунды, но в CI переоткрытие в него попадало.
+    /// Поэтому, пока замок занят, — повтор, не дольше 10 с.
+    fn reopen(p: &Path, capacity: usize) -> Journal {
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(10);
+        loop {
+            // SAFETY: файл наш, кроме журнала его никто не трогает.
+            match unsafe { Journal::open(p, capacity) } {
+                Err(e)
+                    if e.kind() == io::ErrorKind::WouldBlock
+                        && std::time::Instant::now() < deadline =>
+                {
+                    std::thread::sleep(std::time::Duration::from_millis(1))
+                }
+                r => return r.unwrap(),
+            }
+        }
+    }
+
     #[test]
     fn frames_survive_reopen_and_are_seen_by_read() {
         let p = path("reopen");
@@ -226,8 +249,7 @@ mod tests {
         // Пока журнал открыт, read видит те же байты.
         assert_eq!(read_committed(&p).unwrap(), j.committed());
         drop(j);
-        // SAFETY: как выше.
-        let mut j = unsafe { Journal::open(&p, 4096) }.unwrap();
+        let mut j = reopen(&p, 4096);
         assert_eq!(j.frames(), 2);
         assert_eq!(j.push(Kind::Measurement, &[2; 10]).unwrap(), 2);
         let s = stats(j.committed());
@@ -273,8 +295,7 @@ mod tests {
         encode(Kind::Measurement, 1, &[9; 10], tail).unwrap();
         drop(j);
         assert_eq!(read_committed(&p).unwrap().len(), 18);
-        // SAFETY: как выше.
-        let mut j = unsafe { Journal::open(&p, 4096) }.unwrap();
+        let mut j = reopen(&p, 4096);
         assert_eq!(j.frames(), 1);
         j.push(Kind::Event, b"ok").unwrap();
         let s = stats(j.committed());

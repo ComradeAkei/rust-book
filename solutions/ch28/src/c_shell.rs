@@ -167,7 +167,9 @@ pub fn parse(line: &str) -> Result<Option<Job>, ParseError> {
 // ANCHOR: child
 /// Сигналы управления заданиями, которые оболочка игнорирует. SIG_IGN
 /// переживает execve — поэтому ребёнок возвращает их по умолчанию сам,
-/// иначе Ctrl-C не прервал бы и задание.
+/// иначе Ctrl-C не прервал бы и задание. SIGTSTP здесь нет: без `fg`
+/// остановленное задание не продолжить, и задания игнорируют его, как
+/// сама оболочка (`take_terminal`).
 const JOB_SIGNALS: [i32; 4] = [libc::SIGINT, libc::SIGQUIT, libc::SIGTTIN, libc::SIGTTOU];
 
 /// Код ребёнка между fork и exec. Здесь можно только async-signal-safe:

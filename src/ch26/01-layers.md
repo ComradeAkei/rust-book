@@ -171,11 +171,11 @@ error[E0599]: no method named `fetch_add` found for reference `&Atomic<u32>` in 
 {{#include ../../code/ch26/src/layers.rs:alloc}}
 ```
 
-На слое `alloc` память берётся из кучи, и функция возвращает `String`.
-На слое `std` можно печатать. Тест `three_layers_agree` проверяет, что
-три функции дают один и тот же текст «канал 3: -12.05», а
+На слое `alloc` память берётся из кучи, и функция возвращает `String`. На
+слое `std` можно печатать. Тест `three_layers_agree` проверяет, что три
+функции дают один и тот же текст «канал 3: -12.05», а
 `small_buffer_is_an_error` — что буфер на 8 байт для «канал 1: 0.07»
-(13 байт: кириллица по два) — ошибка, а на 18 — нет.
+(13 символов, но 18 байт: кириллица по два) — ошибка, а на 18 — нет.
 
 ```console
 $ cargo build -p ch26 --no-default-features --target thumbv6m-none-eabi
