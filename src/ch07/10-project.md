@@ -158,7 +158,7 @@ $ cargo run --release -q -p ch07-frame --bin quiet
 килобайт, как `report` в разделе [7.8](08-nostd.md).
 
 Ещё почти четыре килобайта `verbose` отдаёт за `dyn Error`. Метод
-`source` возвращает `&dyn Error`, а таблица виртуальных функций
+`source` возвращает `&dyn Error`, а [таблица виртуальных функций][g-vtable]
 `FrameError` для трейта `Error` обязана быть полной: в ней
 `description`, `cause`, `provide`, `type_id` и методы [супертрейтов][g-supertrait]
 `Display` и `Debug`. Программа ни разу не печатает `{:?}`, но `llvm-nm`
@@ -252,3 +252,4 @@ project-frame` без фильтра.
 [g-discriminant]: ../appendix-f.md#discriminant "Дискриминант (discriminant): Тег перечисления: число, по которому видно, какой вариант лежит в памяти."
 [g-saturating]: ../appendix-f.md#saturating "Насыщающая арифметика (saturating arithmetic): Арифметика, в которой результат за границей диапазона заменяется ближайшей границей: 200u8.saturating_add(100) равно 255."
 [g-supertrait]: ../appendix-f.md#supertrait "Супертрейт (supertrait): Трейт, реализация которого нужна для реализации другого: в trait Probe: Named + Debug супертрейты — Named и Debug."
+[g-vtable]: ../appendix-f.md#vtable "Таблица методов (vtable): Таблица, которую компилятор строит для пары «тип — трейт»: деструктор, размер, выравнивание и адреса методов."

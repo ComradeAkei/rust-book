@@ -140,7 +140,7 @@ ch01_fadd64:
 У Cortex-M0 и M3 блока плавающей точки нет, и каждая операция — вызов
 функции из `compiler_builtins`. `__aeabi_fadd` — 12-байтная обёртка над
 реализацией `__addsf3` (в выводе `nm -C` она называется
-`compiler_builtins::float::add::__addsf3`, а неискажённое имя `__addsf3` —
+`compiler_builtins::float::add::__addsf3`, а [неискажённое][g-mangling] имя `__addsf3` —
 такая же 12-байтная обёртка). Реализация занимает 474 байта кода Thumb-2
 с ветками для денормализованных чисел, бесконечностей и NaN
 (`__adddf3` для `f64` — 864 байта). Аргументы и результат идут в
@@ -292,4 +292,5 @@ $ arm-none-eabi-gcc -O2 -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -S fm
 </div>
 
 <!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
+[g-mangling]: ../appendix-f.md#mangling "Манглинг (name mangling): Кодирование полного пути функции и хеша крейта в имя символа: в схеме v0 имена начинаются с _R."
 [g-soft-float]: ../appendix-f.md#soft-float "soft-float, hard-float: Два варианта EABI для чисел с плавающей точкой."

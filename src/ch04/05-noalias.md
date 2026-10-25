@@ -367,7 +367,7 @@ define noundef i32 @ch04_na_pinned(ptr noundef nonnull readonly align 4 captures
 `&u32` — `noalias`: пока ссылка жива, значение не меняется. `&Cell<u32>` —
 без него: `Cell` меняет значение через разделяемую ссылку, это
 [внутренняя изменяемость][g-interior-mut] (глава [14](../ch14/05-cells.md)). Без него и `&mut` на
-тип, который не `Unpin`: такие значения, как [самоссылающиеся][g-self-referential] структуры из
+тип, который не [`Unpin`][g-pinning]: такие значения, как [самоссылающиеся][g-self-referential] структуры из
 задачи [3.D](../ch03/07-tasks.md#d-самоссылка-и-перемещение) и
 асинхронные функции из главы [22](../ch22/03-pin.md), могут держать указатели
 на самих себя, и `noalias` сделал бы их неопределённым поведением.
@@ -385,5 +385,6 @@ define noundef i32 @ch04_na_pinned(ptr noundef nonnull readonly align 4 captures
 <!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
 [g-interior-mut]: ../appendix-f.md#interior-mut "Внутренняя изменяемость (interior mutability): Изменение значения через разделяемую ссылку &."
 [g-noalias]: ../appendix-f.md#noalias "noalias: Атрибут LLVM на параметре-указателе: пока функция выполняется, к памяти, которую она трогает через этот указатель, никто не обращается иначе как через него. rustc ставит его на &mut T и &T, кроме ссылок на типы с внутренней изменяемостью и &mut на типы, которые не Unpin."
+[g-pinning]: ../appendix-f.md#pinning "Закрепление (pinning): Обещание, что значение не переместится в памяти, пока не будет уничтожено."
 [g-self-referential]: ../appendix-f.md#self-referential "Самоссылающаяся структура (self-referential struct): Значение, которое хранит указатель на собственное поле."
 [g-ubsan]: ../appendix-f.md#ubsan "UBSan (UndefinedBehaviorSanitizer): Санитайзер GCC и Clang, который ловит неопределённое поведение C во время выполнения: знаковое переполнение, сдвиг на ширину типа и больше, деление на ноль, невыровненный указатель."

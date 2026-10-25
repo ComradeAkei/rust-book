@@ -145,7 +145,7 @@ freed by thread T0 here:
 Что `Sender::start` забирает ссылку, видно из типа параметра: `Rc<Config>`
 по значению. Отдать её второй раз нельзя — после [перемещения][g-move] переменной
 нет (`E0382`, глава 3). Отправить `Rc` в другой поток не даёт [трейт][g-trait]
-`Send`:
+[`Send`][g-send-sync]:
 
 ```console
 error[E0277]: `Rc<Config>` cannot be sent between threads safely
@@ -233,6 +233,7 @@ $ cargo asm -p ch14 --lib --simplify ch14_arc_clone
 [g-move]: ../appendix-f.md#move "Перемещение (move): Передача владения значением: после let b = a владеет b, а a больше использовать нельзя."
 [g-ownership]: ../appendix-f.md#ownership "Владение (ownership): Правило Rust: у каждого значения ровно один владелец — переменная, поле или элемент коллекции, — и он отвечает за уничтожение значения."
 [g-panic]: ../appendix-f.md#panic "Паника (panic): Аварийная реакция на ошибку в самой программе: индекс за границей, unwrap на None, переполнение в отладочной сборке."
+[g-send-sync]: ../appendix-f.md#send-sync "Send, Sync: Автотрейты потокобезопасности."
 [g-slice]: ../appendix-f.md#slice "Срез (slice): Непрерывная последовательность элементов, длина которой известна только во время выполнения: [T], а str — срез байт UTF-8."
 [g-target]: ../appendix-f.md#target "Цель (target): То, для чего генерируется код: архитектура, ОС и ABI, записанные в имени-триплете (thumbv7m-none-eabi)."
 [g-trait]: ../appendix-f.md#trait "Трейт (trait): Набор методов, типов и констант, которые тип обязуется предоставить: Drop, Iterator, Copy."
