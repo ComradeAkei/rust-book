@@ -87,11 +87,10 @@ Box        rw-p    132 КиБ  [heap]
 
 `PR_SET_VMA_ANON_NAME` даёт анонимной памяти имя, и в maps вместо пустого
 пути появляется `[anon:ch28-journal]`. Аллокатор или среда выполнения
-могут подписать так свои арены, и в отчёте о памяти процесса будет
-видно, чья она.
-Но это — опция сборки ядра, `CONFIG_ANON_VMA_NAME`, и ядро этой машины
-собрано без неё: `EINVAL`. Тест `named_mapping_if_supported` проверяет
-имя, если ядро его приняло.
+могут подписать так свои арены, и в отчёте о памяти процесса будет видно,
+чья она. Но это — опция сборки ядра, `CONFIG_ANON_VMA_NAME`, и ядро этой
+машины собрано без неё: `EINVAL`. Тест `named_mapping_if_supported`
+проверяет имя, если ядро его приняло.
 
 ## status: память процесса
 
@@ -122,8 +121,9 @@ $ cargo run -q -p ch28 --bin procfs -- rss
 
 ## Процессоры
 
-Список процессоров у ядра один формат на всё: `/sys/devices/system/cpu/online`,
-`Cpus_allowed_list` в status, `cpuset.cpus` в cgroup — `0-3,8,10-11`:
+У списков процессоров в ядре один формат на всё:
+`/sys/devices/system/cpu/online`, `Cpus_allowed_list` в status,
+`cpuset.cpus` в cgroup — `0-3,8,10-11`:
 
 ```rust,ignore
 {{#include ../../code/ch28/src/procfs.rs:cpus}}

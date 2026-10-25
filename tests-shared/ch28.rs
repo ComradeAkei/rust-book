@@ -252,7 +252,8 @@ fn c_statuses_and_errors() {
 
 #[test]
 fn c_builtin_cd_changes_the_shell_itself() {
-    let dir = tmp("c-cd");
+    // pwd печатает путь без символических ссылок: target бывает ссылкой.
+    let dir = std::fs::canonicalize(tmp("c-cd")).unwrap();
     let o = shell(&format!("cd {}\npwd\ncd {}/нет\n", dir.display(), dir.display()));
     assert_eq!(text(&o.stdout), format!("{}\n", dir.display()));
     assert!(text(&o.stderr).starts_with("ch28-shell: cd: "), "{}", text(&o.stderr));

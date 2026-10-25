@@ -207,7 +207,7 @@ fn page_faults_by_kind() {
         assert!(huge < small / 4.0, "{out}");
     }
     // Чтение файла: ядро отображает сразу соседние страницы из кэша
-    // (fault-around, большие фолианты) — сбоев заметно меньше страниц.
+    // (fault-around, большие фолио) — сбоев заметно меньше страниц.
     assert!(file < small / 4.0, "{out}");
     assert!(populated < 64.0, "{out}");
 }
