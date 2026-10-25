@@ -152,8 +152,10 @@ help: and (1) occurred earlier here
 TSan над неинструментированной std, у него не бывает.
 
 Порядок потоков Miri выбирает из генератора со своим зерном.
-`-Zmiri-many-seeds=0..16` запускает программу с шестнадцатью зёрнами
-подряд — дешёвый способ пройти больше расписаний:
+`-Zmiri-many-seeds=0..16` запускает программу с шестнадцатью зёрнами —
+дешёвый способ пройти больше расписаний. Зёрна идут параллельно, по
+потоку на ядро (не больше двадцати), поэтому и строки `Trying seed`
+печатаются не по порядку:
 
 ```console
 $ MIRIFLAGS=-Zmiri-many-seeds=0..4 cargo +nightly miri run -q -p ch31 --bin san -- once
@@ -212,17 +214,16 @@ Causality violation: Concurrent read and write accesses.
 test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
 ```
 
-С `AcqRel` loom прошёл 82 исполнения и во всех очередь отдала `[1, 2]`.
-С `AllRelaxed` — нашёл исполнение, где читатель видит новый `head`, а
-запись слота не происходит раньше его чтения: «Causality violation».
-Это не «повезло с расписанием»: такое исполнение loom строит
-намеренно, перебирая точки ветвления, и находит его при каждом прогоне.
-Ожидание в модели — с `thread::yield_now()`, а не пустой цикл: loom
-выполняет потоки по очереди, и цикл без уступки для него бесконечен —
-он остановится с «Model exceeded maximum number of branches. This is
-often caused by an algorithm requiring the processor to make progress,
-e.g. spin locks.» Флаг `--cfg loom` меняет все
-крейты, поэтому у loom свой каталог сборки, а `--release` — потому что
+С `AcqRel` loom прошёл 82 исполнения и во всех очередь отдала `[1, 2]`. С
+`AllRelaxed` — нашёл исполнение, где читатель видит новый `head`, а запись
+слота не происходит раньше его чтения: «Causality violation». Это не
+«повезло с расписанием»: такое исполнение loom строит намеренно, перебирая
+точки ветвления, и находит его при каждом прогоне. Ожидание в модели — с
+`thread::yield_now()`, а не пустой цикл: loom выполняет потоки по очереди,
+и цикл без уступки для него бесконечен — он остановится с «Model exceeded
+maximum number of branches. This is often caused by an algorithm requiring
+the processor to make progress, e.g. spin locks.» Флаг `--cfg loom` меняет
+все крейты, поэтому у loom свой каталог сборки, а `--release` — потому что
 перебор в debug заметно медленнее.
 
 <div class="box hood">
