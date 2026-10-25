@@ -28,7 +28,7 @@ pub trait Iterator {
 {{#include ../../code/ch13/src/basics.rs:free_methods}}
 ```
 
-`Item` — ассоциированный тип, а не параметр трейта, как у
+`Item` — [ассоциированный тип][g-assoc-type], а не параметр трейта, как у
 `From<T>`: у итератора один тип элемента, и пользователь его не
 выбирает. Поэтому `Countdown(4).max()` не спрашивает, итератор чего
 перед ним: это известно из `impl`. (А `sum` спрашивает, но о другом —
@@ -82,7 +82,7 @@ loop {
 |---|---|---|---|
 | `for x in &v` | `core::slice::iter::Iter<'_, u32>` | `&u32` | цела, только читалась |
 | `for x in &mut v` | `core::slice::iter::IterMut<'_, u32>` | `&mut u32` | цела, изменена |
-| `for x in v` | `alloc::vec::into_iter::IntoIter<u32>` | `u32` | перемещена в цикл и освобождена |
+| `for x in v` | `alloc::vec::into_iter::IntoIter<u32>` | `u32` | [перемещена][g-move] в цикл и освобождена |
 
 Имена типов проверяет тест `observed_into_iter_types`: имена, которые
 печатает `type_name`, стабильностью не обещаны. После `for x in v`
@@ -106,7 +106,7 @@ error[E0382]: borrow of moved value: `v`
 <div class="box ref">
 
 **Справка: что внутри итераторов.** Размеры у rustc 1.97 (тест
-`observed_iterator_sizes`; раскладка `repr(Rust)` не гарантирована):
+`observed_iterator_sizes`; [раскладка][g-layout] `repr(Rust)` не гарантирована):
 
 | Итератор | Размер | Что хранит |
 |---|---|---|
@@ -148,10 +148,10 @@ ch13_next:
 `[rdi]` — текущий указатель, `[rdi + 8]` — конец. Если они равны,
 функция возвращает ноль: это `None`, потому что `Option<&u32>` занимает
 одно слово, и ссылка, которая не бывает нулевой, отдаёт ноль под `None`
-(ниша из главы 6). Иначе она сдвигает текущий указатель на 4 байта и
-возвращает прежний — `Some(&x)`. Проверки границ нет: указатель не
+([ниша][g-niche] из главы 6). Иначе она сдвигает текущий указатель на 4 байта и
+возвращает прежний — `Some(&x)`. [Проверки границ][g-bounds-check] нет: указатель не
 выходит за конец по построению. На Cortex-M3 то же самое помещается в
-условное выполнение без переходов:
+[условное выполнение][g-conditional-execution] без переходов:
 
 ```console
 $ cargo asm -p ch13 --lib --simplify --no-default-features --target thumbv7m-none-eabi ch13_next
@@ -247,3 +247,11 @@ error: range endpoint is out of range for `u8`
 `for b in &mut v.iter()` компилируется, а `for b in &v.iter()` — нет?
 
 </div>
+
+<!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
+[g-assoc-type]: ../appendix-f.md#assoc-type "Ассоциированный тип (associated type): Тип, который называет каждая реализация трейта: type Sample в трейте Source."
+[g-bounds-check]: ../appendix-f.md#bounds-check "Проверка границ (bounds check): Сравнение индекса с длиной среза перед обращением: одна беззнаковая инструкция и переход к панике."
+[g-conditional-execution]: ../appendix-f.md#conditional-execution "Условное выполнение (conditional execution): Выполнение команды, только если выполнено условие по флагам, без перехода."
+[g-layout]: ../appendix-f.md#layout "Раскладка (layout): Размер, выравнивание и смещения полей типа в памяти."
+[g-move]: ../appendix-f.md#move "Перемещение (move): Передача владения значением: после let b = a владеет b, а a больше использовать нельзя."
+[g-niche]: ../appendix-f.md#niche "Ниша (niche): Битовый шаблон, который не встречается ни у одного значения типа: 0 у ссылки и NonZeroU32, 2–255 у bool, суррогаты и числа больше 0x10FFFF у char."

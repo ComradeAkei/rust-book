@@ -48,7 +48,7 @@ help: <496> was created by a SharedReadOnly retag at offsets [0x0..0x4]
 ```
 
 Прямую запись через приведение ссылки — `*(x as *const u32 as *mut u32)
-+= 1` — компилятор отвергает сам, линтом `invalid_reference_casting`,
++= 1` — компилятор отвергает сам, [линтом][g-lint] `invalid_reference_casting`,
 который по умолчанию запрещён: «assigning to `&T` is undefined
 behavior, consider using an `UnsafeCell`». Через функцию с сырым
 указателем, как в примере, линт уже не видит.
@@ -140,7 +140,7 @@ x86-64, Cortex-M3 и Cortex-M0.
 то, что компилятору разрешено предполагать. В IR release-сборки
 параметр `x` у `ch14_ref_twice` помечен `noalias noundef readonly align
 4 dereferenceable(4)`, а у `ch14_cell_twice` — только `noundef nonnull
-readonly align 4`: ни `noalias`, ни `dereferenceable`. `readonly` там
+readonly align 4`: ни [`noalias`][g-noalias], ни `dereferenceable`. `readonly` там
 вывел сам LLVM — эта функция через `x` не пишет, но кто-то другой может.
 
 ## Свой Cell
@@ -171,7 +171,7 @@ error[E0277]: `Cell<u32>` cannot be shared between threads safely
   = note: shared static variables must have a type that implements `Sync`
 ```
 
-Для `MyCell` ошибка та же (doc-тест `compile_fail,E0277` в
+Для `MyCell` ошибка та же ([doc-тест][g-doctest] `compile_fail,E0277` в
 `code/ch14/src/cells.rs`). Если обёртка всё-таки выдаст ссылку внутрь, а
 потом изменит значение, это неопределённое поведение, даже если
 ссылка лежит внутри `UnsafeCell`:
@@ -238,7 +238,7 @@ ch14_cell_inc:
 `RefCell<T>` даёт ссылки, но проверяет правила главы 4 во время
 работы. Рядом со значением лежит флаг: 0 — заимствований нет,
 положительное число — столько читателей, −1 — писатель. `borrow()`
-увеличивает флаг и возвращает `Ref<T>` — страж, который уменьшит флаг в
+увеличивает флаг и возвращает `Ref<T>` — [страж][g-guard], который уменьшит флаг в
 `drop`; `borrow_mut()` ставит −1 и возвращает `RefMut<T>`. Нарушение
 правила — паника: `borrow_mut` при живом `Ref` или `RefMut` паникует с
 `RefCell already borrowed`, `borrow` при живом `RefMut` — с `RefCell
@@ -268,7 +268,7 @@ RefCell already borrowed
 обработчик, отпустить, вызвать, снова занять, чтобы посчитать вызов, —
 и тест `registry_fixed_notifies_all` проверяет, что все три подписчика
 получили по вызову. Длина списка прочитана заранее, а не в заголовке
-`for`, и это не случайность: о временных значениях в заголовке цикла —
+`for`, и это не случайность: о [временных значениях][g-temporary] в заголовке цикла —
 раздел [14.8](08-tricks.md).
 
 Цена проверки — сравнение и ветка:
@@ -339,7 +339,7 @@ ch14_refcell_inc:
 неконтролируемую общую изменяемость, от которой спасают правила
 заимствования, только ошибка теперь — паника во время работы, а не
 отказ компиляции. Если структура данных позволяет обойтись владением
-и `&mut`, так и стоит сделать; арена с индексами из задачи
+и `&mut`, так и стоит сделать; [арена][g-arena] с индексами из задачи
 [14.C](09-tasks.md#c-двусвязный-список-дважды) — один из способов.
 
 <div class="box check">
@@ -351,3 +351,11 @@ ch14_refcell_inc:
 `js` — переход по знаку?
 
 </div>
+
+<!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
+[g-arena]: ../appendix-f.md#arena "Арена (arena): Хранилище, в котором все узлы структуры лежат в одном векторе, а связи между ними — индексы, а не ссылки."
+[g-doctest]: ../appendix-f.md#doctest "doc-тест (doctest): Пример кода в документирующем комментарии ///, который cargo test собирает и запускает как тест."
+[g-guard]: ../appendix-f.md#guard "Страж (guard): Значение, чей деструктор отпускает ресурс: MutexGuard отпускает мьютекс, IrqGuard из главы 3 снова разрешает прерывания."
+[g-lint]: ../appendix-f.md#lint "Линт (lint): Правило, которое срабатывает на подозрительном, но допустимом коде: unused_comparisons в rustc, manual_memcpy в clippy."
+[g-noalias]: ../appendix-f.md#noalias "noalias: Атрибут LLVM на параметре-указателе: пока функция выполняется, к памяти, которую она трогает через этот указатель, никто не обращается иначе как через него. rustc ставит его на &mut T и &T, кроме ссылок на типы с внутренней изменяемостью и &mut на типы, которые не Unpin."
+[g-temporary]: ../appendix-f.md#temporary "Временное значение (temporary): Результат подвыражения, не привязанный к переменной: структура из Noisy::new(log) в Noisy::new(log).value()."

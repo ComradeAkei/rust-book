@@ -75,7 +75,7 @@ target_pointer_width="32"
 ```
 
 У ARMv6-M нет `target_has_atomic`: в наборе команд нет пары
-`LDREX`/`STREX`, а значит, нет атомарного `fetch_add` и `compare_exchange`.
+[`LDREX`][g-exclusive-access]/`STREX`, а значит, нет атомарного `fetch_add` и `compare_exchange`.
 Атомарные загрузка и сохранение есть (выровненное слово читается одной
 инструкцией), но всё, что сложнее, на Cortex-M0 делают через запрет
 прерываний. Прошивки главы 6 уже пользовались этим признаком, чтобы
@@ -204,6 +204,7 @@ $ rustup target list --installed
 [g-armv7m]: ../appendix-f.md#armv7m "ARMv6-M, ARMv7-M, ARMv7E-M: Версии архитектуры ARM для микроконтроллеров."
 [g-atomic]: ../appendix-f.md#atomic "Атомик (atomic): Тип из core::sync::atomic (AtomicU32, AtomicBool и другие), операции над которым неделимы и упорядочены по выбранной модели памяти."
 [g-dsp]: ../appendix-f.md#dsp "DSP (digital signal processing): Расширение набора команд ARMv7E-M (Cortex-M4, M7) для обработки сигналов: арифметика с насыщением (qadd), умножение с накоплением, SIMD над байтами и полусловами в 32-битном регистре."
+[g-exclusive-access]: ../appendix-f.md#exclusive-access "Эксклюзивный доступ (exclusive access): Пара инструкций ARM LDREX и STREX: первая читает слово и ставит адрес под наблюдение монитора, вторая пишет, только если с тех пор никто не писал по адресу и не было исключения."
 [g-fpu]: ../appendix-f.md#fpu "FPU (floating-point unit): Блок плавающей точки в процессоре."
 [g-prologue]: ../appendix-f.md#prologue "Пролог и эпилог (prologue, epilogue): Начальные и конечные команды функции: пролог сохраняет callee-saved регистры и адрес возврата и выделяет кадр стека, эпилог восстанавливает их и возвращается."
 [g-sanitizer]: ../appendix-f.md#sanitizer "Санитайзер (sanitizer): Инструментирование машинного кода: компилятор вставляет проверки перед обращениями к памяти, а библиотека времени выполнения ведёт теневую память и сообщает об ошибке в момент, когда она случилась."

@@ -103,7 +103,7 @@ help: alternatively, consider constraining `kind` so it does not apply to trait 
 ```
 
 Второй работает для любого метода из таблицы правил. `dyn Probe` не
-`Sized`, поэтому метод с `where Self: Sized` у объекта не существует,
+[`Sized`][g-sized], поэтому метод с `where Self: Sized` у объекта не существует,
 в таблицу не попадает и перестаёт мешать. Трейт датчика АЦП из
 `code/ch11/src/compat.rs`:
 
@@ -254,3 +254,4 @@ where Self: Sized`? Почему `Iterator::next` попадает в табли
 
 <!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
 [g-move]: ../appendix-f.md#move "Перемещение (move): Передача владения значением: после let b = a владеет b, а a больше использовать нельзя."
+[g-sized]: ../appendix-f.md#sized "Sized, ?Sized: Sized — маркерный трейт типов, размер которых известен при компиляции; компилятор неявно требует его от каждого параметра типа."

@@ -31,8 +31,8 @@
 
 *Cortex-M3, M4, M7 (ARMv7-M).* Невыровненный доступ разрешён только для
 `LDR`, `LDRH`, `LDRSH`, `STR`, `STRH` и их непривилегированных вариантов.
-Инструкции `LDRD`, `STRD`, `LDM`, `STM`, `PUSH`, `POP` и эксклюзивный
-доступ `LDREX`/`STREX` требуют выравнивания всегда и при нарушении
+Инструкции `LDRD`, `STRD`, `LDM`, `STM`, `PUSH`, `POP` и [эксклюзивный
+доступ][g-exclusive-access] `LDREX`/`STREX` требуют выравнивания всегда и при нарушении
 генерируют UsageFault с битом `UNALIGNED`. Если UsageFault не включён
 (так после сброса), он повышается до HardFault. Бит `CCR.UNALIGN_TRP`
 заставляет ловить и разрешённые случаи. Источник: ARMv7-M Architecture
@@ -288,5 +288,6 @@ HardFault`. Именно так выглядел первый запуск эт�
 </div>
 
 <!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
+[g-exclusive-access]: ../appendix-f.md#exclusive-access "Эксклюзивный доступ (exclusive access): Пара инструкций ARM LDREX и STREX: первая читает слово и ставит адрес под наблюдение монитора, вторая пишет, только если с тех пор никто не писал по адресу и не было исключения."
 [g-faults]: ../appendix-f.md#faults "MemManage, BusFault, UsageFault: Отдельные исключения сбоев ARMv7-M: нарушение прав MPU или выполнение из запрещённой области, ошибка шины, неверная инструкция или состояние ядра (например, переход на адрес без бита Thumb)."
 [g-sse-avx]: ../appendix-f.md#sse-avx "SSE, AVX (Streaming SIMD Extensions, Advanced Vector Extensions): Векторные расширения x86: SSE даёт 128-битные регистры xmm0–xmm15 и команды над ними (SSE2 есть у любого x86_64), AVX и AVX2 — 256-битные ymm, AVX-512 — 512-битные zmm."

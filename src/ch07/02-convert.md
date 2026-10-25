@@ -61,7 +61,7 @@ assert!(e.downcast_ref::<core::num::ParseIntError>().is_some());
 
 **Справка: `Error` без `std`.** Трейт `Error` живёт в `core::error` с
 Rust 1.81, а реализации `From` для `Box<dyn Error>` — в `alloc`. Поэтому
-весь этот раздел работает и в прошивке с глобальным аллокатором, и в
+весь этот раздел работает и в прошивке с [глобальным аллокатором][g-global-allocator], и в
 [`no_std`][g-no-std] без него, если не использовать `Box`. [Крейт][g-crate] `code/ch07`
 собирается для трёх [целей][g-target] Cortex-M с `--no-default-features`.
 
@@ -163,6 +163,7 @@ Doc-тесты в `code/ch07/src/convert.rs` проверяют оба случ�
 [g-closure]: ../appendix-f.md#closure "Замыкание (closure): Функция вместе со своим контекстом — захваченными переменными."
 [g-crate]: ../appendix-f.md#crate "Крейт (crate): Единица компиляции Rust: одно дерево модулей, один вызов rustc, один результат — библиотека или программа."
 [g-generic]: ../appendix-f.md#generic "Обобщение (generic): Функция или тип с параметрами-типами: fn max(a: T, b: T) -> T."
+[g-global-allocator]: ../appendix-f.md#global-allocator "Глобальный аллокатор (global allocator): Распределитель памяти, который зовут Box, Vec, String и все коллекции alloc: тип, реализующий GlobalAlloc и объявленный атрибутом #[global_allocator]."
 [g-guard]: ../appendix-f.md#guard "Страж (guard): Значение, чей деструктор отпускает ресурс: MutexGuard отпускает мьютекс, IrqGuard из главы 3 снова разрешает прерывания."
 [g-lifetime]: ../appendix-f.md#lifetime "Время жизни (lifetime): Имя для участка программы, на котором ссылка действительна: 'a в &'a str."
 [g-no-std]: ../appendix-f.md#no-std "no_std: Атрибут крейта #![no_std]: крейт пользуется только core (и, если нужно, alloc), без стандартной библиотеки ОС."
