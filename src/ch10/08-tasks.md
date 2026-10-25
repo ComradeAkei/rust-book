@@ -166,7 +166,7 @@ $ cargo test -p ch10-exercises task_c_sizes -- --nocapture
 ## D. Typestate-драйвер SPI-flash
 
 Драйвер микросхемы flash серии W25Q (Winbond, 16 МиБ, интерфейс SPI)
-поверх трейтов `embedded-hal` 1.0. Команды и константы микросхемы:
+поверх трейтов [`embedded-hal`][g-embedded-hal] 1.0. Команды и константы микросхемы:
 
 ```rust
 {{#include ../../exercises/ch10/src/d_flash.rs:commands}}
@@ -247,3 +247,6 @@ E0451, а правильная цепочка `write_enable → program` — с�
 микросхемы после сброса питания?), и сколько кода приходится писать
 вызывающему из-за `Failed`. Где граница, за которой typestate мешает
 больше, чем помогает?
+
+<!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
+[g-embedded-hal]: ../appendix-f.md#embedded-hal "embedded-hal: Крейт трейтов периферии микроконтроллера: OutputPin, InputPin, DelayNs, SpiDevice, I2c."

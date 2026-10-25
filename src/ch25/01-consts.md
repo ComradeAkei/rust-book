@@ -39,7 +39,7 @@ error[E0530]: match bindings cannot shadow statics
 забыли импортировать (раздел [2.3](../ch02/03-match.md)).
 
 Объект `static` видят все потоки сразу, поэтому его тип обязан быть
-`Sync`:
+[`Sync`][g-send-sync]:
 
 ```text
 error[E0277]: `Cell<u32>` cannot be shared between threads safely
@@ -146,7 +146,7 @@ help: for a shared instance of `COUNTER`, consider making it a `static` item ins
 
 **Ловушка.** `const` с `Cell`, атомиком или мьютексом внутри — шаблон
 для инициализации, а не общий объект. Если два места программы должны
-видеть одно состояние — это `static`. clippy ловит и само объявление
+видеть одно состояние — это `static`. [clippy][g-clippy] ловит и само объявление
 (`declare_interior_mutable_const`), и заём (`borrow_interior_mutable_const`).
 
 </div>
@@ -187,11 +187,12 @@ error[E0515]: cannot return reference to temporary value
   |     returns a reference to data owned by the current function
 ```
 
-Вне константного контекста `square(4)` — обычный вызов при выполнении:
-функция могла бы паниковать или зависеть от входа, и компилятор не
-вправе тайно вычислять её заранее. Блок `const { square(4) }` делает
-вызов константой явно, и ссылка на неё — `'static`. Оба случая —
-doc-тесты модуля `consts`.
+Вне *константного контекста* (const context: инициализатор `const` или
+`static`, длина массива, блок `const { … }`) `square(4)` — обычный вызов
+при выполнении: функция могла бы паниковать или зависеть от входа, и
+компилятор не вправе тайно вычислять её заранее. Блок
+`const { square(4) }` делает вызов константой явно, и ссылка на неё —
+`'static`. Оба случая — doc-тесты модуля `consts`.
 
 <div class="box check">
 
@@ -200,3 +201,7 @@ doc-тесты модуля `consts`.
 Какой адрес у `COUNTER`?
 
 </div>
+
+<!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
+[g-clippy]: ../appendix-f.md#clippy "clippy: Линтер из тулчейна Rust: несколько сотен линтов, от неидиоматичного кода до заведомых ошибок, разбитых на группы с уровнями allow, warn и deny."
+[g-send-sync]: ../appendix-f.md#send-sync "Send, Sync: Автотрейты потокобезопасности."

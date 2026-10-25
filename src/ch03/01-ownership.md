@@ -124,7 +124,7 @@ error[E0382]: use of moved value: `frame`
 
 <div class="box trap">
 
-**Ловушка.** `#[derive(Clone, Copy)]` ставят по привычке, чтобы
+**Ловушка.** [`#[derive(Clone, Copy)]`][g-derive] ставят по привычке, чтобы
 компилятор не ругался на перемещения. Для значений-данных это нормально,
 но для типов, которые означают *право* на что-то, `Copy` разрушает смысл.
 Если тип `Uart0` означает «этот код единственный управляет [UART0][g-uart]», то
@@ -148,6 +148,7 @@ error[E0382]: use of moved value: `frame`
 
 <!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
 [g-borrowing]: ../appendix-f.md#borrowing "Заимствование (borrowing): Создание ссылки на значение без передачи владения: &x — разделяемое, &mut x — уникальное."
+[g-derive]: ../appendix-f.md#derive "derive (derive macro): Атрибут #[derive(...)] над типом: макрос получает объявление структуры, перечисления или объединения и добавляет рядом реализации трейтов — Debug, Clone, PartialEq."
 [g-raw-pointer]: ../appendix-f.md#raw-pointer "Сырой указатель (raw pointer): Указатель *const T или *mut T без гарантий ссылки: он может быть нулевым, висячим, невыровненным."
 [g-temporary]: ../appendix-f.md#temporary "Временное значение (temporary): Результат подвыражения, не привязанный к переменной: структура из Noisy::new(log) в Noisy::new(log).value()."
 [g-uart]: ../appendix-f.md#uart "UART (Universal Asynchronous Receiver-Transmitter): Последовательный порт: передаёт байты по линии бит за битом без общего тактового сигнала."

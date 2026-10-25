@@ -114,14 +114,14 @@ Derive не может изменить структуру, поэтому ря�
 {{#include ../../exercises/ch24/src/c_timed.rs:clock}}
 ```
 
-Счётчик и охранник даны:
+Счётчик и [охранник][g-guard] даны:
 
 ```rust,ignore
 {{#include ../../exercises/ch24/src/c_timed.rs:timing}}
 ```
 
-Часы для Cortex-M тоже даны — SysTick на любом ядре и счётчик тактов
-DWT на ARMv7-M и новее:
+Часы для Cortex-M тоже даны — [SysTick][g-systick] на любом ядре и счётчик тактов
+DWT на [ARMv7-M][g-armv7m] и новее:
 
 ```rust,ignore
 {{#include ../../exercises/ch24/src/c_timed.rs:systick}}
@@ -142,7 +142,7 @@ DWT на ARMv7-M и новее:
 Требования тестов `c_*`:
 
 - считается каждый выход: обычный возврат, `return`, `?` и паника с
-  раскруткой стека (`c_every_exit_is_counted`, `c_panic_is_counted`);
+  [раскруткой стека][g-unwinding] (`c_every_exit_is_counted`, `c_panic_is_counted`);
 - аргументы функции с именами `guard`, `_guard`, `__guard`, `start` и
   `timing` работают как прежде (`c_arguments_keep_their_names`);
 - атрибут работает на методах и обобщённых функциях;
@@ -251,3 +251,9 @@ install svd2rust`), сгенерируйте крейт из того же фа�
 сборка и пересборка, сколько крейтов тянет каждый и какой машинный код
 получается для одной и той же записи в регистр. Что из API svd2rust ваш
 макрос не умеет и что из этого стоило бы добавить?
+
+<!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
+[g-armv7m]: ../appendix-f.md#armv7m "ARMv6-M, ARMv7-M, ARMv7E-M: Версии архитектуры ARM для микроконтроллеров."
+[g-guard]: ../appendix-f.md#guard "Страж (guard): Значение, чей деструктор отпускает ресурс: MutexGuard отпускает мьютекс, IrqGuard из главы 3 снова разрешает прерывания."
+[g-systick]: ../appendix-f.md#systick "SysTick: Системный таймер Cortex-M: 24-битный счётчик, который считает вниз от заданного значения и при переходе через ноль вызывает исключение SysTick."
+[g-unwinding]: ../appendix-f.md#unwinding "Раскрутка стека (unwinding): Снятие кадров стека по одному после паники с вызовом деструкторов живых значений."
