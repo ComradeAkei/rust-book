@@ -4,6 +4,7 @@
 //! Тест запускает cargo — под Miri пропускается.
 //!
 //! - `xchg` — SeqCst-store (полный барьер на x86-64);
+//! - обычный `mov` без барьера — Release-store;
 //! - `lock` — префикс атомарного read-modify-write (`fetch_add`, CAS).
 
 use std::path::PathBuf;
@@ -52,10 +53,36 @@ fn has_insn(asm: &str, mnemonic: &str) -> bool {
     })
 }
 
+/// Инструкции функции, чьё (искажённое) имя содержит `name`: от её метки
+/// до `.Lfunc_end`, без директив и комментариев, пробелы схлопнуты.
+fn body(asm: &str, name: &str) -> Vec<String> {
+    let mut lines = asm.lines().skip_while(|l| !(l.ends_with(':') && l.contains(name))).skip(1);
+    let mut out = Vec::new();
+    for l in lines.by_ref() {
+        let t = l.trim();
+        if t.starts_with(".Lfunc_end") {
+            return out;
+        }
+        if !t.is_empty() && !t.starts_with(['.', '#', '@']) {
+            out.push(t.split_whitespace().collect::<Vec<_>>().join(" "));
+        }
+    }
+    panic!("нет функции {name} в ассемблере")
+}
+
 #[test]
 #[cfg_attr(miri, ignore = "запускает cargo")]
 fn memory_model_instructions_are_emitted() {
     let s = asm();
     assert!(has_insn(s, "xchg"), "нет xchg от SeqCst-store (раздел 21.4)");
     assert!(has_insn(s, "lock"), "нет префикса lock от атомарного RMW (21.4)");
+}
+
+#[test]
+#[cfg_attr(miri, ignore = "запускает cargo")]
+fn release_store_is_plain_mov() {
+    let b = body(asm(), "rel_store");
+    assert!(b.iter().any(|l| l == "mov qword ptr [rdi], rsi"), "{b:?}");
+    let fenced = b.iter().any(|l| ["xchg", "lock", "mfence"].iter().any(|m| l.starts_with(m)));
+    assert!(!fenced, "Release-store на x86-64 не требует барьера: {b:?}");
 }

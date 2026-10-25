@@ -23,7 +23,8 @@ struct Context {
 /// # Safety
 ///
 /// `from` и `to` указывают на валидные `Context`. `to.rsp` сохранён прошлым
-/// `switch` либо указывает на корректно собранный стартовый кадр. ABI —
+/// `switch` либо указывает на корректно собранный стартовый кадр, кратный
+/// 16: после `ret` в точку входа `rsp` ≡ 8 (mod 16), как после `call`. ABI —
 /// `extern "C"`: `from` в rdi, `to` в rsi.
 #[unsafe(naked)]
 unsafe extern "C" fn switch(from: *mut Context, to: *const Context) {
@@ -82,14 +83,16 @@ pub fn pingpong(rounds: u32) -> Vec<u32> {
     // по очереди, поэтому единоличный доступ к общему состоянию соблюдён.
     // Собираем стартовый кадр сопрограммы: шесть callee-saved значений (любых)
     // и адрес возврата = coroutine сверху; первый switch «восстановит» его и
-    // ret-нется в coroutine.
+    // ret-нется в coroutine. Верх стека выровнен вниз по 16, над адресом
+    // возврата — пустая ячейка: после ret rsp ≡ 8 (mod 16), как ждёт System V
+    // ABI, иначе SSE-код в теле сопрограммы (`movaps` по стеку) может упасть.
     unsafe {
         let log = &raw mut LOG;
         (*log).clear();
         (&raw mut ROUNDS).write(rounds);
 
         let base = (&raw mut STACK).cast::<u64>();
-        let sp = base.add(1024).sub(7);
+        let sp = base.add(1024).map_addr(|a| a & !15).sub(8);
         *sp.add(6) = coroutine as *const () as u64;
         (&raw mut CO).write(Context { rsp: sp as u64 });
 

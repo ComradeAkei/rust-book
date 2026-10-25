@@ -15,10 +15,11 @@
 обещание программиста проверяемым хотя бы частично:
 
 ```rust,ignore
-let tsc: u64;
+let (lo, hi): (u32, u32);
 unsafe {
     core::arch::asm!("rdtsc", out("eax") lo, out("edx") hi);
 }
+let tsc = (u64::from(hi) << 32) | u64::from(lo);
 ```
 
 Проблема в том, что встроенный ассемблер — это дыра в модели компилятора.

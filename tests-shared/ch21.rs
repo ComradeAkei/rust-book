@@ -2,7 +2,9 @@
 // заготовок и решений после строки `use <крейт> as sut;`.
 //
 // Глава хостовая (потоки std). Многопоточные тесты помечены ignore под Miri
-// (тысячи операций по кооперативному планировщику Miri идут слишком долго).
+// (тысячи операций по кооперативному планировщику Miri идут слишком долго);
+// малый прогон задачи D (`d_treiber_small_concurrency`) Miri успевает и
+// проверяет на гонки данных — он и поймал неатомарный `next` у узла.
 
 use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
 use std::sync::Arc;
@@ -106,4 +108,38 @@ fn d_treiber_conserves_sum_under_concurrency() {
 
     assert_eq!(popped.load(Ordering::Relaxed), (THREADS * PER) as usize);
     assert_eq!(consumed.load(Ordering::Relaxed), produced);
+}
+
+/// Малый прогон для Miri: два потока по три раза кладут значение и снимают
+/// какое-нибудь (своё или чужое). Miri моделирует слабую память и ловит
+/// гонки данных: будь `next` узла обычной ячейкой, он сообщил бы «Data race
+/// detected» между чтением `next` в `pop_index` и записью в `push_index`.
+#[test]
+fn d_treiber_small_concurrency() {
+    const THREADS: u64 = 2;
+    const PER: u64 = 3;
+    let stack: sut::d_treiber::TreiberStack<4> = sut::d_treiber::TreiberStack::new();
+    let consumed = AtomicU64::new(0);
+    thread::scope(|s| {
+        for t in 0..THREADS {
+            let (stack, consumed) = (&stack, &consumed);
+            s.spawn(move || {
+                for v in t * PER..(t + 1) * PER {
+                    while stack.push(v).is_err() {
+                        std::hint::spin_loop();
+                    }
+                    // Свой push всегда раньше своего pop: стек не опустеет
+                    // у обоих потоков сразу, и ожидание конечно.
+                    loop {
+                        if let Some(x) = stack.pop() {
+                            consumed.fetch_add(x, Ordering::Relaxed);
+                            break;
+                        }
+                        std::hint::spin_loop();
+                    }
+                }
+            });
+        }
+    });
+    assert_eq!(consumed.load(Ordering::Relaxed), (0..THREADS * PER).sum::<u64>());
 }

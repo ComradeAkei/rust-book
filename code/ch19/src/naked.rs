@@ -42,7 +42,9 @@ pub struct Context {
 ///
 /// `from` и `to` указывают на валидные `Context`. `to.rsp` либо сохранён
 /// прошлым вызовом `switch`, либо указывает на корректно собранный стартовый
-/// кадр (шесть callee-saved значений и адрес возврата сверху). Соглашение о
+/// кадр (шесть callee-saved значений и адрес возврата сверху), причём сам
+/// `to.rsp` кратен 16: тогда после `ret` в точку входа `rsp` ≡ 8 (mod 16),
+/// как сразу после `call`, — этого требует System V ABI. Соглашение о
 /// вызовах — `extern "C"`: `from` в rdi, `to` в rsi.
 #[unsafe(naked)]
 pub unsafe extern "C" fn switch(from: *mut Context, to: *const Context) {
@@ -86,14 +88,27 @@ mod tests {
     static mut CO: Context = Context { rsp: 0 };
     static mut STACK: [u64; 512] = [0; 512];
     static mut HITS: u32 = 0;
+    static mut ALIGNED: bool = false;
+
+    /// Выровнен ли стек по ABI. Компилятор считает, что при входе в функцию
+    /// rsp ≡ 8 (mod 16), и кладёт локальную с align(16) по адресу, кратному
+    /// 16, только при этом условии; на сбитом стеке адрес выйдет ≡ 8.
+    #[inline(never)]
+    fn stack_is_aligned() -> bool {
+        #[repr(align(16))]
+        struct Probe(#[allow(dead_code)] [u8; 16]);
+        let probe = Probe([0; 16]);
+        core::hint::black_box((&raw const probe).addr()) % 16 == 0
+    }
 
     extern "C" fn coroutine() -> ! {
-        // SAFETY: единственный доступ к HITS/CO — здесь и в тесте, строго по
-        // очереди (кооперативно), гонки нет.
+        // SAFETY: единственный доступ к HITS/ALIGNED/CO — здесь и в тесте,
+        // строго по очереди (кооперативно), гонки нет.
         unsafe {
             // Через сырой указатель, не ссылку на static mut.
             let hits = &raw mut HITS;
             *hits += 1;
+            (&raw mut ALIGNED).write(stack_is_aligned());
             // Вернуть управление main.
             switch(&raw mut CO, &raw const MAIN);
         }
@@ -104,15 +119,18 @@ mod tests {
     fn switch_runs_coroutine_then_returns() {
         // SAFETY: собираем стартовый кадр сопрограммы: шесть callee-saved
         // значений (любых) и адрес возврата = coroutine сверху. Первый switch
-        // «восстановит» этот кадр и ret-нется в coroutine.
+        // «восстановит» этот кадр и ret-нется в coroutine. Верх стека выровнен
+        // вниз по 16, над адресом возврата — пустая ячейка: после ret
+        // rsp ≡ 8 (mod 16), как сразу после call (System V ABI).
         unsafe {
             let base = (&raw mut STACK).cast::<u64>();
-            let sp = base.add(512).sub(7);
+            let sp = base.add(512).map_addr(|a| a & !15).sub(8);
             *sp.add(6) = coroutine as *const () as u64; // адрес для ret
             (&raw mut CO).write(Context { rsp: sp as u64 });
 
             switch(&raw mut MAIN, &raw const CO);
             assert_eq!((&raw const HITS).read(), 1);
+            assert!((&raw const ALIGNED).read(), "стек сопрограммы сбит на 8 байт");
         }
     }
 }
