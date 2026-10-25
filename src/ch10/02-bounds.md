@@ -98,7 +98,7 @@ help: consider restricting type parameter `T` with trait `Ord`
 на стек. Для функций, которые принимают `T` только по ссылке, это
 ограничение лишнее, и его снимают записью `T: ?Sized`:
 `fn len_of<T: ?Sized + AsRef<[u8]>>(x: &T)` принимает и `&str`, и `&[u8]`.
-`Sized` разбирал раздел [9.5](../ch09/05-markers.md).
+[`Sized`][g-sized] разбирал раздел [9.5](../ch09/05-markers.md).
 
 </div>
 
@@ -164,3 +164,4 @@ str` ограничению отвечает. Запрещены только с
 [g-borrowing]: ../appendix-f.md#borrowing "Заимствование (borrowing): Создание ссылки на значение без передачи владения: &x — разделяемое, &mut x — уникальное."
 [g-iterator]: ../appendix-f.md#iterator "Итератор (iterator): Тип, реализующий трейт Iterator: состояние обхода с методом next, который выдаёт следующий элемент или None."
 [g-lifetime]: ../appendix-f.md#lifetime "Время жизни (lifetime): Имя для участка программы, на котором ссылка действительна: 'a в &'a str."
+[g-sized]: ../appendix-f.md#sized "Sized, ?Sized: Sized — маркерный трейт типов, размер которых известен при компиляции; компилятор неявно требует его от каждого параметра типа."

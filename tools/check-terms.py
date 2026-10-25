@@ -16,7 +16,11 @@
 целый фрагмент кода: `` `cmov\\w*` `` найдёт `cmovne`, но не `cmovne eax, ecx`.
 Образцов у статьи может быть несколько: обычно один для прозы и один для кода.
 Пометка `<!-- once -->` — сквозной термин (UB, LLVM): ссылка нужна только при
-первом упоминании в книге, а не в каждой главе.
+первом упоминании в книге, а не в каждой главе. `<!-- only: ch13 appendix-e/ch13 -->`
+ограничивает проверку и расстановку ссылок перечисленными единицами, а
+`<!-- skip: ch29 -->` исключает единицы: так слово, у которого в других главах
+свой смысл («адаптер» итератора и отладочный, модуль Rust и модуль ядра),
+размечается только там, где оно термин.
 
 Проверки:
 1. Статьи разобраны, id уникальны, каждая стоит под своей буквой и по
@@ -59,7 +63,7 @@ FILL = "\x01"
 ENTRY = re.compile(r'^<span id="([a-z0-9][a-z0-9-]*)"></span>\*\*(.+?)\*\*(?: \((.+)\))?$')
 LETTER = re.compile(r"^## (\S)$")
 HOME = re.compile(r"→ \[[^\]]+\]\(([^)#\s]+\.md)[^)]*\)")
-COMMENT = re.compile(r"<!--\s*(term-cs|term|once)\b:?\s*(.*?)\s*-->")
+COMMENT = re.compile(r"<!--\s*(term-cs|term|once|only|skip)\b:?\s*(.*?)\s*-->")
 
 FENCE = re.compile(r"^\s*(```|~~~)")
 # Строки, которые не проза: заголовки, include, определения ссылок, HTML,
@@ -89,6 +93,12 @@ class Term:
     patterns: list[tuple[re.Pattern, bool]]
     once: bool
     line: int
+    # Единицы, где термин размечается: None — везде, кроме skip.
+    only: set[str] | None
+    skip: set[str]
+
+    def applies(self, unit: str) -> bool:
+        return (self.only is None or unit in self.only) and unit not in self.skip
 
     def title(self) -> str:
         head = f"{self.name} ({self.pair})" if self.pair else self.name
@@ -170,10 +180,14 @@ def load_glossary(errors: list[str]) -> list[Term]:
             errors.append(f"{where}: «{name}» должен стоять раньше «{previous}»")
         previous = name
         home = HOME.search(dd)
-        sources, once = [], False
+        sources, once, only, skip = [], False, None, set()
         for kind, value in COMMENT.findall(dd):
             if kind == "once":
                 once = True
+            elif kind == "only":
+                only = (only or set()) | set(value.split())
+            elif kind == "skip":
+                skip |= set(value.split())
             else:
                 sources.append((value, re.I if kind == "term" else 0))
         text = plain(dd.split("→")[0])
@@ -195,7 +209,7 @@ def load_glossary(errors: list[str]) -> list[Term]:
             except re.error as e:
                 errors.append(f"{where}: образец «{source}» не компилируется: {e}")
         if home and patterns and len(patterns) == len(sources):
-            terms.append(Term(tid, name, pair, text, home.group(1), patterns, once, i + 1))
+            terms.append(Term(tid, name, pair, text, home.group(1), patterns, once, i + 1, only, skip))
         i = j
     return terms
 
@@ -405,6 +419,9 @@ def main(argv: list[str]) -> int:
 
     for t in terms:
         check_home(t, pages, errors)
+        for u in sorted((t.only or set()) | t.skip):
+            if u not in names:
+                errors.append(f"src/{GLOSSARY}:{t.line}: у «{t.name}» в only/skip нет единицы {u}")
 
     # Первое употребление в книге — для сквозных терминов только оно.
     first_unit: dict[str, str] = {}
@@ -421,7 +438,7 @@ def main(argv: list[str]) -> int:
         if name not in selected:
             continue
         for t in terms:
-            if t.once and first_unit.get(t.id) != name:
+            if t.once and first_unit.get(t.id) != name or not t.applies(name):
                 continue
             hit = first_in(t, files, pages)
             if not hit or hit[3] != "bare":

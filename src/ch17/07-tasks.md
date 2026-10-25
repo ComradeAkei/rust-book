@@ -3,7 +3,7 @@
 Задачи B, C и D решаются кодом: заготовки — в `exercises/ch17`, тесты, общие
 для заготовок и решений, — в `tests-shared/ch17.rs`. Задача A решается не
 кодом, а чтением и запуском: это каталог вызовов `transmute`, часть которых
-даёт UB (ловится Miri) или не компилируется (doc-тесты `compile_fail`).
+даёт UB (ловится Miri) или не компилируется ([doc-тесты][g-doctest] `compile_fail`).
 
 ```console
 $ cargo test -p ch17-exercises                 # задачи B, C, D
@@ -130,3 +130,6 @@ $ cargo +nightly miri test -p ch17-exercises --test ch17 d_
    привёл бы к двойному освобождению? Чем за это платит `TwoBox`?
 
 </div>
+
+<!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
+[g-doctest]: ../appendix-f.md#doctest "doc-тест (doctest): Пример кода в документирующем комментарии ///, который cargo test собирает и запускает как тест."

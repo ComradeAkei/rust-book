@@ -90,7 +90,7 @@ $ cargo run --example store -p telemetry-store
 
 ## Задача П15
 
-Реализуйте модуль `store` и аллокатор-счётчик в заготовке
+Реализуйте [модуль][g-module] `store` и аллокатор-счётчик в заготовке
 `exercises/project-store`. Типы, поля и конструкторы даны; тела `ingest`,
 `range`, `sensors_sorted`, `summary`, `Ring::push` и подсчёт в `Counted`
 — `todo!()`. Условия:
@@ -135,3 +135,6 @@ $ cargo test -p project-store p15
    вызывающему?
 
 </div>
+
+<!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
+[g-module]: ../appendix-f.md#module "Модуль (module): Пространство имён внутри крейта со своими правилами видимости: объявляется словом mod, с телом в скобках или в отдельном файле."

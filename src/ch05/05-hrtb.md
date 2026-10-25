@@ -89,7 +89,7 @@ error[E0521]: borrowed data escapes outside of closure
 
 ## `for<'a>` без замыканий
 
-Сокращённая запись есть только у `Fn`, `FnMut` и `FnOnce`. Для остальных
+Сокращённая запись есть только у [`Fn`][g-fn-traits], `FnMut` и `FnOnce`. Для остальных
 [трейтов][g-trait] граница с ссылкой внутри записывается явно:
 
 ```rust
@@ -179,5 +179,6 @@ u32>`. Нужен ли здесь `for<'a>`? Чем она отличается 
 
 <!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
 [g-closure]: ../appendix-f.md#closure "Замыкание (closure): Функция вместе со своим контекстом — захваченными переменными."
+[g-fn-traits]: ../appendix-f.md#fn-traits "Fn, FnMut, FnOnce: Трейты вызова, которые компилятор реализует для замыканий, функций и указателей на функции."
 [g-monomorphization]: ../appendix-f.md#monomorphization "Мономорфизация (monomorphization): Создание отдельной копии обобщённой функции для каждого набора типов, с которым её вызвали."
 [g-trait]: ../appendix-f.md#trait "Трейт (trait): Набор методов, типов и констант, которые тип обязуется предоставить: Drop, Iterator, Copy."

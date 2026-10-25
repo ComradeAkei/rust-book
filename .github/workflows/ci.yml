@@ -915,6 +915,9 @@ jobs:
           part2 ch06 ch07 ch08 ch09 ch10 ch11
           appendix-e/ch06 appendix-e/ch07 appendix-e/ch08
           appendix-e/ch09 appendix-e/ch10 appendix-e/ch11
+          part3 ch12 ch13 ch14 ch15 ch16 ch17
+          appendix-e/ch12 appendix-e/ch13 appendix-e/ch14
+          appendix-e/ch15 appendix-e/ch16 appendix-e/ch17
       - run: |
           mdbook build 2>&1 | tee mdbook.log
           # Предупреждение «search index is very large» безвредно (поиск

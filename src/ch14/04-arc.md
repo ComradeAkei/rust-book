@@ -37,7 +37,7 @@ error[E0277]: `Cell<u32>` cannot be shared between threads safely
     = note: required for `Arc<Cell<u32>>` to implement `Send`
 ```
 
-Сообщение предлагает то, что и нужно: атомик или замок вместо `Cell`.
+Сообщение предлагает то, что и нужно: [атомик][g-atomic] или замок вместо `Cell`.
 `Arc<Mutex<T>>` — обычная пара для изменяемого общего состояния; что
 именно означают `Send` и `Sync`, почему их выводит компилятор и как
 устроен `Mutex`, — глава 20.
@@ -179,7 +179,7 @@ ch14_arc_drop:
 работу делает `lock`.
 
 На Cortex-M0 (`thumbv6m-none-eabi`) эксклюзивных инструкций нет, и
-`target_has_atomic = "ptr"` там ложно: модуля `alloc::sync` нет вовсе,
+`target_has_atomic = "ptr"` там ложно: [модуля][g-module] `alloc::sync` нет вовсе,
 и `Arc` не собирается. Модуль `code/ch14/src/arc.rs` подключён под тем
 же условием, а тест `rustc_rc_and_arc_clone` проверяет, что в
 ассемблере для M0 есть `ch14_rc_clone`, но нет `ch14_arc_clone`.
@@ -251,3 +251,7 @@ RefCell: +1          2.24 нс
 `Arc<AtomicU32>` другой?
 
 </div>
+
+<!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
+[g-atomic]: ../appendix-f.md#atomic "Атомик (atomic): Тип из core::sync::atomic (AtomicU32, AtomicBool и другие), операции над которым неделимы и упорядочены по выбранной модели памяти."
+[g-module]: ../appendix-f.md#module "Модуль (module): Пространство имён внутри крейта со своими правилами видимости: объявляется словом mod, с телом в скобках или в отдельном файле."
