@@ -44,8 +44,7 @@ error: lifetime may not live long enough
 
 ## Обобщённые ассоциированные типы
 
-С Rust 1.65 ассоциированный тип может иметь свои параметры — это GAT
-(generic associated types). Тип элемента становится семейством типов,
+С Rust 1.65 ассоциированный тип может иметь свои параметры — это *GAT* (generic associated types). Тип элемента становится семейством типов,
 по одному на каждое время жизни заимствования:
 
 ```rust
@@ -119,7 +118,7 @@ note: due to a current limitation of the type system, this implies a `'static` l
 инвариантность — следствие ловушки из раздела [5.4](04-variance.md):
 `Normalize` хранит `str::Lines`, а он инвариантен. Пояснение «due to a
 current limitation» rustc 1.97 печатает, только если граница записана в
-том же крейте; при вызове из другого крейта (doc-тест в
+том же [крейте][g-crate]; при вызове из другого крейта (doc-тест в
 `code/ch05/src/gat.rs`) остаётся одна E0521.
 
 <div class="box trick">
@@ -149,3 +148,6 @@ str>` пробегает лишь допустимые `'a`, и `count_keys` р�
 изменится, если `Normalize` будет отдавать `String`?
 
 </div>
+
+<!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
+[g-crate]: ../appendix-f.md#crate "Крейт (crate): Единица компиляции Rust: одно дерево модулей, один вызов rustc, один результат — библиотека или программа."

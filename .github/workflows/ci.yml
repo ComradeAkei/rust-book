@@ -904,6 +904,14 @@ jobs:
       # а на пропущенный якорь молча вставляет пустой блок. Первое ловит
       # grep по журналу, второе — отдельная проверка всех ссылок.
       - run: python3 tools/check-includes.py
+      # Глоссарий: каждый термин определён в своём разделе, а первое
+      # упоминание в главе — определение или ссылка на приложение F.
+      # Список растёт по мере того, как главы получают ссылки.
+      - run: >-
+          python3 tools/check-terms.py introduction part1
+          ch00 ch01 ch02 ch03 ch04 ch05
+          appendix-e appendix-e/ch00 appendix-e/ch01 appendix-e/ch02
+          appendix-e/ch03 appendix-e/ch04 appendix-e/ch05
       - run: |
           mdbook build 2>&1 | tee mdbook.log
           # Предупреждение «search index is very large» безвредно (поиск

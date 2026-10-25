@@ -1,0 +1,14 @@
+/* Ссылки на глоссарий (приложение F) подчёркнуты пунктиром, чтобы термин
+   не путался со ссылками на разделы; определение всплывает из title. */
+a[href*="appendix-f.html#"] {
+    color: inherit;
+    text-decoration: underline dotted;
+    text-underline-offset: 0.2em;
+    cursor: help;
+}
+a[href*="appendix-f.html#"]:hover { color: var(--links); }
+/* Статья, на которую перешли по ссылке, подсвечена. */
+dt:has(span:target) {
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--links) 15%, transparent);
+}
