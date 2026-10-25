@@ -86,7 +86,10 @@ impl<T, const N: usize, O: Orderings> Spsc<T, N, O> {
         }
     }
 
-    pub fn push(&self, v: T) -> Result<(), T> {
+    /// # Safety
+    ///
+    /// Как в главе 21: писатель один, вызовы `push` не идут одновременно.
+    pub unsafe fn push(&self, v: T) -> Result<(), T> {
         let head = self.head.load(Ordering::Relaxed);
         let next = (head + 1) % N;
         if next == self.tail.load(O::OBSERVE) {
@@ -98,7 +101,10 @@ impl<T, const N: usize, O: Orderings> Spsc<T, N, O> {
         Ok(())
     }
 
-    pub fn pop(&self) -> Option<T> {
+    /// # Safety
+    ///
+    /// Как в главе 21: читатель один, вызовы `pop` не идут одновременно.
+    pub unsafe fn pop(&self) -> Option<T> {
         let tail = self.tail.load(Ordering::Relaxed);
         if tail == self.head.load(O::OBSERVE) {
             return None;
@@ -119,7 +125,8 @@ impl<T, const N: usize, O: Orderings> Default for Spsc<T, N, O> {
 
 impl<T, const N: usize, O: Orderings> Drop for Spsc<T, N, O> {
     fn drop(&mut self) {
-        while self.pop().is_some() {}
+        // SAFETY: `&mut self` — читатель здесь единственный.
+        while unsafe { self.pop() }.is_some() {}
     }
 }
 
@@ -130,11 +137,17 @@ mod tests {
     #[test]
     fn fifo_like_chapter_21() {
         let q: Spsc<u32, 4> = Spsc::new();
-        assert_eq!(q.pop(), None);
-        assert_eq!((q.push(1), q.push(2), q.push(3), q.push(4)), (Ok(()), Ok(()), Ok(()), Err(4)));
-        assert_eq!((q.pop(), q.pop()), (Some(1), Some(2)));
-        assert_eq!(q.push(5), Ok(()));
-        assert_eq!((q.pop(), q.pop(), q.pop()), (Some(3), Some(5), None));
+        // SAFETY: поток один — он и писатель, и читатель.
+        unsafe {
+            assert_eq!(q.pop(), None);
+            assert_eq!(
+                (q.push(1), q.push(2), q.push(3), q.push(4)),
+                (Ok(()), Ok(()), Ok(()), Err(4))
+            );
+            assert_eq!((q.pop(), q.pop()), (Some(1), Some(2)));
+            assert_eq!(q.push(5), Ok(()));
+            assert_eq!((q.pop(), q.pop(), q.pop()), (Some(3), Some(5), None));
+        }
     }
 
     /// Непрочитанные элементы роняются вместе с очередью.
@@ -142,8 +155,11 @@ mod tests {
     fn drop_releases_items() {
         let item = std::rc::Rc::new(());
         let q: Spsc<_, 3, AllRelaxed> = Spsc::new();
-        q.push(item.clone()).unwrap();
-        q.push(item.clone()).unwrap();
+        // SAFETY: поток один.
+        unsafe {
+            q.push(item.clone()).unwrap();
+            q.push(item.clone()).unwrap();
+        }
         assert_eq!(std::rc::Rc::strong_count(&item), 3);
         drop(q);
         assert_eq!(std::rc::Rc::strong_count(&item), 1);

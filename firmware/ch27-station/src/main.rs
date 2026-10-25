@@ -46,7 +46,8 @@ struct Sample {
 
 /// Писатель — обработчик ADC0SS3, читатель — main. Очередь из главы 21
 /// обходится атомарными load/store: ни критических секций, ни запрета
-/// прерываний.
+/// прерываний. Что писатель и читатель по одному, обещаем мы: `push` и
+/// `pop` — `unsafe fn`.
 static QUEUE: Spsc<Sample, 8> = Spsc::new();
 /// АЦП нужен только обработчику, но настраивает его main.
 static ADC: Mutex<RefCell<Option<Adc>>> = Mutex::new(RefCell::new(None));
@@ -58,7 +59,9 @@ fn ADC0SS3() {
     let raw = critical_section::with(|cs| ADC.borrow_ref_mut(cs).as_mut().and_then(Adc::take));
     let Some(raw) = raw else { return };
     let n = SAMPLES.fetch_add(1, Relaxed);
-    if QUEUE.push(Sample { t_ms: n * PERIOD_MS, raw }).is_err() {
+    // SAFETY: писатель QUEUE — только этот обработчик, а сам себя он не
+    // вытесняет: повторно в то же прерывание процессор не входит.
+    if unsafe { QUEUE.push(Sample { t_ms: n * PERIOD_MS, raw }) }.is_err() {
         DROPPED.fetch_add(1, Relaxed);
     }
 }
@@ -94,7 +97,8 @@ fn main() -> ! {
     let (mut sent, mut bytes, mut lo, mut hi) = (0u32, 0usize, i32::MAX, i32::MIN);
     let sensor = NonZeroU16::new(1).unwrap();
     while sent < FRAMES {
-        let Some(s) = QUEUE.pop() else {
+        // SAFETY: читатель QUEUE — только main.
+        let Some(s) = (unsafe { QUEUE.pop() }) else {
             // Очередь пуста: спать до следующего прерывания.
             cortex_m::asm::wfi();
             continue;

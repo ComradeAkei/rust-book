@@ -95,7 +95,8 @@ fn spsc<O: Orderings + Send + Sync + 'static>() {
         let q = Arc::clone(&q);
         thread::spawn(move || {
             for i in 0..10_000 {
-                while q.push(i).is_err() {
+                // SAFETY: писатель — только этот поток.
+                while unsafe { q.push(i) }.is_err() {
                     thread::yield_now();
                 }
             }
@@ -104,7 +105,8 @@ fn spsc<O: Orderings + Send + Sync + 'static>() {
     let mut sum = 0u64;
     let mut got = 0;
     while got < 10_000 {
-        match q.pop() {
+        // SAFETY: читатель — только главный поток.
+        match unsafe { q.pop() } {
             Some(v) => {
                 sum += u64::from(v);
                 got += 1;

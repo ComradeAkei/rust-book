@@ -72,7 +72,7 @@ $ target/.../release/san uaf
 ==19872==ERROR: AddressSanitizer: heap-use-after-free on address 0x7b6de9de0030 at pc 0x56089122e3b1 bp 0x7fff40780f90 sp 0x7fff40780f88
 READ of size 4 at 0x7b6de9de0030 thread T0
     #0 0x56089122e3b0 in san::uaf code/ch31/src/bin/san.rs:21:58
-    #1 0x56089122e3b0 in san::main code/ch31/src/bin/san.rs:142:18
+    #1 0x56089122e3b0 in san::main code/ch31/src/bin/san.rs:144:18
 ...
 0x7b6de9de0030 is located 0 bytes inside of 12-byte region [0x7b6de9de0030,0x7b6de9de003c)
 freed by thread T0 here:
@@ -269,11 +269,11 @@ WARNING: ThreadSanitizer: data race (pid=20295)
   Read of size 4 at 0x721000000010 by main thread:
     #0 core::ptr::read::<u32> library/core/src/ptr/mod.rs:1754:9 (san+0xf7af7)
 ...
-    #3 <ch31::spsc::Spsc<u32, 8, ch31::spsc::AllRelaxed>>::pop::{closure#0} code/ch31/src/spsc.rs:107:61
+    #3 <ch31::spsc::Spsc<u32, 8, ch31::spsc::AllRelaxed>>::pop::{closure#0} code/ch31/src/spsc.rs:113:61
 ...
   Previous write of size 4 at 0x721000000010 by thread T1:
     #0 <core::mem::maybe_uninit::MaybeUninit<u32>>::write library/core/src/mem/maybe_uninit.rs:575:9
-    #1 <ch31::spsc::Spsc<u32, 8, ch31::spsc::AllRelaxed>>::push::{closure#0} code/ch31/src/spsc.rs:96:57
+    #1 <ch31::spsc::Spsc<u32, 8, ch31::spsc::AllRelaxed>>::push::{closure#0} code/ch31/src/spsc.rs:99:57
 ...
 SUMMARY: ThreadSanitizer: data race library/core/src/ptr/mod.rs:1754:9 in core::ptr::read::<u32>
 ==================
