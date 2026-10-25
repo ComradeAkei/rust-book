@@ -60,7 +60,7 @@
 протокола требует своей реакции, и пусть компилятор не даст забыть о
 ней ни в этом методе, ни в приёмниках, которые разбирают ошибки сами
 (раздел [7.4](04-design.md)). `const fn` позволяет вычислять реакцию и
-в константах. `saturating_sub` вместо
+в константах. [`saturating_sub`][g-saturating] вместо
 вычитания защищает от `Short`, собранной вручную с `need < have`:
 `decode` такой не создаёт, но с обычным вычитанием `recovery`
 запаниковала бы в отладочной сборке, а в release вернула бы почти
@@ -90,7 +90,7 @@
 | `Result<Frame<'_>, RxError>` | 32 | 16 |
 
 `Result` не больше самой ошибки: признак `Ok` поместился в нишу
-дискриминанта `FrameError`, у которого из 256 значений байта заняты
+[дискриминанта][g-discriminant] `FrameError`, у которого из 256 значений байта заняты
 восемь (раздел [6.4](../ch06/04-niches.md)). До порога
 `clippy::result_large_err` в 128 байт далеко. В регистрах такой
 `Result` уже не помещается: это не пара скаляров, и по правилу из
@@ -160,7 +160,7 @@ $ cargo run --release -q -p ch07-frame --bin quiet
 Ещё почти четыре килобайта `verbose` отдаёт за `dyn Error`. Метод
 `source` возвращает `&dyn Error`, а таблица виртуальных функций
 `FrameError` для трейта `Error` обязана быть полной: в ней
-`description`, `cause`, `provide`, `type_id` и методы супертрейтов
+`description`, `cause`, `provide`, `type_id` и методы [супертрейтов][g-supertrait]
 `Display` и `Debug`. Программа ни разу не печатает `{:?}`, но `llvm-nm`
 находит в образе выведенный `<FrameError as Debug>::fmt` (996 байт), а с
 ним `DebugStruct::field`, `PadAdapter` и `Debug` для `u8`, `u16` и
@@ -247,3 +247,8 @@ project-frame` без фильтра.
    безопасен?
 
 </div>
+
+<!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
+[g-discriminant]: ../appendix-f.md#discriminant "Дискриминант (discriminant): Тег перечисления: число, по которому видно, какой вариант лежит в памяти."
+[g-saturating]: ../appendix-f.md#saturating "Насыщающая арифметика (saturating arithmetic): Арифметика, в которой результат за границей диапазона заменяется ближайшей границей: 200u8.saturating_add(100) равно 255."
+[g-supertrait]: ../appendix-f.md#supertrait "Супертрейт (supertrait): Трейт, реализация которого нужна для реализации другого: в trait Probe: Named + Debug супертрейты — Named и Debug."

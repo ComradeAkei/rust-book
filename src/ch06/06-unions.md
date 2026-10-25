@@ -33,7 +33,7 @@ x86_64:              thumbv7m:              thumbv7em-none-eabihf:
 ```
 
 На x86_64 вещественный аргумент приходит в `xmm0`, а целый результат
-уходит в `eax`. У Cortex-M3 нет FPU, по soft-float ABI `f32` уже лежит в
+уходит в `eax`. У Cortex-M3 нет [FPU][g-fpu], по [soft-float][g-soft-float] ABI `f32` уже лежит в
 `r0`, и делать нечего. Cortex-M4F с hard-float ABI получает аргумент в
 регистре FPU `s0` и переносит его в `r0` одной инструкцией.
 
@@ -62,7 +62,7 @@ x86_64:              thumbv7m:              thumbv7em-none-eabihf:
 **Как в C.** В C99 и C11 чтение не того члена union, в который писали,
 разрешено и переинтерпретирует байты (сноска к 6.5.2.3 стандарта). В C++
 это неопределённое поведение, а в C через приведение указателей
-`*(uint32_t *)&f` — нарушение strict aliasing. В Rust правил strict
+`*(uint32_t *)&f` — нарушение strict [aliasing][g-aliasing]. В Rust правил strict
 aliasing по типам нет вовсе: важно только, допустимы ли байты для
 читаемого типа. Это делает перевод через union и через приведение сырых
 указателей одинаково законным, если байты подходят.
@@ -88,3 +88,8 @@ aliasing по типам нет вовсе: важно только, допус�
    `char`?
 
 </div>
+
+<!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
+[g-aliasing]: ../appendix-f.md#aliasing "Алиасинг (aliasing): Два пути к одной памяти: два указателя, ссылка и указатель."
+[g-fpu]: ../appendix-f.md#fpu "FPU (floating-point unit): Блок плавающей точки в процессоре."
+[g-soft-float]: ../appendix-f.md#soft-float "soft-float, hard-float: Два варианта EABI для чисел с плавающей точкой."

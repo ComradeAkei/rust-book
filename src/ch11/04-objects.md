@@ -61,7 +61,7 @@ help: consider relaxing the implicit `Sized` restriction
 но не `&dyn Sensor`. Теперь `sum_all` принимает массив `[&dyn Sensor;
 2]`, массив `[&Thermo; 2]` и вектор `Box<dyn Sensor>`, для которого
 ниже есть такая же реализация. Писать её можно потому, что трейт
-`Sensor` свой: правило сироты из раздела [9.4](../ch09/04-coherence.md)
+`Sensor` свой: [правило сироты][g-orphan-rule] из раздела [9.4](../ch09/04-coherence.md)
 не даёт реализовать чужой трейт для `&S`. Стандартная библиотека делает
 то же для своих трейтов: `impl<W: Write + ?Sized> Write for &mut W`,
 `impl<I: Iterator + ?Sized> Iterator for &mut I`, `impl<T: Display +
@@ -71,7 +71,7 @@ help: consider relaxing the implicit `Sized` restriction
 
 ## `Box<dyn Sensor>`
 
-`Box<dyn Sensor>` владеет объектом в куче. Это толстый указатель, как
+`Box<dyn Sensor>` [владеет][g-ownership] объектом в куче. Это толстый указатель, как
 `&dyn Sensor`, но `drop` для него зовёт деструктор из таблицы и
 возвращает память (раздел [11.2](02-vtable.md)):
 
@@ -103,7 +103,7 @@ help: consider relaxing the implicit `Sized` restriction
 таблицы — `Box<dyn Sensor>` и `Thermo`. Так же выходит в цикле
 `for s in &v { object_size(s) }` по вектору `Vec<Box<dyn Sensor>>`:
 `s` там — `&Box<dyn Sensor>`. Явное `&**s` или `s.as_ref()` даёт
-объект с данными датчика. Clippy предупреждает о соседнем случае,
+объект с данными датчика. [Clippy][g-clippy] предупреждает о соседнем случае,
 `&Box<T>` в типе параметра (`borrowed_box`), а приведение в аргументе
 не замечает.
 
@@ -168,7 +168,7 @@ ch11_rc_read:
 {{#include ../../code/ch11/src/object.rs:callback}}
 ```
 
-Замыкание `|_, s| worst = worst.max(s)` лежит на стеке
+[Замыкание][g-closure] `|_, s| worst = worst.max(s)` лежит на стеке
 `ch11_scan_max`, а `scan` получает на него толстый указатель. Функция
 `scan` одна на все обработчики:
 
@@ -250,8 +250,8 @@ ch11_scan_max:
 	…
 ```
 
-Это девиртуализация, и раздел [11.6](06-cost.md) разбирает, когда она
-случается.
+Это *девиртуализация* (devirtualization), и раздел [11.6](06-cost.md)
+разбирает, когда она случается.
 
 <div class="box c">
 
@@ -287,3 +287,9 @@ size_t scan(const int16_t *s, size_t n, int16_t limit,
 если убрать пересылающую реализацию для `Box`?
 
 </div>
+
+<!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
+[g-clippy]: ../appendix-f.md#clippy "clippy: Линтер из тулчейна Rust: несколько сотен линтов, от неидиоматичного кода до заведомых ошибок, разбитых на группы с уровнями allow, warn и deny."
+[g-closure]: ../appendix-f.md#closure "Замыкание (closure): Функция вместе со своим контекстом — захваченными переменными."
+[g-orphan-rule]: ../appendix-f.md#orphan-rule "Правило сироты (orphan rule): Крейт может реализовать трейт для типа, только если свой хотя бы трейт или тип; точнее, среди типов реализации есть локальный, и до него не стоит непокрытый параметр."
+[g-ownership]: ../appendix-f.md#ownership "Владение (ownership): Правило Rust: у каждого значения ровно один владелец — переменная, поле или элемент коллекции, — и он отвечает за уничтожение значения."

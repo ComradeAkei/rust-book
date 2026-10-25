@@ -102,7 +102,7 @@ doc-тест в `code/ch05/src/variance.rs`.
 | `Cell<T>`, `RefCell<T>`, `UnsafeCell<T>` | | инвариантен |
 | `fn(T) -> U` | | контравариантен по `T`, ковариантен по `U` |
 | `dyn Trait<T> + 'a` | ковариантен | инвариантен |
-| `PhantomData<T>` | | как `T` |
+| [`PhantomData<T>`][g-phantom-data] | | как `T` |
 
 Вариантность своих типов компилятор выводит из полей: структура
 ковариантна по параметру, если все поля с ним ковариантны, инвариантна,
@@ -210,5 +210,6 @@ pub fn dangling() -> &'static mut [u8] {
 <!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
 [g-aliasing]: ../appendix-f.md#aliasing "Алиасинг (aliasing): Два пути к одной памяти: два указателя, ссылка и указатель."
 [g-assoc-type]: ../appendix-f.md#assoc-type "Ассоциированный тип (associated type): Тип, который называет каждая реализация трейта: type Sample в трейте Source."
+[g-phantom-data]: ../appendix-f.md#phantom-data "PhantomData: Тип нулевого размера PhantomData, который говорит компилятору, что значение логически содержит T, хотя поля такого типа нет."
 [g-raw-pointer]: ../appendix-f.md#raw-pointer "Сырой указатель (raw pointer): Указатель *const T или *mut T без гарантий ссылки: он может быть нулевым, висячим, невыровненным."
 [g-rustdoc]: ../appendix-f.md#rustdoc "rustdoc: Генератор документации Rust: собирает HTML из комментариев /// (cargo doc) и запускает doc-тесты."

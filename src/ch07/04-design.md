@@ -94,7 +94,7 @@ ch07_outer_boxed:
 
 <div class="box trick">
 
-**Трюк.** `clippy` предупреждает о большой ошибке сам: линт
+**Трюк.** `clippy` предупреждает о большой ошибке сам: [линт][g-lint]
 `result_large_err` включён по умолчанию и срабатывает, когда вариант
 `Err` занимает 128 байт и больше:
 
@@ -186,3 +186,6 @@ error[E0004]: non-exhaustive patterns: `_` not covered
    если указатель ссылается на `u8`?
 
 </div>
+
+<!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
+[g-lint]: ../appendix-f.md#lint "Линт (lint): Правило, которое срабатывает на подозрительном, но допустимом коде: unused_comparisons в rustc, manual_memcpy в clippy."
