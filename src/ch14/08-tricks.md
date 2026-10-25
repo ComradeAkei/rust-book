@@ -36,7 +36,7 @@
 списком паникует:
 
 ```console
-thread 'main' (1751) panicked at code/ch14/src/tricks.rs:38:17:
+thread 'main' (1751) panicked at code/ch14/src/tricks.rs:53:17:
 RefCell already borrowed
 ```
 
@@ -48,7 +48,7 @@ RefCell already borrowed
 ```
 
 ```console
-thread 'main' (1753) panicked at code/ch14/src/tricks.rs:51:13:
+thread 'main' (1753) panicked at code/ch14/src/tricks.rs:66:13:
 RefCell already borrowed
 ```
 
@@ -121,7 +121,7 @@ ch14_get_rc_slice:
 объект» спрашивают `Rc::ptr_eq` — тест `eq_compares_values` проверяет
 оба ответа. Для `Rc<dyn Trait>` `ptr_eq` сравнивает только адреса и не
 смотрит на таблицы методов: одна и та же реализация может оказаться в
-двух таблицах из разных единиц компиляции.
+двух таблицах из разных единиц кодогенерации.
 
 ## Срез ячеек: windows с записью
 

@@ -16,10 +16,13 @@ fn require() -> bool {
 
 /// `cargo +nightly` без переменных, которые внешний cargo задал тесту, и
 /// без кодов цвета: текст ошибок сборки сравнивается, а в CI задан
-/// CARGO_TERM_COLOR=always.
+/// CARGO_TERM_COLOR=always. `RUSTUP_AUTO_INSTALL=0`: без nightly опыт
+/// пропускается, а не ставит тулчейн, — иначе rustup качал бы его из трёх
+/// параллельных тестов наперегонки, и зависшая загрузка вешала бы прогон.
 fn nightly_cargo() -> Command {
     let mut c = Command::new("cargo");
-    c.arg("+nightly").current_dir(env!("CARGO_MANIFEST_DIR")).env("CARGO_TERM_COLOR", "never");
+    c.arg("+nightly").current_dir(env!("CARGO_MANIFEST_DIR"));
+    c.env("CARGO_TERM_COLOR", "never").env("RUSTUP_AUTO_INSTALL", "0");
     for v in ["CARGO_ENCODED_RUSTFLAGS", "RUSTFLAGS", "RUSTUP_TOOLCHAIN", "RUSTC", "RUSTDOC"] {
         c.env_remove(v);
     }

@@ -175,7 +175,7 @@ warning: function pointer comparisons do not produce meaningful results since th
 ```
 
 Обе оговорки настоящие. Обобщённая функция или функция с `#[inline]`
-получает копию в каждой единице трансляции, где используется, и два
+получает копию в каждой единице кодогенерации, где используется, и два
 указателя на «одну» функцию могут различаться. А две функции с
 одинаковым машинным кодом компоновщик с `--icf` или LLVM с
 `mergefunc` может слить в одну, и указатели на разные функции совпадут.
@@ -242,7 +242,7 @@ ABI `"C"`: если замыкание паникует внутри трамп�
 паникующим замыканием и проверяет сигнал SIGABRT и сообщение:
 
 ```console
-thread 'fnptr::tests::panic_in_callback_aborts' panicked at code/ch12/src/fnptr.rs:184:38:
+thread 'fnptr::tests::panic_in_callback_aborts' (31380) panicked at code/ch12/src/fnptr.rs:184:38:
 сравнение сломалось
 …
 panic in a function that cannot unwind

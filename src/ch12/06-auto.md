@@ -88,7 +88,7 @@ note: required because it's used within this closure
 note: required by a bound in `spawn`
 ```
 
-Это и есть ответ на третью беду `void *ctx` из введения: передать
+Этой защиты у `void *ctx` из введения нет вовсе: здесь передать
 контекст в другой поток, не убедившись, что он к этому готов, нельзя.
 Потоки, `Send` и `Sync` подробно разобраны в главе 20.
 
