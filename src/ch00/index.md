@@ -49,7 +49,9 @@ $ arm-none-eabi-objdump -d sum.o
 Вторая трудность — сама сборка под микроконтроллер. Для Cortex-M нужен
 отдельный компилятор `arm-none-eabi-gcc`, четыре флага, которые описывают
 ядро и способ передачи чисел с плавающей точкой, а к ним стартовый файл с
-таблицей векторов и скрипт компоновщика. Без них компоновка падает:
+[таблицей векторов][g-vector-table] и *скрипт компоновщика* (linker script), который
+раскладывает секции программы по адресам флеш-памяти и ОЗУ. Без них
+компоновка падает:
 
 ```text
 $ arm-none-eabi-gcc -O2 -mcpu=cortex-m4 -mthumb sum.c -o sum.elf
@@ -65,14 +67,15 @@ writer.c:49:(.text+0x14): undefined reference to `_write'
 
 ## Что делает Rust
 
-- Один компилятор знает все цели. `rustup target add thumbv7em-none-eabihf`
-  ставит готовую `core` для Cortex-M4F, а ключ `--target` у cargo заменяет
+- Один компилятор знает все [цели][g-target]. `rustup target add thumbv7em-none-eabihf`
+  ставит готовую [`core`][g-core-alloc-std] для Cortex-M4F, а ключ `--target` у cargo заменяет
   набор флагов `-mcpu`, `-mfloat-abi`, `-mfpu`: всё это записано в описании
   цели.
-- Стартовый код и скрипт компоновщика для Cortex-M дают крейты экосистемы
+- *Стартовый код* (startup code) — всё, что выполняется от сброса до
+  `main`, — и скрипт компоновщика для Cortex-M дают [крейты][g-crate] экосистемы
   (`cortex-m-rt`), и подключаются они так же, как любая зависимость.
-- `cargo asm`, Miri и clippy ставятся одной командой и работают с тем же
-  workspace, что и сборка.
+- `cargo asm`, Miri и [clippy][g-clippy] ставятся одной командой и работают с тем же
+  [workspace][g-workspace], что и сборка.
 
 Эта глава не про язык, а про инструменты, которыми проверяется каждое
 утверждение книги. К её концу вы соберёте один исходник под x86_64 и три
@@ -100,7 +103,16 @@ $ cargo +nightly miri run -p ch00 --example ub
 $ cd firmware && bash run-demos.sh            # прошивки главы на Cortex-M0, M3 и M4F
 ```
 
-Числа в тексте получены на rustc 1.97.0 (LLVM 22.1.6) для
+Числа в тексте получены на rustc 1.97.0 ([LLVM][g-llvm] 22.1.6) для
 `x86_64-unknown-linux-gnu`, `thumbv6m-none-eabi`, `thumbv7m-none-eabi` и
 `thumbv7em-none-eabihf`, QEMU 8.2.2 и gdb 15.1. Ассемблер снят командой
 `cargo asm --simplify` из release-сборки, если не сказано иное.
+
+<!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
+[g-clippy]: ../appendix-f.md#clippy "clippy: Линтер из тулчейна Rust: несколько сотен линтов, от неидиоматичного кода до заведомых ошибок, разбитых на группы с уровнями allow, warn и deny."
+[g-core-alloc-std]: ../appendix-f.md#core-alloc-std "core, alloc, std: Три слоя стандартной библиотеки. core ничего не требует от среды; alloc добавляет Box, Vec, String и требует распределитель памяти; std переэкспортирует оба и добавляет то, что требует ОС: потоки, файлы, сеть."
+[g-crate]: ../appendix-f.md#crate "Крейт (crate): Единица компиляции Rust: одно дерево модулей, один вызов rustc, один результат — библиотека или программа."
+[g-llvm]: ../appendix-f.md#llvm "LLVM: Компиляторная инфраструктура, на которой построены rustc и clang: принимает LLVM IR, оптимизирует его и генерирует машинный код под цель."
+[g-target]: ../appendix-f.md#target "Цель (target): То, для чего генерируется код: архитектура, ОС и ABI, записанные в имени-триплете (thumbv7m-none-eabi)."
+[g-vector-table]: ../appendix-f.md#vector-table "Таблица векторов (vector table): Массив слов в начале образа Cortex-M: слово 0 — начальное значение указателя стека, слово 1 — адрес обработчика сброса, дальше адреса обработчиков исключений и прерываний."
+[g-workspace]: ../appendix-f.md#workspace "Рабочее пространство (workspace): Несколько пакетов cargo с общим Cargo.lock, общим каталогом target/ и общими профилями."

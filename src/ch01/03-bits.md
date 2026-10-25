@@ -29,9 +29,11 @@
 ## Одна инструкция или десять
 
 Во что превращается каждый метод, зависит от того, какие инструкции
-обещает цель. Базовый уровень `x86_64-unknown-linux-gnu` — процессор 2003
-года без `lzcnt` и `popcnt`, и без указаний компилятор не вправе ими
-пользоваться:
+обещает цель. Базовый *уровень микроархитектуры* (microarchitecture level)
+`x86_64-unknown-linux-gnu` — процессор 2003 года без `lzcnt` и `popcnt`, и
+без указаний компилятор не вправе ими пользоваться. Следующие уровни
+добавляют команды: `x86-64-v2` — `popcnt` и [SSE4.2][g-sse-avx], `x86-64-v3` — AVX2,
+[FMA][g-fma] и `lzcnt`, `x86-64-v4` — AVX-512:
 
 ```text
 $ cargo asm -p ch01 --lib ch01_clz
@@ -83,14 +85,14 @@ ch01_popcount:
 	ret
 ```
 
-Длинный вариант — классический алгоритм SWAR (SIMD within a register):
+Длинный вариант — классический алгоритм *SWAR* (SIMD within a register):
 константы `0x5555_5555`, `0x3333_3333` и `0x0F0F_0F0F` складывают биты
 парами, четвёрками и байтами, а умножение на `0x0101_0101` собирает сумму
 четырёх байт в старшем. Пятнадцать инструкций без ветвлений и без
 обращений к памяти.
 
 На ARM картина другая: `clz` есть с ARMv5, а подсчёта единиц нет ни в
-ARMv7-M, ни в ARMv6-M.
+[ARMv7-M][g-armv7m], ни в ARMv6-M.
 
 ```text
 $ cargo asm -p ch01 --lib --target thumbv7m-none-eabi ch01_clz
@@ -154,7 +156,7 @@ C23 добавил `<stdbit.h>` с функциями `stdc_leading_zeros` и п
 уровень из списка `x86-64-v2`, `x86-64-v3`, `x86-64-v4`: на процессоре без
 нужных инструкций она упадёт с SIGILL. Для Cortex-M набор инструкций уже
 задан целью: `thumbv7em` гарантирует `clz` и `qadd`,
-`thumbv7em-none-eabihf` — ещё и FPU одинарной точности, `thumbv6m` — ничего
+`thumbv7em-none-eabihf` — ещё и [FPU][g-fpu] одинарной точности, `thumbv6m` — ничего
 из этого.
 
 </div>
@@ -171,3 +173,9 @@ C23 добавил `<stdbit.h>` с функциями `stdc_leading_zeros` и п
    скомпилируется на Cortex-M0?
 
 </div>
+
+<!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
+[g-armv7m]: ../appendix-f.md#armv7m "ARMv6-M, ARMv7-M, ARMv7E-M: Версии архитектуры ARM для микроконтроллеров."
+[g-fma]: ../appendix-f.md#fma "FMA (fused multiply-add): Слитное умножение со сложением: a · b + c с одним округлением в конце, а не с двумя."
+[g-fpu]: ../appendix-f.md#fpu "FPU (floating-point unit): Блок плавающей точки в процессоре."
+[g-sse-avx]: ../appendix-f.md#sse-avx "SSE, AVX (Streaming SIMD Extensions, Advanced Vector Extensions): Векторные расширения x86: SSE даёт 128-битные регистры xmm0–xmm15 и команды над ними (SSE2 есть у любого x86_64), AVX и AVX2 — 256-битные ymm, AVX-512 — 512-битные zmm."

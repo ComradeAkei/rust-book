@@ -366,3 +366,4 @@
     - [Глава 29](appendix-e/ch29.md)
     - [Глава 30](appendix-e/ch30.md)
     - [Глава 31](appendix-e/ch31.md)
+- [F. Глоссарий](appendix-f.md)
