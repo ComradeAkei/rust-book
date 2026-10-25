@@ -32,9 +32,9 @@ C-заголовке — договор, и Rust-сторона должна е�
 
 `size_of`, `align_of` и `offset_of!` (Rust 1.77) — константные, и
 проверка стоит рядом с типом. Переставили поля, сменили `u16` на `u32`,
-забыли `repr(C)` — сборка остановится здесь, а не загрузчик на разборе
+забыли [`repr(C)`][g-layout] — сборка остановится здесь, а не загрузчик на разборе
 журнала. Тот же приём для регистровых блоков — раздел
-[6.9](../ch06/09-registers.md), а derive из главы 24 порождает такие
+[6.9](../ch06/09-registers.md), а [derive][g-derive] из главы 24 порождает такие
 проверки сам.
 
 ## Инвариант таблицы
@@ -77,7 +77,7 @@ error[E0015]: cannot call non-const formatting macro in constants
 ```
 
 Блок `const { assert!(…) }` внутри `new` зависит от `N`, и вычисляется
-он для каждого `N`, с которым функцию вызвали, — при мономорфизации
+он для каждого `N`, с которым функцию вызвали, — при [мономорфизации][g-monomorphization]
 (раздел [10.4](../ch10/04-const-generics.md)):
 
 ```text
@@ -143,7 +143,7 @@ note: the above error was encountered while instantiating `fn Pool::<40>::new`
 
 `compile_error!` — ошибка с текстом, как `#error`, а условие — `cfg`
 (раздел [8.3](../ch08/03-cfg.md)). Поставить её можно и в ветку макроса
-`macro_rules!`, которая разбирает неверный ввод (глава 23).
+[`macro_rules!`][g-declarative-macro], которая разбирает неверный ввод (глава 23).
 
 <div class="box c">
 
@@ -163,3 +163,9 @@ note: the above error was encountered while instantiating `fn Pool::<40>::new`
 смысл поставить проверку, и что изменится в сообщении об ошибке?
 
 </div>
+
+<!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
+[g-declarative-macro]: ../appendix-f.md#declarative-macro "Декларативный макрос (declarative macro): Макрос macro_rules!: список правил «образец — подстановка»."
+[g-derive]: ../appendix-f.md#derive "derive (derive macro): Атрибут #[derive(...)] над типом: макрос получает объявление структуры, перечисления или объединения и добавляет рядом реализации трейтов — Debug, Clone, PartialEq."
+[g-layout]: ../appendix-f.md#layout "Раскладка (layout): Размер, выравнивание и смещения полей типа в памяти."
+[g-monomorphization]: ../appendix-f.md#monomorphization "Мономорфизация (monomorphization): Создание отдельной копии обобщённой функции для каждого набора типов, с которым её вызвали."

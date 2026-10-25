@@ -55,7 +55,7 @@ error[E0603]: module `private` is private
 - Понятную документацию: rustdoc и сообщение компилятора перечисляют
   все реализации.
 
-Так устроен `embedded-hal` 1.0: `i2c::AddressMode`, параметр трейта
+Так устроен [`embedded-hal`][g-embedded-hal] 1.0: `i2c::AddressMode`, параметр трейта
 `I2c`, запечатан, и реализуют его только `SevenBitAddress` (`u8`) и
 `TenBitAddress` (`u16`). Драйверу этого достаточно, чтобы знать все
 возможные виды адресов. Задача [9.C](08-tasks.md) запечатывает выводы
@@ -182,5 +182,6 @@ private`? Может ли другой крейт написать `impl SliceEx
 </div>
 
 <!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
+[g-embedded-hal]: ../appendix-f.md#embedded-hal "embedded-hal: Крейт трейтов периферии микроконтроллера: OutputPin, InputPin, DelayNs, SpiDevice, I2c."
 [g-module]: ../appendix-f.md#module "Модуль (module): Пространство имён внутри крейта со своими правилами видимости: объявляется словом mod, с телом в скобках или в отдельном файле."
 [g-smart-pointer]: ../appendix-f.md#smart-pointer "Умный указатель (smart pointer): Тип, который ведёт себя как указатель (реализует Deref) и сам управляет тем, на что указывает: Box владеет значением в куче, Rc и Arc считают ссылки, MutexGuard держит мьютекс."

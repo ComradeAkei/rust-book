@@ -80,7 +80,7 @@ C, и в Rust:
 {{#include ../../code/ch25/src/tables.rs:const-div}}
 ```
 
-Release-сборка, без пролога и эпилога:
+Release-сборка, без [пролога][g-prologue] и эпилога:
 
 ```text
 @ thumbv7m-none-eabi                @ thumbv6m-none-eabi
@@ -189,3 +189,6 @@ C++ 20 это `consteval`-функция, в Rust — `const fn` и десято
 hex!("A5 0");`? Зачем в макросе константа `BYTES`?
 
 </div>
+
+<!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
+[g-prologue]: ../appendix-f.md#prologue "Пролог и эпилог (prologue, epilogue): Начальные и конечные команды функции: пролог сохраняет callee-saved регистры и адрес возврата и выделяет кадр стека, эпилог восстанавливает их и возвращается."

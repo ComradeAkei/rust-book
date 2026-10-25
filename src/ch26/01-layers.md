@@ -7,7 +7,7 @@
 
 | Слой | Что даёт | Что требует от среды |
 |---|---|---|
-| `core` | типы и трейты языка, `Option`, `Result`, срезы, `str`, итераторы, `core::fmt`, атомики, `Cell` | обработчик паники и функции памяти: `memcpy`, `memmove`, `memset`, `memcmp`, `bcmp`, `strlen` |
+| `core` | типы и [трейты][g-trait] языка, `Option`, `Result`, срезы, `str`, итераторы, `core::fmt`, атомики, `Cell` | обработчик паники и функции памяти: `memcpy`, `memmove`, `memset`, `memcmp`, `bcmp`, `strlen` |
 | `alloc` | `Box`, `Vec`, `String`, `Rc`, `BTreeMap`, `format!` | глобальный распределитель памяти |
 | `std` | всё из `core` и `alloc`, плюс потоки, файлы, сеть, часы, окружение, раскрутка стека | операционную систему |
 
@@ -24,7 +24,7 @@
 
 ## Ошибки слоёв
 
-В крейте с `#![no_std]` в прелюдии только `core`:
+В крейте с `#![no_std]` в [прелюдии][g-prelude] только `core`:
 
 ```rust,ignore
 {{#include ../../code/ch26/fragments/vec.rs:vec}}
@@ -101,10 +101,10 @@ false`, как у прошивки `ch26-bare`, которая зависит о
 
 ## Слой — не только ОС, но и процессор
 
-`core` одинакова для всех целей по набору модулей, но не по содержимому
-— часть элементов зависит от того, что умеет процессор. У ARMv6-M
-(Cortex-M0) нет инструкций `ldrex` и `strex`, а значит, нет атомарного
-чтения-изменения-записи:
+`core` одинакова для всех [целей][g-target] по набору [модулей][g-module], но не по содержимому
+— часть элементов зависит от того, что умеет процессор. У [ARMv6-M][g-armv7m]
+(Cortex-M0) нет инструкций [`ldrex`][g-exclusive-access] и `strex`, а значит, нет атомарного
+[чтения-изменения-записи][g-rmw]:
 
 ```rust,ignore
 {{#include ../../code/ch26/fragments/atomics_m0.rs:atomics_m0}}
@@ -139,7 +139,7 @@ error[E0599]: no method named `fetch_add` found for reference `&Atomic<u32>` in 
 операции над словом, не только `load` и `store`. `AtomicU32` на M0 есть,
 но только с `load`, `store` и без `fetch_add` и `compare_exchange` —
 отсюда `Atomic<u32>` в сообщении: в 1.97 `AtomicU32` — псевдоним
-обобщённого `Atomic<u32>`. Атомики на Cortex-M разбирала глава
+[обобщённого][g-generic] `Atomic<u32>`. Атомики на Cortex-M разбирала глава
 [21](../ch21/index.md); прошивки этой книги на M0 считают через `load` и
 `store` при выключенных прерываниях или без прерываний вовсе.
 
@@ -208,3 +208,13 @@ $ cargo build -p ch26 --no-default-features --features alloc --target thumbv6m-n
 [26.3](03-cortex-m.md)) всё-таки не пользуется `from_utf8(…).unwrap()`?
 
 </div>
+
+<!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
+[g-armv7m]: ../appendix-f.md#armv7m "ARMv6-M, ARMv7-M, ARMv7E-M: Версии архитектуры ARM для микроконтроллеров."
+[g-exclusive-access]: ../appendix-f.md#exclusive-access "Эксклюзивный доступ (exclusive access): Пара инструкций ARM LDREX и STREX: первая читает слово и ставит адрес под наблюдение монитора, вторая пишет, только если с тех пор никто не писал по адресу и не было исключения."
+[g-generic]: ../appendix-f.md#generic "Обобщение (generic): Функция или тип с параметрами-типами: fn max(a: T, b: T) -> T."
+[g-module]: ../appendix-f.md#module "Модуль (module): Пространство имён внутри крейта со своими правилами видимости: объявляется словом mod, с телом в скобках или в отдельном файле."
+[g-prelude]: ../appendix-f.md#prelude "Прелюдия (prelude): Набор имён, которые видны в каждом модуле без use: Option, Vec, drop, трейты Clone, Iterator и другие."
+[g-rmw]: ../appendix-f.md#rmw "Чтение-изменение-запись (read-modify-write, RMW): Атомарная операция, которая читает ячейку, вычисляет новое значение и записывает его одним неделимым шагом: fetch_add, swap, compare_exchange."
+[g-target]: ../appendix-f.md#target "Цель (target): То, для чего генерируется код: архитектура, ОС и ABI, записанные в имени-триплете (thumbv7m-none-eabi)."
+[g-trait]: ../appendix-f.md#trait "Трейт (trait): Набор методов, типов и констант, которые тип обязуется предоставить: Drop, Iterator, Copy."

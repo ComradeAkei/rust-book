@@ -23,18 +23,19 @@
 {{#include ../../code/ch24-macros/src/lib.rs:entry_points}}
 ```
 
-- `#[proc_macro]` — **функциональный** макрос: `token_tree!(...)`. Вход —
-  токены внутри скобок вызова.
+- `#[proc_macro]` — **функциональный макрос** (function-like macro):
+  `token_tree!(...)`. Вход — токены внутри скобок вызова.
 - `#[proc_macro_derive(Describe, attributes(describe))]` — **derive**.
   Вход — объявление структуры, перечисления или объединения целиком,
   выход *добавляется* после него: изменить или убрать сам тип derive не
   может. `attributes(describe)` объявляет атрибут-помощник
   `#[describe(...)]`, который derive читает с полей и самой структуры
   ([24.4](04-attributes.md)).
-- `#[proc_macro_attribute]` — **атрибут**: `#[interrupt] fn UART0() {}`.
-  Два входа — токены аргументов атрибута (здесь пусто) и элемент, на
-  котором он стоит; выход *заменяет* элемент. Атрибут может переименовать
-  функцию, переписать её тело или вовсе её не выдать.
+- `#[proc_macro_attribute]` — **атрибутный макрос** (attribute macro):
+  `#[interrupt] fn UART0() {}`. Два входа — токены аргументов атрибута
+  (здесь пусто) и элемент, на котором он стоит; выход *заменяет* элемент.
+  Атрибут может переименовать функцию, переписать её тело или вовсе её не
+  выдать.
 
 Корень такого крейта не может экспортировать ничего, кроме макросов:
 
@@ -53,8 +54,8 @@ error: `proc-macro` crate types currently cannot export any items other than fun
 
 ## Что видит макрос
 
-`TokenStream` — последовательность **деревьев токенов** (`TokenTree`),
-и вариантов у дерева четыре:
+`TokenStream` — *поток токенов* (token stream), последовательность
+**[деревьев токенов][g-token-tree]** (`TokenTree`), и вариантов у дерева четыре:
 
 - `Group` — скобки `()`, `[]` или `{}` с потоком токенов внутри; скобки
   всегда сбалансированы — это гарантирует лексер;
@@ -83,7 +84,7 @@ error: `proc-macro` crate types currently cannot export any items other than fun
 Разбирать вход в синтаксис — работа самого макроса (раздел
 [24.2](02-syn-quote.md)).
 
-Литералы и времена жизни:
+Литералы и [времена жизни][g-lifetime]:
 
 ```rust
 {{#include ../../code/ch24/src/tokens.rs:literals}}
@@ -184,7 +185,7 @@ rustc открывает библиотеку через `dlopen`, находи�
 ## Ошибки: паника — худший вариант
 
 Макрос, который не может обработать вход, должен сообщить об этом.
-Самое простое — паника, и `token_tree!` паникует на пустом входе:
+Самое простое — [паника][g-panic], и `token_tree!` паникует на пустом входе:
 
 ```text
 {{#include ../../code/ch24/tests/ui/token_tree_empty.stderr}}
@@ -201,9 +202,15 @@ rustc открывает библиотеку через `dlopen`, находи�
 <div class="box check">
 
 **Проверка.** Тесты `operators_are_puncts`, `literals_and_lifetimes` и
-`expr_fragment_is_invisible_group` в `code/ch24/src/tokens.rs`; doc-тест
+`expr_fragment_is_invisible_group` в `code/ch24/src/tokens.rs`; [doc-тест][g-doctest]
 `compile_fail` там же — пустой вход; снимок `token_tree_empty.stderr` —
 тест `rustc_ui`; модульный тест `proc_macro_outside_of_macro_panics` в
 `code/ch24-macros`.
 
 </div>
+
+<!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
+[g-doctest]: ../appendix-f.md#doctest "doc-тест (doctest): Пример кода в документирующем комментарии ///, который cargo test собирает и запускает как тест."
+[g-lifetime]: ../appendix-f.md#lifetime "Время жизни (lifetime): Имя для участка программы, на котором ссылка действительна: 'a в &'a str."
+[g-panic]: ../appendix-f.md#panic "Паника (panic): Аварийная реакция на ошибку в самой программе: индекс за границей, unwrap на None, переполнение в отладочной сборке."
+[g-token-tree]: ../appendix-f.md#token-tree "Дерево токенов (token tree): Единица входа макроса: отдельный токен или группа токенов в парных скобках (), [], {}."

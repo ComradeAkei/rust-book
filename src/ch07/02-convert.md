@@ -117,7 +117,7 @@ Rust 1.81, а реализации `From` для `Box<dyn Error>` — в `alloc`
 
 `Infallible` встречается в [обобщённом][g-generic] коде: трейт требует тип ошибки, а
 конкретная реализация ошибиться не может. Например, трейты
-`embedded-hal` для вывода GPIO требуют тип ошибки, а HAL-крейты
+[`embedded-hal`][g-embedded-hal] для вывода GPIO требуют тип ошибки, а [HAL][g-hal]-крейты
 микроконтроллеров, где запись в регистр не может не получиться,
 объявляют `type Error = Infallible` (раздел [27.5](../ch27/05-hal.md)).
 
@@ -162,9 +162,11 @@ Doc-тесты в `code/ch07/src/convert.rs` проверяют оба случ�
 <!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
 [g-closure]: ../appendix-f.md#closure "Замыкание (closure): Функция вместе со своим контекстом — захваченными переменными."
 [g-crate]: ../appendix-f.md#crate "Крейт (crate): Единица компиляции Rust: одно дерево модулей, один вызов rustc, один результат — библиотека или программа."
+[g-embedded-hal]: ../appendix-f.md#embedded-hal "embedded-hal: Крейт трейтов периферии микроконтроллера: OutputPin, InputPin, DelayNs, SpiDevice, I2c."
 [g-generic]: ../appendix-f.md#generic "Обобщение (generic): Функция или тип с параметрами-типами: fn max(a: T, b: T) -> T."
 [g-global-allocator]: ../appendix-f.md#global-allocator "Глобальный аллокатор (global allocator): Распределитель памяти, который зовут Box, Vec, String и все коллекции alloc: тип, реализующий GlobalAlloc и объявленный атрибутом #[global_allocator]."
 [g-guard]: ../appendix-f.md#guard "Страж (guard): Значение, чей деструктор отпускает ресурс: MutexGuard отпускает мьютекс, IrqGuard из главы 3 снова разрешает прерывания."
+[g-hal]: ../appendix-f.md#hal "HAL (hardware abstraction layer): Уровень абстракции оборудования — библиотека над регистрами кристалла: вместо регистров — выводы, UART, таймеры."
 [g-lifetime]: ../appendix-f.md#lifetime "Время жизни (lifetime): Имя для участка программы, на котором ссылка действительна: 'a в &'a str."
 [g-no-std]: ../appendix-f.md#no-std "no_std: Атрибут крейта #![no_std]: крейт пользуется только core (и, если нужно, alloc), без стандартной библиотеки ОС."
 [g-pattern]: ../appendix-f.md#pattern "Образец (pattern): Описание формы значения в match, let, if let и параметрах функций: литералы, диапазоны, альтернативы |, разбор кортежей, структур и срезов, привязки имён."

@@ -163,11 +163,12 @@ previously been poisoned`. Если ошибка инициализации ож
 **Проверь себя.** Почему `OnceCell::get_or_init` может вернуть `&T` на
 всё время жизни ячейки, а `RefCell::borrow` — только `Ref<T>`? Что
 выведет `channel_fits_once`, если `value` вызвать из двух `Rc` одного
-канала? Почему `LazyLock` нельзя заменить на `static` с `const fn`,
+канала? Почему `LazyLock` нельзя заменить на `static` с [`const fn`][g-const-fn],
 которая строит таблицу CRC, — или можно?
 
 </div>
 
 <!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
+[g-const-fn]: ../appendix-f.md#const-fn "const fn: Функция, которую компилятор умеет выполнить при компиляции своим интерпретатором, когда её результат нужен в константном контексте."
 [g-futex]: ../appendix-f.md#futex "Futex (fast userspace mutex): Системный вызов Linux для ожидания на слове памяти: FUTEX_WAIT усыпляет поток, пока слово равно ожидаемому значению, FUTEX_WAKE будит ждущих."
 [g-no-std]: ../appendix-f.md#no-std "no_std: Атрибут крейта #![no_std]: крейт пользуется только core (и, если нужно, alloc), без стандартной библиотеки ОС."

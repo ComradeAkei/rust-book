@@ -210,7 +210,7 @@ ch05_first:
 ```
 
 `ch05_first_static` cargo asm не находит: своего тела у неё нет. Код
-двух функций совпал, и проход LLVM MergeFunctions оставил одно тело, а
+двух функций совпал, и [проход LLVM][g-llvm-pass] MergeFunctions оставил одно тело, а
 второе имя сделал псевдонимом:
 
 ```console
@@ -251,4 +251,5 @@ flash. В Rust `&'static str` неизменяем по типу.
 [g-generic]: ../appendix-f.md#generic "Обобщение (generic): Функция или тип с параметрами-типами: fn max(a: T, b: T) -> T."
 [g-host]: ../appendix-f.md#host "Хост (host): Машина, на которой идёт сборка и работают инструменты, в отличие от цели, под которую собирается код."
 [g-interior-mut]: ../appendix-f.md#interior-mut "Внутренняя изменяемость (interior mutability): Изменение значения через разделяемую ссылку &."
+[g-llvm-pass]: ../appendix-f.md#llvm-pass "Проход LLVM (LLVM pass): Один шаг оптимизатора LLVM над IR."
 [g-ownership]: ../appendix-f.md#ownership "Владение (ownership): Правило Rust: у каждого значения ровно один владелец — переменная, поле или элемент коллекции, — и он отвечает за уничтожение значения."

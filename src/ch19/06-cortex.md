@@ -40,7 +40,7 @@ SIMD. На микроконтроллере он нужен для другог�
 
 <div class="box c">
 
-**Как в C.** Это те же инструкции, что в CMSIS: `__WFI()`,
+**Как в C.** Это те же инструкции, что в [CMSIS][g-cmsis]: `__WFI()`,
 `__disable_irq()` / `__enable_irq()`, `__get_PRIMASK()` / `__set_PRIMASK()`
 — тонкие обёртки над `wfi`, `cpsid i`, `mrs`/`msr`. Проблема барьера памяти
 там та же: наивный `__disable_irq()` без `"memory"` в clobber-листе не
@@ -72,4 +72,5 @@ CriticalSection` — тот же приём, что здесь, только о�
 </div>
 
 <!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
+[g-cmsis]: ../appendix-f.md#cmsis "CMSIS (Common Microcontroller Software Interface Standard): Стандарт ARM для программ на C под Cortex-M: заголовки ядра с функциями вроде NVIC_EnableIRQ, __disable_irq, SysTick_Config, интринсики DSP и формат описания кристалла CMSIS-SVD."
 [g-host]: ../appendix-f.md#host "Хост (host): Машина, на которой идёт сборка и работают инструменты, в отличие от цели, под которую собирается код."

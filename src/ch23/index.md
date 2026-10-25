@@ -124,7 +124,7 @@ $ cd firmware && cargo run --release -p ch23-periph   # задача C в QEMU
 макросов показывает `rustc -Zunpretty=expanded` (флаг nightly; на stable
 его открывает `RUSTC_BOOTSTRAP=1` — только для осмотра, не для сборки);
 [крейт][g-crate] `cargo-expand` печатает то же, отформатировав. Тест
-`rustc_swap_hygiene_expansion` сверяет снимок раскрытия с закреплённым
+`rustc_swap_hygiene_expansion` сверяет [снимок][g-snapshot] раскрытия с закреплённым
 rustc, а `rustc_macro_is_free` — ассемблер под thumbv7m-none-eabi.
 
 <!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
@@ -141,6 +141,7 @@ rustc, а `rustc_macro_is_free` — ассемблер под thumbv7m-none-eabi
 [g-repetition]: ../appendix-f.md#repetition "Повторение (repetition): Конструкция $( … ) разделитель оператор в макросе (*, + или ?)."
 [g-rustdoc]: ../appendix-f.md#rustdoc "rustdoc: Генератор документации Rust: собирает HTML из комментариев /// (cargo doc) и запускает doc-тесты."
 [g-shadowing]: ../appendix-f.md#shadowing "Затенение (shadowing): Объявление новой переменной с тем же именем: let x = x + 1."
+[g-snapshot]: ../appendix-f.md#snapshot "Снимок (snapshot): Эталонный вывод, сохранённый в файле рядом с тестом: текст ошибок компилятора (.stderr у trybuild) или раскрытие макроса."
 [g-target]: ../appendix-f.md#target "Цель (target): То, для чего генерируется код: архитектура, ОС и ABI, записанные в имени-триплете (thumbv7m-none-eabi)."
 [g-textual-scope]: ../appendix-f.md#textual-scope "Текстовая область видимости (textual scope): Видимость макроса macro_rules! ниже его определения: в том же модуле и во вложенных модулях, объявленных после него."
 [g-token-tree]: ../appendix-f.md#token-tree "Дерево токенов (token tree): Единица входа макроса: отдельный токен или группа токенов в парных скобках (), [], {}."

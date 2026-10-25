@@ -132,7 +132,7 @@ ch08-sections v0.1.0 (/home/user/rust-book/firmware/ch08-sections)
 В нём видно три вещи, которых нет в мире C.
 
 **Две старшие версии одного крейта.** `cortex-m` зависит сразу от
-`embedded-hal` 0.2 и 1.0 (в его `Cargo.toml` они переименованы в `eh0` и
+[`embedded-hal`][g-embedded-hal] 0.2 и 1.0 (в его `Cargo.toml` они переименованы в `eh0` и
 `eh1`), чтобы реализовать трейты обеих. Для компилятора это два разных
 крейта с разными хешами в именах символов (раздел
 [8.7](07-symbols.md)): трейт `OutputPin` из 0.2 и трейт из 1.0 — разные
@@ -145,7 +145,7 @@ ch08-sections v0.1.0 (/home/user/rust-book/firmware/ch08-sections)
 1.x, и типы совпадают. Приём называется semver trick.
 
 **Код для хоста.** `cortex-m-macros` помечен `(proc-macro)`, а
-`rustc_version` стоит под `[build-dependencies]`. Процедурные макросы и
+`rustc_version` стоит под `[build-dependencies]`. [Процедурные макросы][g-proc-macro] и
 сценарии сборки выполняются во время компиляции, поэтому собираются для
 машины сборки, x86_64, хотя вся прошивка — для ARM (раздел
 [8.5](05-build-rs.md)).
@@ -172,11 +172,13 @@ ch08-sections v0.1.0 (/home/user/rust-book/firmware/ch08-sections)
 [g-abi]: ../appendix-f.md#abi "ABI (application binary interface): Двоичный интерфейс платформы: соглашение о вызовах, раскладка типов в памяти, имена символов."
 [g-borrowing]: ../appendix-f.md#borrowing "Заимствование (borrowing): Создание ссылки на значение без передачи владения: &x — разделяемое, &mut x — уникальное."
 [g-build-script]: ../appendix-f.md#build-script "Сценарий сборки (build script): Программа build.rs в корне пакета, которую cargo собирает и запускает до компиляции крейта: генерирует исходники, собирает C-код, сообщает компилятору ключи и пути."
+[g-embedded-hal]: ../appendix-f.md#embedded-hal "embedded-hal: Крейт трейтов периферии микроконтроллера: OutputPin, InputPin, DelayNs, SpiDevice, I2c."
 [g-host]: ../appendix-f.md#host "Хост (host): Машина, на которой идёт сборка и работают инструменты, в отличие от цели, под которую собирается код."
 [g-ir]: ../appendix-f.md#ir "Промежуточное представление (intermediate representation, IR): Форма программы между исходником и машинным кодом, удобная для анализа и оптимизации. rustc проходит через несколько: HIR, MIR, затем LLVM IR."
 [g-layout]: ../appendix-f.md#layout "Раскладка (layout): Размер, выравнивание и смещения полей типа в памяти."
 [g-linker-script]: ../appendix-f.md#linker-script "Скрипт компоновщика (linker script): Файл, который говорит компоновщику, по каким адресам разместить секции программы: таблицу векторов — по адресу 0, код и константы — во флеш-память, .data и .bss — в ОЗУ."
 [g-mir]: ../appendix-f.md#mir "MIR (mid-level IR): Промежуточное представление rustc после проверки типов: граф базовых блоков с явными переходами, временными переменными и флагами drop."
 [g-panic-handler]: ../appendix-f.md#panic-handler "Обработчик паники (panic handler): Функция с атрибутом #[panic_handler], которую core вызывает при панике в программе без std."
+[g-proc-macro]: ../appendix-f.md#proc-macro "Процедурный макрос (procedural macro): Функция на Rust, которую компилятор вызывает при компиляции: на входе поток токенов, на выходе поток токенов."
 [g-target]: ../appendix-f.md#target "Цель (target): То, для чего генерируется код: архитектура, ОС и ABI, записанные в имени-триплете (thumbv7m-none-eabi)."
 [g-trait]: ../appendix-f.md#trait "Трейт (trait): Набор методов, типов и констант, которые тип обязуется предоставить: Drop, Iterator, Copy."
