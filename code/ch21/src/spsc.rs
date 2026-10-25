@@ -190,4 +190,33 @@ mod tests {
         }
         producer.join().unwrap();
     }
+
+    /// Тот же сценарий в малом — его Miri успевает. Miri моделирует слабую
+    /// память и ловит гонки данных: опубликуй `push` индекс через `Relaxed`
+    /// вместо `Release`, и он сообщил бы «Data race detected» на слоте.
+    #[test]
+    fn producer_consumer_small() {
+        const ITEMS: usize = 20;
+        let q: Spsc<usize, 4> = Spsc::new();
+        thread::scope(|s| {
+            s.spawn(|| {
+                for i in 0..ITEMS {
+                    while q.push(i).is_err() {
+                        std::hint::spin_loop();
+                    }
+                }
+            });
+            for next in 0..ITEMS {
+                loop {
+                    match q.pop() {
+                        Some(v) => {
+                            assert_eq!(v, next); // строгий FIFO
+                            break;
+                        }
+                        None => std::hint::spin_loop(),
+                    }
+                }
+            }
+        });
+    }
 }

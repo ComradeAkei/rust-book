@@ -278,17 +278,26 @@ jobs:
           MIRIFLAGS: -Zmiri-strict-provenance
       - name: Каталог transmute главы 17
         run: bash code/ch17/ub/run.sh
-      # Глава 20: безопасность от гонок данных — свойство типов (Send/Sync),
-      # а не Miri; тяжёлые потоковые тесты под Miri непрактичны и проверяются
-      # заданием host. Под Miri гоняем только unsafe-обёртки (Shared, SendBox)
-      # на отсутствие UB и утечек; задача C (futex через syscall) — ignore.
+      # Глава 20: безопасность от гонок данных в безопасном коде — свойство
+      # типов (Send/Sync), её проверяет компилятор; тяжёлые потоковые тесты
+      # под Miri непрактичны и проверяются заданием host. Под Miri гоняем
+      # unsafe-обёртки (Shared, SendBox) на отсутствие UB, гонок и утечек;
+      # задача C (futex через syscall) — ignore.
       - run: cargo +nightly miri test -p ch20 -p ch20-solutions -- shared_pointer a_sendbox
-      # Глава 21: корректность порядков — свойство железа, а не Miri, и
-      # многопоточные пробы/замки под Miri непрактичны (проверяет host). Под
-      # Miri гоняем только однопоточный кольцевой буфер SPSC: там Miri сверяет
-      # работу с UnsafeCell<MaybeUninit<T>> (нет чтения неинициализированного,
-      # нет нарушения алиасинга). Миллионный прогон помечен ignore.
-      - run: cargo +nightly miri test -p ch21 -- single_thread_fifo
+      # Глава 21: Miri ловит гонки данных и эмулирует слабую память, так что
+      # слишком слабый порядок в unsafe-коде он находит — но зависит от
+      # чередования, поэтому малые многопоточные тесты гоняем на нескольких
+      # зёрнах. Миллионные прогоны и пробы перестановок под Miri непрактичны
+      # (проверяет host). Однопоточный SPSC сверяет работу с
+      # UnsafeCell<MaybeUninit<T>> (нет чтения неинициализированного, нет
+      # нарушения алиасинга); малый двухпоточный SPSC и малый стек Трайбера
+      # (задача D) — публикацию через Release/Acquire и отсутствие гонок.
+      - run: cargo +nightly miri test -p ch21 -- single_thread_fifo producer_consumer_small
+        env:
+          MIRIFLAGS: -Zmiri-many-seeds=0..8
+      - run: cargo +nightly miri test -p ch21-solutions -- d_treiber_small
+        env:
+          MIRIFLAGS: -Zmiri-many-seeds=0..8
       # Глава 22: автоматы async, Pin, исполнители, RawWaker без кучи и
       # таймеры — всё однопоточное и под Miri проходит целиком, в обеих
       # моделях алиасинга (самоссылки и get_unchecked_mut — их предмет).

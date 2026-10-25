@@ -10,7 +10,7 @@
 //! с такой же версионной головой.
 
 use std::cell::UnsafeCell;
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::atomic::{AtomicU32, AtomicU64, Ordering};
 
 // ANCHOR: skeleton
 const NIL: u32 = u32::MAX;
@@ -32,7 +32,8 @@ fn idx_of(head: u64) -> u32 {
 #[allow(dead_code)]
 struct Node {
     value: UnsafeCell<u64>,
-    next: UnsafeCell<u32>,
+    // Атомарный: его читает и отставший pop_index, проигрывающий CAS.
+    next: AtomicU32,
 }
 
 /// Lock-free стек на `N` узлов из пула. `data` — голова стека значений,
@@ -45,13 +46,16 @@ pub struct TreiberStack<const N: usize> {
 }
 
 // SAFETY: каждый узел в любой момент принадлежит ровно одному из двух
-// стеков; доступ к его полям идёт только у потока, выигравшего CAS за него.
+// стеков, и `value` узла читает и пишет только поток, выигравший CAS за
+// него. `next` атомарный: его читает и поток, чей CAS потом не пройдёт, пока
+// новый владелец узла пишет `next` в push_index, — обычная ячейка дала бы
+// здесь гонку данных.
 unsafe impl<const N: usize> Sync for TreiberStack<N> {}
 
 impl<const N: usize> TreiberStack<N> {
     pub fn new() -> Self {
         let nodes =
-            std::array::from_fn(|_| Node { value: UnsafeCell::new(0), next: UnsafeCell::new(NIL) });
+            std::array::from_fn(|_| Node { value: UnsafeCell::new(0), next: AtomicU32::new(NIL) });
         let stack = TreiberStack {
             nodes,
             data: AtomicU64::new(pack(0, NIL)),
@@ -60,8 +64,8 @@ impl<const N: usize> TreiberStack<N> {
         // Сложить все узлы в список свободных (инициализация — без гонки).
         for i in 0..N as u32 {
             let head = stack.free.load(Ordering::Relaxed);
-            // SAFETY: инициализация однопоточная.
-            unsafe { *stack.nodes[i as usize].next.get() = idx_of(head) };
+            // Инициализация однопоточная — хватает Relaxed.
+            stack.nodes[i as usize].next.store(idx_of(head), Ordering::Relaxed);
             stack.free.store(pack(0, i), Ordering::Relaxed);
         }
         stack
@@ -69,10 +73,11 @@ impl<const N: usize> TreiberStack<N> {
 
     /// Снять узел с версионной головы `head` (lock-free). `None` — пусто.
     /// Цикл: прочитайте `head.load(Acquire)`, если индекс `NIL` — верните
-    /// `None`; иначе прочитайте `next` кандидата, соберите новую голову
-    /// `pack(ver_of(h) + 1, next)` и попробуйте `compare_exchange_weak` с
-    /// `AcqRel` при успехе. Поколение растёт на каждый успех — здесь и живёт
-    /// защита от ABA.
+    /// `None`; иначе прочитайте `next` кандидата (`load(Relaxed)`: узел может
+    /// уже принадлежать другому потоку — тогда CAS не пройдёт, а атомарность
+    /// спасает от гонки данных), соберите новую голову `pack(ver_of(h) + 1,
+    /// next)` и попробуйте `compare_exchange_weak` с `AcqRel` при успехе.
+    /// Поколение растёт на каждый успех — здесь и живёт защита от ABA.
     #[allow(dead_code)]
     fn pop_index(&self, head: &AtomicU64) -> Option<u32> {
         let _ = head;
@@ -80,8 +85,9 @@ impl<const N: usize> TreiberStack<N> {
     }
 
     /// Поставить узел `idx` на версионную голову `head` (lock-free). Цикл:
-    /// прочитайте голову, запишите в `next` узла текущий индекс головы,
-    /// соберите `pack(ver_of(h) + 1, idx)` и повторяйте `compare_exchange_weak`
+    /// прочитайте голову, запишите в `next` узла текущий индекс головы
+    /// (`store(Relaxed)`: опубликует его Release-часть CAS), соберите
+    /// `pack(ver_of(h) + 1, idx)` и повторяйте `compare_exchange_weak`
     /// (`AcqRel`), пока не пройдёт.
     #[allow(dead_code)]
     fn push_index(&self, head: &AtomicU64, idx: u32) {

@@ -33,7 +33,7 @@ pub fn channel_sum(producers: u64, per_producer: u64) -> u64 {
 // ANCHOR: condvar
 /// Ожидание условия без активного цикла. Пара `Mutex<bool>` + `Condvar`:
 /// рабочий поток ставит флаг и будит ожидающих, главный засыпает на
-/// `wait_while`, пока флаг не станет `true`. Процессор на ожидании не
+/// `wait` в цикле, пока флаг не станет `true`. Процессор на ожидании не
 /// крутится — поток снят с выполнения до `notify`.
 pub fn wait_for_ready() -> &'static str {
     let pair = Arc::new((Mutex::new(false), Condvar::new()));
@@ -47,8 +47,8 @@ pub fn wait_for_ready() -> &'static str {
 
     let (lock, cvar) = &*pair;
     let mut ready = lock.lock().unwrap();
-    // wait_while освобождает замок на время сна и снова берёт при пробуждении;
-    // цикл внутри защищает от ложных пробуждений.
+    // wait освобождает замок на время сна и снова берёт при пробуждении;
+    // цикл while защищает от ложных пробуждений (то же делает wait_while).
     while !*ready {
         ready = cvar.wait(ready).unwrap();
     }

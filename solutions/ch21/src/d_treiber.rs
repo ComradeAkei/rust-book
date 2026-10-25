@@ -11,7 +11,7 @@
 //! версионной головой. Так снята и проблема переиспользования памяти.
 
 use std::cell::UnsafeCell;
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::atomic::{AtomicU32, AtomicU64, Ordering};
 
 // ANCHOR: solution
 const NIL: u32 = u32::MAX;
@@ -31,7 +31,8 @@ fn idx_of(head: u64) -> u32 {
 
 struct Node {
     value: UnsafeCell<u64>,
-    next: UnsafeCell<u32>,
+    // Атомарный: его читает и отставший pop_index, проигрывающий CAS.
+    next: AtomicU32,
 }
 
 /// Lock-free стек на `N` узлов из пула. `data` — голова стека значений,
@@ -43,13 +44,16 @@ pub struct TreiberStack<const N: usize> {
 }
 
 // SAFETY: каждый узел в любой момент принадлежит ровно одному из двух
-// стеков; доступ к его полям идёт только у потока, выигравшего CAS за него.
+// стеков, и `value` узла читает и пишет только поток, выигравший CAS за
+// него. `next` атомарный: его читает и поток, чей CAS потом не пройдёт, пока
+// новый владелец узла пишет `next` в push_index, — обычная ячейка дала бы
+// здесь гонку данных.
 unsafe impl<const N: usize> Sync for TreiberStack<N> {}
 
 impl<const N: usize> TreiberStack<N> {
     pub fn new() -> Self {
         let nodes =
-            std::array::from_fn(|_| Node { value: UnsafeCell::new(0), next: UnsafeCell::new(NIL) });
+            std::array::from_fn(|_| Node { value: UnsafeCell::new(0), next: AtomicU32::new(NIL) });
         let stack = TreiberStack {
             nodes,
             data: AtomicU64::new(pack(0, NIL)),
@@ -58,8 +62,8 @@ impl<const N: usize> TreiberStack<N> {
         // Сложить все узлы в список свободных (инициализация — без гонки).
         for i in 0..N as u32 {
             let head = stack.free.load(Ordering::Relaxed);
-            // SAFETY: инициализация однопоточная.
-            unsafe { *stack.nodes[i as usize].next.get() = idx_of(head) };
+            // Инициализация однопоточная — хватает Relaxed.
+            stack.nodes[i as usize].next.store(idx_of(head), Ordering::Relaxed);
             stack.free.store(pack(0, i), Ordering::Relaxed);
         }
         stack
@@ -73,9 +77,14 @@ impl<const N: usize> TreiberStack<N> {
             if idx == NIL {
                 return None;
             }
-            // SAFETY: читаем next кандидата; если голова изменится, CAS ниже
-            // не пройдёт и мы повторим — прочитанное значение не используем.
-            let next = unsafe { *self.nodes[idx as usize].next.get() };
+            // Читаем next кандидата. Узел мог уже уйти к другому потоку, и
+            // тот пишет его next в push_index: тогда голова изменилась, CAS
+            // ниже не пройдёт, и прочитанное выбросится. Но само чтение
+            // одновременно с записью было бы гонкой данных (UB), будь next
+            // обычной ячейкой, — поэтому он атомарный. Relaxed хватает:
+            // next, записанный до публикации узла, виден через
+            // Acquire-чтение головы.
+            let next = self.nodes[idx as usize].next.load(Ordering::Relaxed);
             let new = pack(ver_of(h).wrapping_add(1), next);
             if head.compare_exchange_weak(h, new, Ordering::AcqRel, Ordering::Relaxed).is_ok() {
                 return Some(idx);
@@ -87,9 +96,10 @@ impl<const N: usize> TreiberStack<N> {
     fn push_index(&self, head: &AtomicU64, idx: u32) {
         loop {
             let h = head.load(Ordering::Acquire);
-            // SAFETY: узел idx принадлежит нам (только что сняли с другого
-            // стека), пишем его next до публикации.
-            unsafe { *self.nodes[idx as usize].next.get() = idx_of(h) };
+            // Узел idx наш (только что сняли с другого стека); next пишем до
+            // публикации CAS-ом с Release. Атомарно: его может в этот момент
+            // читать отставший pop_index.
+            self.nodes[idx as usize].next.store(idx_of(h), Ordering::Relaxed);
             let new = pack(ver_of(h).wrapping_add(1), idx);
             if head.compare_exchange_weak(h, new, Ordering::AcqRel, Ordering::Relaxed).is_ok() {
                 return;
