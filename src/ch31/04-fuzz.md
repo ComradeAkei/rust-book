@@ -105,13 +105,12 @@ Test unit written to fuzz/artifacts/cmd_v1_shape/crash-20dba98dadfa3346dbde1afc1
 Error: Fuzz target exited with exit status: 77
 ```
 
-Падение — на 6508-м запуске, и с ASan, и без санитайзера (на 6441-м):
-это паника проверки границ, а не порча памяти. Предупреждение в начале
-— не беда: первый вход пустой, а libfuzzer-sys отвергает входы короче
-нижней оценки `Arbitrary::size_hint` для `Shape` — нового покрытия
-такой вход не даёт. Сохранённый вход — 48 байт,
-которые глазами не прочитать; `cargo fuzz fmt` печатает его как
-структуру через `Debug`:
+Падение — на 6508-м запуске, и с ASan, и без санитайзера (на 6441-м): это
+паника проверки границ, а не порча памяти. Предупреждение в начале — не
+беда: первый вход пустой, а libfuzzer-sys отвергает входы короче нижней
+оценки `Arbitrary::size_hint` для `Shape` — нового покрытия такой вход не
+даёт. Сохранённый вход — 48 байт, которые глазами не прочитать;
+`cargo fuzz fmt` печатает его как структуру через `Debug`:
 
 ```console
 $ cargo +nightly fuzz fmt cmd_v1_shape fuzz/artifacts/cmd_v1_shape/crash-20dba98dadfa3346dbde1afc19ab9ad2b2844370
@@ -206,8 +205,9 @@ nightly-компилятором в release с `-Cpasses=sancov-module` и
 `fuzz_target!` определяет `LLVMFuzzerTestOneInput` — ту самую функцию,
 которую libFuzzer зовёт в C, — и ставит хук паники, который вызывает
 `abort`: libFuzzer видит панику как аварийный сигнал («deadly signal»).
-Код выхода 77 — уже от cargo fuzz: так он сообщает о найденном
-падении.
+Код выхода 77 — от самого libFuzzer: так он по умолчанию
+(`-error_exitcode=77`) завершается, найдя падение, а cargo fuzz лишь
+передаёт этот код дальше.
 
 </div>
 
