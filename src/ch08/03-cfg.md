@@ -59,7 +59,7 @@ $ diff <(rustc --print cfg --target thumbv6m-none-eabi) \
 ```
 
 Cortex-M0 и Cortex-M3 различаются в этом списке ровно одним признаком:
-у [ARMv7-M][g-armv7m] есть атомарные операции чтения-изменения-записи, у ARMv6-M
+у [ARMv7-M][g-armv7m] есть атомарные операции [чтения-изменения-записи][g-rmw], у ARMv6-M
 нет. Сам тип `AtomicU32` на M0 есть, но только с `load` и `store`:
 инструкций [`LDREX`][g-exclusive-access]/`STREX` в ARMv6-M нет, и `fetch_add` выразить
 нечем. Между M3 и M4F разница только в `target_abi` (`eabi` и
@@ -243,3 +243,4 @@ warning: unexpected `cfg` condition value: `linxu`
 [g-exclusive-access]: ../appendix-f.md#exclusive-access "Эксклюзивный доступ (exclusive access): Пара инструкций ARM LDREX и STREX: первая читает слово и ставит адрес под наблюдение монитора, вторая пишет, только если с тех пор никто не писал по адресу и не было исключения."
 [g-fpu]: ../appendix-f.md#fpu "FPU (floating-point unit): Блок плавающей точки в процессоре."
 [g-primask]: ../appendix-f.md#primask "PRIMASK (priority mask): Однобитовый регистр маски Cortex-M: если бит установлен, ядро не принимает исключения с настраиваемым приоритетом, то есть все прерывания, кроме NMI и HardFault."
+[g-rmw]: ../appendix-f.md#rmw "Чтение-изменение-запись (read-modify-write, RMW): Атомарная операция, которая читает ячейку, вычисляет новое значение и записывает его одним неделимым шагом: fetch_add, swap, compare_exchange."

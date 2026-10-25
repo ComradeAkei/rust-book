@@ -238,7 +238,7 @@ ch13_mix_index:
 {{#include ../../code/ch13/src/codegen.rs:avx2}}
 ```
 
-`#[target_feature(enable = "avx2")]` разрешает компилятору AVX2 только
+[`#[target_feature(enable = "avx2")]`][g-target-feature] разрешает компилятору AVX2 только
 в этой функции. Объявить её безопасной можно с Rust 1.86, а вызвать из
 кода без того же атрибута — только в `unsafe`: обещать, что процессор
 умеет AVX2, должен вызывающий. `is_x86_feature_detected!` проверяет
@@ -389,3 +389,4 @@ ch13_peaks_exact:
 <!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
 [g-external-iteration]: ../appendix-f.md#external-iteration "Внешняя и внутренняя итерация (external iteration, internal iteration): При внешней итерации цикл принадлежит вызывающему и на каждом шаге зовёт next; при внутренней цикл пишет сам итератор в fold или for_each."
 [g-saturating]: ../appendix-f.md#saturating "Насыщающая арифметика (saturating arithmetic): Арифметика, в которой результат за границей диапазона заменяется ближайшей границей: 200u8.saturating_add(100) равно 255."
+[g-target-feature]: ../appendix-f.md#target-feature "Фича процессора (target feature): Необязательное расширение набора инструкций — SSE4.2, AVX2, NEON, — которое есть не на каждом процессоре архитектуры."

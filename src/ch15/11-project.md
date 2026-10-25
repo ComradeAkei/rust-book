@@ -101,7 +101,7 @@ $ cargo run --example store -p telemetry-store
   режиме не обращается к куче;
 - `range` находит границы окна двоичным поиском, границы включаются;
 - `sensors_sorted` возвращает номера по возрастанию;
-- счётчик в `Counted` ведётся в атомиках (`Relaxed`), `realloc` — это и
+- счётчик в `Counted` ведётся в атомиках ([`Relaxed`][g-memory-ordering]), `realloc` — это и
   освобождение, и выделение.
 
 ```console
@@ -137,4 +137,5 @@ $ cargo test -p project-store p15
 </div>
 
 <!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
+[g-memory-ordering]: ../appendix-f.md#memory-ordering "Порядок памяти (memory ordering): Аргумент Ordering атомарной операции: какие из соседних обращений к памяти другие потоки обязаны увидеть до неё или после."
 [g-module]: ../appendix-f.md#module "Модуль (module): Пространство имён внутри крейта со своими правилами видимости: объявляется словом mod, с телом в скобках или в отдельном файле."

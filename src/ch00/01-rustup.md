@@ -52,7 +52,7 @@ thumbv7em - none - eabihf              набор инструкций, ОС н�
 
 | Цель | Ядра | Архитектура | Чего нет по сравнению со следующей строкой |
 |---|---|---|---|
-| `thumbv6m-none-eabi` | Cortex-M0, M0+ | ARMv6-M | деления, `clz`, атомарных чтения-изменения-записи, невыровненного доступа |
+| `thumbv6m-none-eabi` | Cortex-M0, M0+ | ARMv6-M | деления, `clz`, атомарных [чтения-изменения-записи][g-rmw], невыровненного доступа |
 | `thumbv7m-none-eabi` | Cortex-M3 | ARMv7-M | DSP-инструкций и [FPU][g-fpu] |
 | `thumbv7em-none-eabihf` | Cortex-M4F, M7F | ARMv7E-M с FPU | — |
 
@@ -144,7 +144,7 @@ ch00_scale:                     ch00_scale:
 Это функция `x * k + 1.0` из раздела [0.4](04-abi.md). Число 1065353216
 слева — это 0x3F80_0000, битовое представление `1.0f32`. Включить FPU,
 сохранив soft-float ABI, можно ключом
-`-C target-feature=+vfp4d16sp`, но rustc предупредит, что этот ключ
+[`-C target-feature=+vfp4d16sp`][g-target-feature], но rustc предупредит, что этот ключ
 нестабилен для ARM (`unknown and unstable feature specified`). Выбирайте
 цель по ядру, а не по наитию.
 
@@ -207,5 +207,7 @@ $ rustup target list --installed
 [g-exclusive-access]: ../appendix-f.md#exclusive-access "Эксклюзивный доступ (exclusive access): Пара инструкций ARM LDREX и STREX: первая читает слово и ставит адрес под наблюдение монитора, вторая пишет, только если с тех пор никто не писал по адресу и не было исключения."
 [g-fpu]: ../appendix-f.md#fpu "FPU (floating-point unit): Блок плавающей точки в процессоре."
 [g-prologue]: ../appendix-f.md#prologue "Пролог и эпилог (prologue, epilogue): Начальные и конечные команды функции: пролог сохраняет callee-saved регистры и адрес возврата и выделяет кадр стека, эпилог восстанавливает их и возвращается."
+[g-rmw]: ../appendix-f.md#rmw "Чтение-изменение-запись (read-modify-write, RMW): Атомарная операция, которая читает ячейку, вычисляет новое значение и записывает его одним неделимым шагом: fetch_add, swap, compare_exchange."
 [g-sanitizer]: ../appendix-f.md#sanitizer "Санитайзер (sanitizer): Инструментирование машинного кода: компилятор вставляет проверки перед обращениями к памяти, а библиотека времени выполнения ведёт теневую память и сообщает об ошибке в момент, когда она случилась."
+[g-target-feature]: ../appendix-f.md#target-feature "Фича процессора (target feature): Необязательное расширение набора инструкций — SSE4.2, AVX2, NEON, — которое есть не на каждом процессоре архитектуры."
 [g-unwinding]: ../appendix-f.md#unwinding "Раскрутка стека (unwinding): Снятие кадров стека по одному после паники с вызовом деструкторов живых значений."

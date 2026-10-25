@@ -16,7 +16,7 @@
 (marker type) различает `Addr<Phys>` и `Addr<Virt>` при компиляции, а
 внутри обоих один `usize`. Поле [`PhantomData<S>`][g-phantom-data] нужно, потому что
 параметр, который нигде не использован, — ошибка E0392: компилятор должен
-знать, как `S` влияет на [вариантность][g-variance] и `Send`/`Sync` (раздел
+знать, как `S` влияет на [вариантность][g-variance] и [`Send`][g-send-sync]/`Sync` (раздел
 [5.4](../ch05/04-variance.md)). Размер `PhantomData` — ноль.
 
 ```text
@@ -269,6 +269,7 @@ Off(Uart<Disabled>), On(Uart<Enabled>) }`. Проверка возвращает
 [g-phantom-data]: ../appendix-f.md#phantom-data "PhantomData: Тип нулевого размера PhantomData, который говорит компилятору, что значение логически содержит T, хотя поля такого типа нет."
 [g-sealed-trait]: ../appendix-f.md#sealed-trait "Запечатанный трейт (sealed trait): Публичный трейт, который нельзя реализовать вне его крейта: он требует супертрейт из приватного модуля, а назвать этот супертрейт снаружи невозможно."
 [g-semihosting]: ../appendix-f.md#semihosting "Semihosting: Способ, которым прошивка просит отладчик выполнить ввод-вывод за неё: номер операции в r0, параметры в r1, затем bkpt 0xab."
+[g-send-sync]: ../appendix-f.md#send-sync "Send, Sync: Автотрейты потокобезопасности."
 [g-uart]: ../appendix-f.md#uart "UART (Universal Asynchronous Receiver-Transmitter): Последовательный порт: передаёт байты по линии бит за битом без общего тактового сигнала."
 [g-variance]: ../appendix-f.md#variance "Вариантность (variance): Как отношение подтипа проходит сквозь составной тип."
 [g-wrapping]: ../appendix-f.md#wrapping "Заворачивание (wrapping): Арифметика по модулю 2ⁿ: при переполнении старшие биты отбрасываются, и 255u8 + 1 даёт 0."

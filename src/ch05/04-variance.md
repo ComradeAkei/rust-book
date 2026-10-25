@@ -174,7 +174,7 @@ error[E0505]: cannot move out of `rx` because it is borrowed
 под Miri проходит в обеих моделях [алиасинга][g-aliasing]. Почему в полях окна [сырой
 указатель][g-raw-pointer], а не `&'a mut [u8]`, объяснит глава [16](../ch16/05-models.md):
 уникальная ссылка на память, в которую пишет DMA, — уже неопределённое
-поведение. Барьеры и `volatile` для настоящего контроллера добавит
+поведение. [Барьеры][g-memory-barrier] и `volatile` для настоящего контроллера добавит
 глава [17](../ch17/05-volatile.md).
 
 <div class="box trap">
@@ -210,6 +210,7 @@ pub fn dangling() -> &'static mut [u8] {
 <!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
 [g-aliasing]: ../appendix-f.md#aliasing "Алиасинг (aliasing): Два пути к одной памяти: два указателя, ссылка и указатель."
 [g-assoc-type]: ../appendix-f.md#assoc-type "Ассоциированный тип (associated type): Тип, который называет каждая реализация трейта: type Sample в трейте Source."
+[g-memory-barrier]: ../appendix-f.md#memory-barrier "Барьер памяти (memory barrier, fence): Инструкция или указание компилятору, которые запрещают переставлять обращения к памяти через себя."
 [g-phantom-data]: ../appendix-f.md#phantom-data "PhantomData: Тип нулевого размера PhantomData, который говорит компилятору, что значение логически содержит T, хотя поля такого типа нет."
 [g-raw-pointer]: ../appendix-f.md#raw-pointer "Сырой указатель (raw pointer): Указатель *const T или *mut T без гарантий ссылки: он может быть нулевым, висячим, невыровненным."
 [g-rustdoc]: ../appendix-f.md#rustdoc "rustdoc: Генератор документации Rust: собирает HTML из комментариев /// (cargo doc) и запускает doc-тесты."
