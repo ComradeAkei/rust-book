@@ -263,7 +263,7 @@ fn p12_inputs() -> Vec<Vec<u8>> {
 #[test]
 fn p12_same_as_decode() {
     let inputs = p12_inputs();
-    // Под Miri каждый сороковой вход: иначе тест идёт минуты.
+    // Под Miri каждый сорок первый вход: иначе тест идёт минуты.
     let step = if cfg!(miri) { 41 } else { 1 };
     for b in inputs.iter().step_by(step) {
         assert_eq!(parse::decode(b), decode(b), "вход {b:02x?}");

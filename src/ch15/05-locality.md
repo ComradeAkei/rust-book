@@ -62,8 +62,10 @@ LinkedList<u64>, вперемешку:  22.71 нс
 
 `VecDeque` — кольцо, и `get(i)` должен превратить логический индекс в
 физический с учётом смещения головы. Наивно это `(head + i) % cap` с
-делением, но `cap` — степень двойки, и деления нет: одно сравнение и
-условное вычитание.
+делением. Но `head < cap` и `i < len ≤ cap`, так что сумма меньше
+`2 · cap`, и остаток сводится к одному сравнению и условному вычитанию —
+деления нет. Степенью двойки ёмкость при этом быть не обязана:
+`VecDeque::with_capacity(10)` даёт ровно 10.
 
 ```rust
 {{#include ../../code/ch15/src/codegen.rs:deque_get}}
@@ -82,8 +84,11 @@ ch15_deque_get:
     cmovae rcx, rax         ; если i+head >= cap, вычесть cap
     mov   rax, [rdi + 8]    ; ptr
     sub   rsi, rcx
-    mov   edx, [rax + 4*rsi]; buf[(i + head) & (cap-1)]
+    mov   edx, [rax + 4*rsi]; buf[i + head - (cap или 0)]
     mov   eax, 1            ; Some
+    ret
+.none:
+    xor   eax, eax          ; None
     ret
 ```
 

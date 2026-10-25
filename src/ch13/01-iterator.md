@@ -100,7 +100,7 @@ error[E0382]: borrow of moved value: `v`
 ```
 
 Массив тоже отдаёт элементы по значению: `for x in [1, 2, 3]` даёт
-`i32`, а не `&i32`, и итератор `core::array::IntoIter<u32, 4>` хранит
+`i32`, а не `&i32`, и итератор `core::array::IntoIter<i32, 3>` хранит
 сам массив внутри себя.
 
 <div class="box ref">
