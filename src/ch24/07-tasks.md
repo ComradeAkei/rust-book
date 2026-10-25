@@ -121,7 +121,7 @@ Derive не может изменить структуру, поэтому ря�
 ```
 
 Часы для Cortex-M тоже даны — [SysTick][g-systick] на любом ядре и счётчик тактов
-DWT на [ARMv7-M][g-armv7m] и новее:
+[DWT][g-dwt] на [ARMv7-M][g-armv7m] и новее:
 
 ```rust,ignore
 {{#include ../../exercises/ch24/src/c_timed.rs:systick}}
@@ -254,6 +254,7 @@ install svd2rust`), сгенерируйте крейт из того же фа�
 
 <!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
 [g-armv7m]: ../appendix-f.md#armv7m "ARMv6-M, ARMv7-M, ARMv7E-M: Версии архитектуры ARM для микроконтроллеров."
+[g-dwt]: ../appendix-f.md#dwt "DWT (Data Watchpoint and Trace): Отладочный блок Cortex-M3, M4, M7 и M33 с точками наблюдения и счётчиками, среди них — 32-битный счётчик тактов CYCCNT по адресу 0xE000_1004."
 [g-guard]: ../appendix-f.md#guard "Страж (guard): Значение, чей деструктор отпускает ресурс: MutexGuard отпускает мьютекс, IrqGuard из главы 3 снова разрешает прерывания."
 [g-systick]: ../appendix-f.md#systick "SysTick: Системный таймер Cortex-M: 24-битный счётчик, который считает вниз от заданного значения и при переходе через ноль вызывает исключение SysTick."
 [g-unwinding]: ../appendix-f.md#unwinding "Раскрутка стека (unwinding): Снятие кадров стека по одному после паники с вызовом деструкторов живых значений."

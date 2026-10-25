@@ -906,24 +906,8 @@ jobs:
       - run: python3 tools/check-includes.py
       # Глоссарий: каждый термин определён в своём разделе, а первое
       # упоминание в главе — определение или ссылка на приложение F.
-      # Список растёт по мере того, как главы получают ссылки.
-      - run: >-
-          python3 tools/check-terms.py introduction part1
-          ch00 ch01 ch02 ch03 ch04 ch05
-          appendix-e appendix-e/ch00 appendix-e/ch01 appendix-e/ch02
-          appendix-e/ch03 appendix-e/ch04 appendix-e/ch05
-          part2 ch06 ch07 ch08 ch09 ch10 ch11
-          appendix-e/ch06 appendix-e/ch07 appendix-e/ch08
-          appendix-e/ch09 appendix-e/ch10 appendix-e/ch11
-          part3 ch12 ch13 ch14 ch15 ch16 ch17
-          appendix-e/ch12 appendix-e/ch13 appendix-e/ch14
-          appendix-e/ch15 appendix-e/ch16 appendix-e/ch17
-          part4 part5 ch18 ch19 ch20 ch21 ch22 ch23
-          appendix-e/ch18 appendix-e/ch19 appendix-e/ch20
-          appendix-e/ch21 appendix-e/ch22 appendix-e/ch23
-          part6 ch24 ch25 ch26 ch27 ch28
-          appendix-e/ch24 appendix-e/ch25 appendix-e/ch26
-          appendix-e/ch27 appendix-e/ch28
+      # Без аргументов проверяются все единицы книги.
+      - run: python3 tools/check-terms.py
       - run: |
           mdbook build 2>&1 | tee mdbook.log
           # Предупреждение «search index is very large» безвредно (поиск

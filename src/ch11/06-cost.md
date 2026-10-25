@@ -130,7 +130,7 @@ ch11_devirt_hidden:
 константа, слово 3 в ней — `ch11_read_thermo`, вызов встроен, и
 `344 * 100 / 16` посчитано при компиляции. В `ch11_devirt_static`
 константы всё: массив `SENSORS`, объекты и таблицы, и сумма двух
-датчиков, 2150 + 12, тоже сложилась при компиляции. `black_box` в
+датчиков, 2150 + 12, тоже сложилась при компиляции. [`black_box`][g-black-box] в
 `ch11_devirt_hidden` делает вид, что читает и меняет толстый указатель
 (`#APP` и `#NO_APP` — пустая ассемблерная вставка), и после него LLVM
 уже не знает, что за таблица в `[rsp + 16]`.
@@ -270,6 +270,7 @@ Mitigation: Enhanced / Automatic IBRS; IBPB: conditional; PBRSB-eIBRS: SW sequen
 
 <!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
 [g-abi]: ../appendix-f.md#abi "ABI (application binary interface): Двоичный интерфейс платформы: соглашение о вызовах, раскладка типов в памяти, имена символов."
+[g-black-box]: ../appendix-f.md#black-box "black_box: Функция std::hint::black_box(x): возвращает свой аргумент, но оптимизатор не знает, что она с ним делает."
 [g-ffi]: ../appendix-f.md#ffi "FFI (foreign function interface): Вызов функций, написанных на другом языке, и показ своих функций ему."
 [g-vectorization]: ../appendix-f.md#vectorization "Векторизация (vectorization): Оптимизация, при которой компилятор переписывает цикл на SIMD-команды, обрабатывающие несколько элементов за раз, и добавляет скалярный хвост для остатка."
 [g-wait-states]: ../appendix-f.md#wait-states "Такты ожидания (wait states): Пустые такты, которые ядро ждёт при чтении медленной флеш-памяти на высокой частоте."

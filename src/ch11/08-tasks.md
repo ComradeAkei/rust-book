@@ -146,7 +146,7 @@ $ valgrind --tool=callgrind --branch-sim=yes --toggle-collect='*best*' \
       target/release/examples/c_bench 4096 2 8/shuffled/dyn
 ```
 
-`perf` нужен доступ к счётчикам, а в виртуальных машинах их часто нет.
+[`perf`][g-perf] нужен доступ к счётчикам, а в виртуальных машинах их часто нет.
 `--toggle-collect` ограничивает подсчёт функцией замера `best`, без
 построения массивов.
 
@@ -203,3 +203,4 @@ $ cargo +nightly miri test -p ch11-exercises --test ch11 task_d -- --include-ign
 
 <!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
 [g-no-std]: ../appendix-f.md#no-std "no_std: Атрибут крейта #![no_std]: крейт пользуется только core (и, если нужно, alloc), без стандартной библиотеки ОС."
+[g-perf]: ../appendix-f.md#perf "perf: Профилировщик Linux поверх системного вызова perf_event_open: perf stat считает события — такты, инструкции, промахи, — perf record снимает выборки адреса и стека по таймеру или по переполнению счётчика, perf report и perf annotate показывают, где идёт время."

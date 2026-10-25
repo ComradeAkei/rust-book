@@ -109,7 +109,7 @@ $ cargo run --release -p ch10-exercises --example b_bench
 Он сортирует 10 миллионов псевдослучайных `u32` тремя способами,
 лучшее время из пяти: `qsort`, `sort_unstable_by` и та же
 `sort_unstable_by`, но с компаратором через указатель, спрятанный от
-оптимизатора `black_box`.
+оптимизатора [`black_box`][g-black-box].
 
 Вопросы к отчёту. Во сколько раз отличается время и какая доля разницы
 приходится на алгоритм, а какая на встраивание: что отделяет третий
@@ -249,4 +249,5 @@ E0451, а правильная цепочка `write_enable → program` — с�
 больше, чем помогает?
 
 <!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
+[g-black-box]: ../appendix-f.md#black-box "black_box: Функция std::hint::black_box(x): возвращает свой аргумент, но оптимизатор не знает, что она с ним делает."
 [g-embedded-hal]: ../appendix-f.md#embedded-hal "embedded-hal: Крейт трейтов периферии микроконтроллера: OutputPin, InputPin, DelayNs, SpiDevice, I2c."

@@ -68,9 +68,11 @@ config RUST
 {{#include ../../code/ch29/kernel/ch29.config}}
 ```
 
-Отладочное ядро — то же плюс `ch29-debug.config`: KASAN, kmemleak,
-lockdep и проверка сна в атомарном контексте. Оно нужно разделам
-[29.4](04-memory.md) и [29.5](05-pin-init.md) и задаче
+Отладочное ядро — то же плюс `ch29-debug.config`: *KASAN* (Kernel Address
+Sanitizer) проверяет каждое обращение к памяти, *kmemleak* (kernel memory
+leak detector) ищет утечки, *lockdep* (lock dependency validator) —
+порядок взятия блокировок, и включена проверка сна в атомарном контексте.
+Оно нужно разделам [29.4](04-memory.md) и [29.5](05-pin-init.md) и задаче
 [29.A](10-tasks.md).
 
 ```text
@@ -165,7 +167,7 @@ $ make -C target/ch29-kernel/build M=$PWD MO=out LLVM=1
 символы с экспортом ядра, `ch29_hello.mod.c` — сгенерированный на C
 список зависимостей и `vermagic`, а `ld` собирает `.ko`.
 
-`CLIPPY=1` в той же команде заменяет rustc на `clippy-driver` с линтами,
+`CLIPPY=1` в той же команде заменяет rustc на `clippy-driver` с [линтами][g-lint],
 которые ядро считает обязательными: `// SAFETY:` у каждого блока
 `unsafe`, раздел `# Safety` у каждой `unsafe fn` и запрет на API новее
 минимальной версии rustc ядра (1.78) — даже если сам компилятор новее.
@@ -260,3 +262,6 @@ init читает из журнала сам, и строки не переме�
    initramfs, как `/dev/console`?
 
 </div>
+
+<!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
+[g-lint]: ../appendix-f.md#lint "Линт (lint): Правило, которое срабатывает на подозрительном, но допустимом коде: unused_comparisons в rustc, manual_memcpy в clippy."
