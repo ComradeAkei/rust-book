@@ -252,7 +252,7 @@ $ llvm-dwarfdump --name='mul<f16>' --show-children=0 target/thumbv6m-none-eabi/r
 
 **Как в C.** Всё то же самое делают `arm-none-eabi-gcc`, OpenOCD и
 `arm-none-eabi-gdb`: Rust не приносит своего отладчика. gdb понимает
-отладочную информацию Rust (имена с путями модулей, `enum`, срезы), и
+отладочную информацию Rust (имена с путями [модулей][g-module], `enum`, срезы), и
 `print` работает с переменными Rust так же, как с переменными C. Для
 semihosting в *newlib* — стандартной библиотеке C для микроконтроллеров,
 которая идёт с `arm-none-eabi-gcc`, — есть `--specs=rdimon.specs`. В Rust его заменяет
@@ -300,4 +300,5 @@ defmt и probe-rs возвращаются в главе 27.
 
 <!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
 [g-hardfault]: ../appendix-f.md#hardfault "HardFault: Исключение Cortex-M, в которое попадает сбой, если для него нет отдельного включённого обработчика: неверная инструкция, ошибка шины, нарушение прав MPU."
+[g-module]: ../appendix-f.md#module "Модуль (module): Пространство имён внутри крейта со своими правилами видимости: объявляется словом mod, с телом в скобках или в отдельном файле."
 [g-uart]: ../appendix-f.md#uart "UART (Universal Asynchronous Receiver-Transmitter): Последовательный порт: передаёт байты по линии бит за битом без общего тактового сигнала."

@@ -107,7 +107,8 @@ $ cargo asm -p ch11 --lib --include-constants ch11_as_node
 
 ## Приведение к супертрейту
 
-С Rust 1.86 `&dyn Node` приводится к `&dyn Sensor`, `&dyn Actuator` и
+С Rust 1.86 работает *приведение к супертрейту* (trait upcasting):
+`&dyn Node` приводится к `&dyn Sensor`, `&dyn Actuator` и
 `&dyn Any`, как `&Fan` приводится к любому из них:
 
 ```rust
@@ -207,7 +208,7 @@ ch11_as_fan:
 
 `box_ids(Box::new(5u8))` возвращает `(false, true)`. `downcast` и
 `downcast_ref` у `Box<dyn Any>` написаны правильно, ошибаются при
-ручном сравнении `TypeId`. Clippy знает этот случай: линт
+ручном сравнении `TypeId`. Clippy знает этот случай: [линт][g-lint]
 `type_id_on_box` включён по умолчанию и советует `(*b)`.
 
 </div>
@@ -221,3 +222,6 @@ ch11_as_fan:
 `describe` ветку для узлов, не перечисляя их типы?
 
 </div>
+
+<!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
+[g-lint]: ../appendix-f.md#lint "Линт (lint): Правило, которое срабатывает на подозрительном, но допустимом коде: unused_comparisons в rustc, manual_memcpy в clippy."
