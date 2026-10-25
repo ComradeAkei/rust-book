@@ -125,15 +125,15 @@ help: and (1) occurred earlier here
 ```console
 $ cargo +nightly miri run -q -p ch31 --bin san -- relaxed
 error: Undefined Behavior: Data race detected between (1) retag write on thread `unnamed-1` and (2) retag read of type `std::mem::MaybeUninit<u32>` on thread `main` at alloc1194+0x10
-   --> code/ch31/src/spsc.rs:107:53
+   --> code/ch31/src/spsc.rs:113:53
     |
-107 |         let v = self.buf[tail].with(|slot| unsafe { (*slot).assume_init_read() });
+113 |         let v = self.buf[tail].with(|slot| unsafe { (*slot).assume_init_read() });
     |                                                     ^^^^^^^ (2) just happened here
     |
 help: and (1) occurred earlier here
-   --> code/ch31/src/spsc.rs:96:9
+   --> code/ch31/src/spsc.rs:99:9
     |
- 96 |         self.buf[head].with_mut(|slot| unsafe { (*slot).write(v) });
+ 99 |         self.buf[head].with_mut(|slot| unsafe { (*slot).write(v) });
     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     = help: retags occur on all (re)borrows and as well as when references are copied or moved
     = help: retags permit optimizations that insert speculative reads or writes
@@ -207,9 +207,9 @@ thread 'all_relaxed_is_caught' (23452) panicked at .../loom-0.7.2/src/rt/locatio
 Causality violation: Concurrent read and write accesses.
 ...
   15: <ch31::spsc::Spsc<u32, 3, ch31::spsc::AllRelaxed>>::pop
-             at ./src/spsc.rs:107:32
+             at ./src/spsc.rs:113:32
   16: loom::two_items::<ch31::spsc::AllRelaxed>::{closure#0}
-             at ./tests/loom.rs:28:21
+             at ./tests/loom.rs:31:30
 ...
 test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
 ```

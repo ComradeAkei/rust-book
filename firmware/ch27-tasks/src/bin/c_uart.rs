@@ -26,7 +26,8 @@ use cortex_m_semihosting::debug;
 // ANCHOR: rx
 /// Очередь приёма. На линии 115200 бод байты идут раз в 87 мкс, и main
 /// успевает разбирать их по одному. В QEMU весь ввод приходит без пауз,
-/// поэтому очередь вмещает весь ввод опыта.
+/// поэтому очередь вмещает весь ввод опыта. Писатель — обработчик UART0,
+/// читатель — `next_byte` в main.
 static RX: Spsc<u8, 128> = Spsc::new();
 static LOST: AtomicU32 = AtomicU32::new(0);
 
@@ -37,7 +38,9 @@ fn UART0() {
     // Регистры у них общие, но поля — разные.
     let uart = unsafe { &*pac::Uart0::ptr() };
     while uart.fr().read().rxfe().bit_is_clear() {
-        if RX.push(uart.dr().read().data().bits()).is_err() {
+        // SAFETY: писатель RX — только этот обработчик, сам себя он не
+        // вытесняет.
+        if unsafe { RX.push(uart.dr().read().data().bits()) }.is_err() {
             LOST.fetch_add(1, Relaxed);
         }
     }
@@ -58,7 +61,8 @@ fn UART0() {
 fn next_byte() -> u8 {
     loop {
         cortex_m::interrupt::disable();
-        let byte = RX.pop();
+        // SAFETY: читатель RX — только main.
+        let byte = unsafe { RX.pop() };
         if byte.is_none() {
             cortex_m::asm::wfi();
         }

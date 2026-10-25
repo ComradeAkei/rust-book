@@ -16,7 +16,9 @@ use core::sync::atomic::{AtomicUsize, Ordering};
 /// Кольцевая очередь на `N` слотов (вмещает `N − 1` элемент: один слот
 /// всегда пуст, чтобы отличать «полна» от «пуста»). Один писатель двигает
 /// `head`, один читатель — `tail`; делить между двумя потоками можно по
-/// `&`, поэтому `Sync` ставим вручную.
+/// `&`, поэтому `Sync` ставим вручную. Что писатель и читатель — по одному,
+/// компилятор не проверит: это обещание вызывающего, и `push` с `pop` —
+/// `unsafe fn`.
 pub struct Spsc<T, const N: usize> {
     buf: [UnsafeCell<MaybeUninit<T>>; N],
     head: AtomicUsize, // индекс записи — меняет только писатель
@@ -25,7 +27,8 @@ pub struct Spsc<T, const N: usize> {
 
 // SAFETY: доступ к каждому слоту строго разведён по времени через Acquire/
 // Release на head/tail — писатель трогает слот до публикации head, читатель
-// после того, как увидел эту публикацию. `Send` для T достаточно: элемент
+// после того, как увидел эту публикацию. Писатель и читатель при этом по
+// одному — это контракт `push` и `pop`. `Send` для T достаточно: элемент
 // передаётся от одного потока другому во владение.
 unsafe impl<T: Send, const N: usize> Sync for Spsc<T, N> {}
 
@@ -40,7 +43,14 @@ impl<T, const N: usize> Spsc<T, N> {
     }
 
     /// Положить элемент (вызывает только писатель). `Err(v)` — очередь полна.
-    pub fn push(&self, v: T) -> Result<(), T> {
+    ///
+    /// # Safety
+    ///
+    /// Писатель один: каждый вызов `push` этой очереди происходит до
+    /// следующего (happens-before, раздел 21.2). Проще всего — звать `push`
+    /// из одного потока или одного обработчика прерывания. Два вызова
+    /// одновременно прочтут один `head` и запишут в один слот — гонка данных.
+    pub unsafe fn push(&self, v: T) -> Result<(), T> {
         let head = self.head.load(Ordering::Relaxed); // свой индекс — Relaxed
         let next = (head + 1) % N;
         // Acquire синхронизируется с Release-записью tail у читателя: видим,
@@ -58,7 +68,13 @@ impl<T, const N: usize> Spsc<T, N> {
     }
 
     /// Забрать элемент (вызывает только читатель). `None` — очередь пуста.
-    pub fn pop(&self) -> Option<T> {
+    ///
+    /// # Safety
+    ///
+    /// Читатель один: каждый вызов `pop` этой очереди происходит до
+    /// следующего. Два вызова одновременно прочтут один слот, и у значения
+    /// станет два владельца — для `Box` это двойное освобождение.
+    pub unsafe fn pop(&self) -> Option<T> {
         let tail = self.tail.load(Ordering::Relaxed); // свой индекс — Relaxed
         // Acquire синхронизируется с Release-записью head у писателя.
         if tail == self.head.load(Ordering::Acquire) {
@@ -83,7 +99,9 @@ impl<T, const N: usize> Default for Spsc<T, N> {
 // Непрочитанные элементы нужно уронить при уничтожении очереди.
 impl<T, const N: usize> Drop for Spsc<T, N> {
     fn drop(&mut self) {
-        while self.pop().is_some() {}
+        // SAFETY: `&mut self` — других ссылок на очередь нет, читатель здесь
+        // единственный.
+        while unsafe { self.pop() }.is_some() {}
     }
 }
 
@@ -116,11 +134,13 @@ mod proofs {
         let q = any_queue::<N>();
         let before = len(&q);
         if kani::any() {
-            let pushed = q.push(kani::any()).is_ok();
+            // SAFETY: поток один — он и писатель, и читатель.
+            let pushed = unsafe { q.push(kani::any()) }.is_ok();
             assert!(pushed == (before < N - 1));
             assert!(len(&q) == before + usize::from(pushed));
         } else {
-            let popped = q.pop().is_some();
+            // SAFETY: как выше.
+            let popped = unsafe { q.pop() }.is_some();
             assert!(popped == (before > 0));
             assert!(len(&q) + usize::from(popped) == before);
         }
@@ -150,17 +170,21 @@ mod tests {
     #[test]
     fn single_thread_fifo() {
         let q: Spsc<u32, 4> = Spsc::new();
-        assert!(q.pop().is_none());
-        assert_eq!(q.push(1), Ok(()));
-        assert_eq!(q.push(2), Ok(()));
-        assert_eq!(q.push(3), Ok(())); // 4 слота → вмещает 3
-        assert_eq!(q.push(4), Err(4)); // полна
-        assert_eq!(q.pop(), Some(1));
-        assert_eq!(q.pop(), Some(2));
-        assert_eq!(q.push(5), Ok(()));
-        assert_eq!(q.pop(), Some(3));
-        assert_eq!(q.pop(), Some(5));
-        assert_eq!(q.pop(), None);
+        // SAFETY: поток один — он и единственный писатель, и единственный
+        // читатель.
+        unsafe {
+            assert!(q.pop().is_none());
+            assert_eq!(q.push(1), Ok(()));
+            assert_eq!(q.push(2), Ok(()));
+            assert_eq!(q.push(3), Ok(())); // 4 слота → вмещает 3
+            assert_eq!(q.push(4), Err(4)); // полна
+            assert_eq!(q.pop(), Some(1));
+            assert_eq!(q.pop(), Some(2));
+            assert_eq!(q.push(5), Ok(()));
+            assert_eq!(q.pop(), Some(3));
+            assert_eq!(q.pop(), Some(5));
+            assert_eq!(q.pop(), None);
+        }
     }
 
     #[test]
@@ -172,7 +196,8 @@ mod tests {
             let q = Arc::clone(&q);
             thread::spawn(move || {
                 for i in 0..ITEMS {
-                    while q.push(i).is_err() {
+                    // SAFETY: писатель — только этот поток.
+                    while unsafe { q.push(i) }.is_err() {
                         std::hint::spin_loop();
                     }
                 }
@@ -180,7 +205,8 @@ mod tests {
         };
         let mut next = 0;
         while next < ITEMS {
-            match q.pop() {
+            // SAFETY: читатель — только главный поток теста.
+            match unsafe { q.pop() } {
                 Some(v) => {
                     assert_eq!(v, next); // строгий FIFO
                     next += 1;
@@ -201,14 +227,16 @@ mod tests {
         thread::scope(|s| {
             s.spawn(|| {
                 for i in 0..ITEMS {
-                    while q.push(i).is_err() {
+                    // SAFETY: писатель — только этот поток.
+                    while unsafe { q.push(i) }.is_err() {
                         std::hint::spin_loop();
                     }
                 }
             });
             for next in 0..ITEMS {
                 loop {
-                    match q.pop() {
+                    // SAFETY: читатель — только главный поток теста.
+                    match unsafe { q.pop() } {
                         Some(v) => {
                             assert_eq!(v, next); // строгий FIFO
                             break;

@@ -18,14 +18,17 @@ fn two_items<O: Orderings + 'static>(runs: &'static AtomicUsize) {
         let q = Arc::new(Spsc::<u32, 3, O>::new());
         let producer = {
             let q = Arc::clone(&q);
-            thread::spawn(move || {
+            // SAFETY: писатель — только этот поток, читатель — только
+            // главный.
+            thread::spawn(move || unsafe {
                 q.push(1).unwrap();
                 q.push(2).unwrap();
             })
         };
         let mut got = Vec::new();
         while got.len() < 2 {
-            match q.pop() {
+            // SAFETY: см. выше.
+            match unsafe { q.pop() } {
                 Some(v) => got.push(v),
                 None => thread::yield_now(),
             }
@@ -62,11 +65,14 @@ fn single_pop_model_explores_once() {
         let q = Arc::new(Spsc::<u32, 3, AllRelaxed>::new());
         let producer = {
             let q = Arc::clone(&q);
-            thread::spawn(move || q.push(1).unwrap())
+            // SAFETY: писатель — только этот поток.
+            thread::spawn(move || unsafe { q.push(1) }.unwrap())
         };
-        let first = q.pop();
+        // SAFETY: читатель — только главный поток.
+        let first = unsafe { q.pop() };
         producer.join().unwrap();
-        assert_eq!(first.or_else(|| q.pop()), Some(1));
+        // SAFETY: как выше.
+        assert_eq!(first.or_else(|| unsafe { q.pop() }), Some(1));
     });
     assert_eq!(RUNS.load(Ordering::Relaxed), 1);
 }
