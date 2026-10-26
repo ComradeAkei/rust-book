@@ -49,7 +49,7 @@ long strtol(const char *nptr, char **endptr, int base);
 - Обратные вызовы ([18.5](05-callback.md)) — указатели на функции,
   [переходник][g-trampoline] для [замыкания][g-closure] и запрет панике пересекать границу.
 - Настоящая библиотека и инструменты ([18.6](06-tools.md)) — обёртка над
-  zlib, `bindgen`, `cbindgen`, [крейт][g-crate] `cc` и [сценарии сборки][g-build-script].
+  zlib, [`bindgen`][g-bindgen], [`cbindgen`][g-cbindgen], [крейт][g-crate] `cc` и [сценарии сборки][g-build-script].
 
 Общий принцип тот же, что в [главе 16](../ch16/index.md): опасное заперто
 за безопасным API, каждый `unsafe` снабжён `// SAFETY`, а то, что C
@@ -86,8 +86,10 @@ $ bash solutions/ch18/c/run.sh       # C управляет кольцевым �
 
 <!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
 [g-abi]: ../appendix-f.md#abi "ABI (application binary interface): Двоичный интерфейс платформы: соглашение о вызовах, раскладка типов в памяти, имена символов."
+[g-bindgen]: ../appendix-f.md#bindgen "bindgen: Генератор привязок: читает заголовки C через libclang и пишет объявления Rust для их функций, структур и констант."
 [g-build-script]: ../appendix-f.md#build-script "Сценарий сборки (build script): Программа build.rs в корне пакета, которую cargo собирает и запускает до компиляции крейта: генерирует исходники, собирает C-код, сообщает компилятору ключи и пути."
 [g-calling-convention]: ../appendix-f.md#calling-convention "Соглашение о вызовах (calling convention): Часть ABI: в каких регистрах функция получает аргументы и возвращает результат, какие регистры обязана сохранить, как выровнен стек."
+[g-cbindgen]: ../appendix-f.md#cbindgen "cbindgen: Обратный bindgen: по Rust-библиотеке с экспортированными C-функциями (#[unsafe(no_mangle)]) и #[repr(C)]-типами генерирует заголовок C, в том числе непрозрачный тип для описателя."
 [g-closure]: ../appendix-f.md#closure "Замыкание (closure): Функция вместе со своим контекстом — захваченными переменными."
 [g-crate]: ../appendix-f.md#crate "Крейт (crate): Единица компиляции Rust: одно дерево модулей, один вызов rustc, один результат — библиотека или программа."
 [g-host]: ../appendix-f.md#host "Хост (host): Машина, на которой идёт сборка и работают инструменты, в отличие от цели, под которую собирается код."

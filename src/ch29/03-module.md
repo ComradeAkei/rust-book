@@ -16,7 +16,7 @@
 `Err` с кодом errno, и тогда модуль не загрузится, а значения не будет —
 и `Drop` не вызовется. `ThisModule` — то, что в C называется
 `THIS_MODULE`, ссылка на `struct module` для регистраций, которым нужен
-владелец. И сам трейт требует `Sync + Send`: значение модуля доступно из
+владелец. И сам [трейт][g-trait] требует `Sync + Send`: значение модуля доступно из
 любого потока ядра, кто бы его ни вызвал.
 
 Сеанс в QEMU (тест `hello_module_with_parameter`):
@@ -122,7 +122,7 @@ String dump of section '.modinfo':
 Ошибка в ядре — отрицательное число errno: `-ENOMEM`, `-EINVAL`. В крейте
 `kernel` это тип `Error` — обёртка над `NonZeroI32` с инвариантом
 «значение в диапазоне errno», — и `Result<T>` с ним по умолчанию.
-Константы — `ENOMEM`, `EINVAL` и остальные — в прелюдии. На границе с C
+Константы — `ENOMEM`, `EINVAL` и остальные — в [прелюдии][g-prelude]. На границе с C
 абстракции переводят `Error` в число (`to_errno`) и обратно
 (`from_errno`, `to_result`), и `Err(EINVAL)` из `init` уходит
 пользователю как `EINVAL` от `finit_module`.
@@ -251,3 +251,7 @@ info:   ch29_errors_c: освобождаю: буфер
    сеанса с `fail_at=4` и при выгрузке?
 
 </div>
+
+<!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
+[g-prelude]: ../appendix-f.md#prelude "Прелюдия (prelude): Набор имён, которые видны в каждом модуле без use: Option, Vec, drop, трейты Clone, Iterator и другие."
+[g-trait]: ../appendix-f.md#trait "Трейт (trait): Набор методов, типов и констант, которые тип обязуется предоставить: Drop, Iterator, Copy."

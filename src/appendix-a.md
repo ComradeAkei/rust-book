@@ -6,7 +6,7 @@ malloc и free соответствуют Box и Vec, размеченный uni
 вопрос «чем заменить привычную конструкцию C» и ссылается на главу, где
 механизм разобран подробно. Там, где перенос «слово в слово» меняет
 поведение программы, есть отдельная врезка. Все утверждения о поведении
-проверены тестами крейта `code/appendix-a`, а C-код рядом с ними собран
+проверены тестами [крейта][g-crate] `code/appendix-a`, а C-код рядом с ними собран
 и запущен.
 
 ## Код приложения
@@ -29,27 +29,27 @@ C-примеры лежат в `code/appendix-a/c/`. Скрипт собирае
 
 | C | Rust | Замечание |
 |---|---|---|
-| `int8_t` … `int64_t`, `uint8_t` … `uint64_t` | `i8` … `i64`, `u8` … `u64` | ширина в имени типа; `i128` и `u128` есть на всех целях |
+| `int8_t` … `int64_t`, `uint8_t` … `uint64_t` | `i8` … `i64`, `u8` … `u64` | ширина в имени типа; `i128` и `u128` есть на всех [целях][g-target] |
 | `int`, `long`, `unsigned` | `c_int`, `c_long`, `c_uint` из `core::ffi` | только на границе с C, в остальном коде ширину выбирают явно |
 | `size_t`, `uintptr_t` | `usize` | индексы и длины всегда `usize` ([гл. 1](ch01/01-integers.md)) |
 | `ptrdiff_t`, `intptr_t` | `isize` | |
-| `char` как байт | `u8`, на границе с C `c_char` | `char` в Rust — скалярное значение Unicode, 4 байта |
+| `char` как байт | `u8`, на границе с C `c_char` | `char` в Rust — [скалярное значение Unicode][g-unicode-scalar], 4 байта |
 | `bool`, `_Bool` | `bool` | 1 байт; значение, отличное от 0 и 1, — UB ([гл. 16](ch16/02-invariants.md)) |
 | `float`, `double` | `f32`, `f64` | |
-| `void` в типе возврата | `()` | тип нулевого размера |
-| `void *` | `*mut c_void`, `*mut u8` или обобщённый `T` | обобщения вместо стирания типа ([гл. 10](ch10/index.md)) |
+| `void` в типе возврата | `()` | [тип нулевого размера][g-zst] |
+| `void *` | `*mut c_void`, `*mut u8` или [обобщённый][g-generic] `T` | обобщения вместо стирания типа ([гл. 10](ch10/index.md)) |
 | `T *`, не NULL, на один объект | `&T`, `&mut T` | `&mut T` означает единственный доступ ([гл. 4](ch04/index.md)) |
 | `T *`, может быть NULL | `Option<&T>`, `Option<NonNull<T>>` | размер тот же, NULL кодирует `None` ([6.4](ch06/04-niches.md)) |
 | `T *p, size_t n` | `&[T]`, `&mut [T]` | указатель и длина в одном значении, индекс проверяется |
 | `T a[N]` | `[T; N]` | передаётся по значению и в указатель не распадается |
 | `const char *` как строка | `&str`, `&CStr`, `&[u8]` | раздел A.6 |
-| `struct` | `struct`, для общей с C раскладки `#[repr(C)]` | [6.1](ch06/01-structs.md), [6.2](ch06/02-repr-c.md) |
+| `struct` | `struct`, для общей с C [раскладки][g-layout] `#[repr(C)]` | [6.1](ch06/01-structs.md), [6.2](ch06/02-repr-c.md) |
 | `union` плюс поле-тег | `enum` с данными | [6.3](ch06/03-enums.md) |
 | `union` | `union` | поле читается только в `unsafe` ([6.6](ch06/06-unions.md)) |
 | `enum` | `enum` без данных, на границе с C — целое | ловушка ниже |
 | битовые поля | сдвиги и маски, типы-обёртки регистров | [6.9](ch06/09-registers.md) |
-| `typedef` | `type` (синоним) или newtype (новый тип) | [6.1](ch06/01-structs.md) |
-| `T data[]` в конце структуры | `struct { len: usize, data: [T] }` | тип динамического размера ([гл. 17](ch17/06-dst.md)) |
+| `typedef` | `type` (синоним) или [newtype][g-newtype] (новый тип) | [6.1](ch06/01-structs.md) |
+| `T data[]` в конце структуры | `struct { len: usize, data: [T] }` | [тип динамического размера][g-dst] ([гл. 17](ch17/06-dst.md)) |
 | `const`-объект | `const` (подставляется) или `static` (один адрес) | [гл. 25](ch25/01-consts.md) |
 | `volatile` | `read_volatile`, `write_volatile` | volatile — свойство доступа, а не типа ([гл. 17](ch17/05-volatile.md)) |
 | `restrict` | `&mut T` | компилятор знает это без пометок |
@@ -65,7 +65,7 @@ C-примеры лежат в `code/appendix-a/c/`. Скрипт собирае
 ```
 
 После `zero_first(a)` массив `a` остаётся `[1, 2, 3, 4]`. Чтобы функция
-меняла чужой массив, она должна принять `&mut [u8; 4]` или срез
+меняла чужой массив, она должна принять `&mut [u8; 4]` или [срез][g-slice]
 `&mut [u8]`, и это видно в её сигнатуре.
 
 <div class="box trap">
@@ -74,7 +74,7 @@ C-примеры лежат в `code/appendix-a/c/`. Скрипт собирае
 любое значение своего целого типа: библиотека новой версии добавит
 `MODE_TURBO = 3`, а ваш код о нём не знает. Для Rust-`enum` значение вне
 списка вариантов — неопределённое поведение уже в момент создания, ещё до
-первого `match`. Поэтому на границе FFI принимают число и проверяют его:
+первого `match`. Поэтому на границе [FFI][g-ffi] принимают число и проверяют его:
 
 ```rust
 {{#include ../code/appendix-a/src/types.rs:c_enum}}
@@ -96,16 +96,16 @@ error: Undefined Behavior: constructing invalid value of type types::Mode: at .<
 <div class="box ref">
 
 **Справка: C-типы на x86_64 и на ARM.** Ширину `int`, `long`, `char` и
-`enum` задаёт ABI платформы, а не стандарт C.
+`enum` задаёт [ABI][g-abi] платформы, а не стандарт C.
 
-| | x86_64 Linux (System V) | Cortex-M (`thumb*-none-eabi`, AAPCS) |
+| | x86_64 Linux (System V) | Cortex-M (`thumb*-none-eabi`, [AAPCS][g-aapcs]) |
 |---|---|---|
-| `long`, указатель | 8 байт (LP64) | 4 байта (ILP32) |
+| `long`, указатель | 8 байт ([LP64][g-lp64]) | 4 байта (ILP32) |
 | знак `char` | знаковый | беззнаковый |
 | `enum { A, B, C }` | 4 байта | 1 байт |
 | `enum { A = 0, B = 300 }` | 4 байта | 2 байта |
 
-Последние две строки — «короткие перечисления» ARM EABI: размер
+Последние две строки — «короткие перечисления» ARM [EABI][g-eabi]: размер
 перечисления равен наименьшему целому, в которое помещаются его значения.
 arm-none-eabi-gcc 13.2 делает так по умолчанию, и `#[repr(C)]` в Rust
 следует тому же ABI. Проверки при компиляции фиксируют это для обеих
@@ -118,7 +118,7 @@ arm-none-eabi-gcc 13.2 делает так по умолчанию, и `#[repr(C
 Ветку для ARM проверяет сборка `cargo build -p appendix-a
 --no-default-features --target thumbv7m-none-eabi`. Отсюда два вывода.
 `RawMode(u32)` из примера выше годится для Linux, а для C-библиотеки под
-Cortex-M сырой тип был бы `u8`; bindgen, запущенный для нужной цели, сам
+Cortex-M сырой тип был бы `u8`; [bindgen][g-bindgen], запущенный для нужной цели, сам
 выберет ширину. И `c_char` нельзя заменять на `i8`: на ARM это `u8`.
 
 </div>
@@ -132,7 +132,7 @@ Cortex-M сырой тип был бы `u8`; bindgen, запущенный дл�
 
 | Ситуация | C | Rust |
 |---|---|---|
-| переполнение знакового | UB | паника в debug, перенос по модулю 2ⁿ в release |
+| переполнение знакового | UB | [паника][g-panic] в debug, перенос по модулю 2ⁿ в release |
 | переполнение беззнакового | перенос по модулю | так же, как у знакового |
 | деление на ноль | UB | паника всегда |
 | `INT_MIN / -1` | UB, на x86 сигнал SIGFPE | паника всегда, и в release |
@@ -141,7 +141,7 @@ Cortex-M сырой тип был бы `u8`; bindgen, запущенный дл�
 | `uint8_t + uint8_t` | расширение до `int` | `u8 + u8` даёт `u8` |
 | `int` и `unsigned` в одном выражении | неявное преобразование | ошибка компиляции |
 | сужение `(uint8_t)x` | отбрасывает старшие биты | `as` отбрасывает, `try_from` проверяет |
-| `double` в `int` вне диапазона | UB | `as` насыщает, NaN даёт 0 |
+| `double` в `int` вне диапазона | UB | `as` [насыщает][g-saturating], NaN даёт 0 |
 | `%` с отрицательными | знак делимого (C99) | так же; `rem_euclid` для остатка ≥ 0 |
 
 Классическая ловушка с расширением выглядит безобидно:
@@ -157,7 +157,7 @@ Cortex-M сырой тип был бы `u8`; bindgen, запущенный дл�
 promote.c:8:14: runtime error: signed integer overflow: 65535 * 65535 cannot be represented in type 'int'
 ```
 
-Без UBSan программа печатает «правильный» ответ, но это случайность:
+Без [UBSan][g-ubsan] программа печатает «правильный» ответ, но это случайность:
 компилятор вправе считать, что переполнения не бывает. В Rust
 расширения нет, и тип результата — тип операндов:
 
@@ -183,7 +183,7 @@ with overflow`, а в release возвращает 1: 0xFFFF² = 0xFFFE_0001, и
 ### Деление
 
 Проверки переполнения при `+`, `-` и `*` в release выключены. Деление —
-исключение: `i32::MIN / -1` и деление на ноль паникуют в любом профиле.
+исключение: `i32::MIN / -1` и деление на ноль паникуют в любом [профиле][g-profile].
 
 ```rust
 {{#include ../code/appendix-a/src/ints.rs:quot}}
@@ -233,7 +233,7 @@ SIGFPE. Проверка на `-1` сделана без ветвлений: `no
 
 На Cortex-M3 инструкция `sdiv` не ловушка: деление на ноль даёт 0 (если
 не включён бит `CCR.DIV_0_TRP`), а `0x80000000 / -1` даёт `0x80000000`
-(ARMv7-M Architecture Reference Manual, описание SDIV; в QEMU на машине
+([ARMv7-M][g-armv7m] Architecture Reference Manual, описание SDIV; в QEMU на машине
 `lm3s6965evb` получается ровно это). Rust всё равно вставляет обе проверки,
 поэтому программа ведёт себя одинаково на обеих архитектурах. На Cortex-M0
 инструкции деления нет вовсе: после тех же проверок вызывается
@@ -279,12 +279,12 @@ SIGFPE. Проверка на `-1` сделана без ветвлений: `no
 | `memmove` | `buf.copy_within(from.., to)` | области могут перекрываться |
 | `memset(p, 0, n)` | `buf.fill(0)` | |
 | `memcmp` | `a == b`, `a.cmp(b)` для срезов | |
-| `sizeof(T)`, `sizeof x` | `size_of::<T>()`, `size_of_val(&x)` | `const fn`, работают в константах |
+| `sizeof(T)`, `sizeof x` | `size_of::<T>()`, `size_of_val(&x)` | [`const fn`][g-const-fn], работают в константах |
 | `_Alignof(T)` | `align_of::<T>()` | |
 | `offsetof(T, f)` | `offset_of!(T, f)` | [6.2](ch06/02-repr-c.md) |
-| `p + i`, `p[i]` | `s[i]`, `s.get(i)`; для сырых указателей `p.add(i)` | `add` — `unsafe` ([гл. 17](ch17/02-ptr.md)) |
+| `p + i`, `p[i]` | `s[i]`, `s.get(i)`; для [сырых указателей][g-raw-pointer] `p.add(i)` | `add` — `unsafe` ([гл. 17](ch17/02-ptr.md)) |
 | `p - q` | `p.offset_from(q)` | `unsafe` |
-| `(uintptr_t)p`, `(T *)addr` | `p.addr()`, `p.with_addr(a)`, `expose_provenance` | provenance ([гл. 16](ch16/04-provenance.md)) |
+| `(uintptr_t)p`, `(T *)addr` | `p.addr()`, `p.with_addr(a)`, `expose_provenance` | [provenance][g-provenance] ([гл. 16](ch16/04-provenance.md)) |
 | `*(uint32_t *)buf` | `u32::from_le_bytes(...)`, `read_unaligned` | [6.7](ch06/07-packed.md), [гл. 17](ch17/02-ptr.md) |
 | `container_of` | `ptr.byte_sub(offset_of!(T, f))` | `unsafe`, пример ниже |
 
@@ -303,7 +303,7 @@ of length 3`. Если бы длины разошлись у самого `copy_
 
 `vec![0u8; n]` вызывает у аллокатора `alloc_zeroed`, а системный аллокатор
 реализует его через `calloc`. Это наблюдение о текущей стандартной
-библиотеке: тест `tests/zeroed.rs` подменяет глобальный аллокатор на
+библиотеке: тест `tests/zeroed.rs` подменяет [глобальный аллокатор][g-global-allocator] на
 счётчик и проверяет, что `vec![0; n]` идёт через `alloc_zeroed`, а
 `vec![1; n]` нет.
 
@@ -318,7 +318,7 @@ of length 3`. Если бы длины разошлись у самого `copy_
 <div class="box trap">
 
 **Ловушка.** Указатель на поле, взятый прямо от переменной, выглядит так
-же, но Miri в модели по умолчанию (Stacked Borrows) его отвергает:
+же, но Miri в модели по умолчанию ([Stacked Borrows][g-stacked-borrows]) его отвергает:
 
 ```rust
 {{#include ../code/appendix-a/src/memory.rs:ub_container_of}}
@@ -334,7 +334,7 @@ help: <178040> was created by a SharedReadWrite retag at offsets [0x8..0x10]
 
 Права указателя `node` покрывают байты 8..16, то есть одно поле, а `id`
 лежит по смещению 0. Miri сам оговаривается, что правила Stacked Borrows
-пока экспериментальные; почему модели алиасинга устроены именно так и чем
+пока экспериментальные; почему модели [алиасинга][g-aliasing] устроены именно так и чем
 они различаются, разбирается в [главе 16](ch16/05-models.md). Безопасный путь
 работает в любой из них: указатель на поле получают из указателя на весь
 объект, как в `node_of`.
@@ -345,16 +345,16 @@ help: <178040> was created by a SharedReadWrite retag at offsets [0x8..0x10]
 
 | C | Rust | Замечание |
 |---|---|---|
-| `switch` | `match` | проверка полноты, без провала в следующую ветку, `\|` для нескольких значений ([гл. 2](ch02/03-match.md)) |
+| `switch` | `match` | проверка [полноты][g-exhaustiveness], без провала в следующую ветку, `\|` для нескольких значений ([гл. 2](ch02/03-match.md)) |
 | `cond ? a : b` | `if cond { a } else { b }` | `if` — выражение |
-| `for (i = 0; i < n; i++)` | `for i in 0..n` | чаще итератор по самой коллекции ([гл. 13](ch13/index.md)) |
+| `for (i = 0; i < n; i++)` | `for i in 0..n` | чаще [итератор][g-iterator] по самой коллекции ([гл. 13](ch13/index.md)) |
 | `for (;;)`, `while (1)` | `loop` | `break значение` возвращает результат |
 | `do { } while (c)` | `loop { ...; if !c { break } }` | пример ниже |
 | `goto` на выход из вложенных циклов | метки `'outer:` и `break 'outer` | |
 | `goto err_N` для отката | `?` и `Drop` | пример ниже |
 | оператор «запятая» | блок `{ a; b }` | |
 | `setjmp` / `longjmp` | нет; паника и `catch_unwind` — не для управления потоком | [гл. 7](ch07/index.md) |
-| `exit(code)` | `std::process::exit(code)` | деструкторы не вызываются, ловушка ниже |
+| `exit(code)` | `std::process::exit(code)` | [деструкторы][g-destructor] не вызываются, ловушка ниже |
 | `abort()` | `std::process::abort()` | |
 | `__builtin_unreachable()` | `unreachable!()` или `unsafe { unreachable_unchecked() }` | первое паникует, второе — UB, если достижимо |
 
@@ -379,7 +379,7 @@ err_clk:
 ```
 
 Порядок меток надо поддерживать вручную, и ошибка в нём — утечка или
-двойное освобождение. В Rust освобождение привязано к владению:
+двойное освобождение. В Rust освобождение привязано к [владению][g-ownership]:
 
 ```rust
 {{#include ../code/appendix-a/src/control.rs:cleanup}}
@@ -452,7 +452,7 @@ err_clk:
 
 Обратите внимание на комментарий к `close`: в C закрыть «чужой»
 дескриптор — обычная ошибка, а в Rust безопасная функция, которая это
-позволяет, была бы unsound. Чек-лист таких рассуждений — в
+позволяет, была бы [unsound][g-soundness]. Чек-лист таких рассуждений — в
 [приложении C](appendix-c.md).
 
 ## A.6. Строки и форматированный вывод
@@ -535,16 +535,16 @@ char boundary`.
 | C | Rust | Замечание |
 |---|---|---|
 | `int (*f)(int)` | `fn(i32) -> i32` | никогда не NULL; `Option<fn(...)>` того же размера |
-| колбэк + `void *ctx` | замыкание: `impl FnMut(...)`, `&mut dyn FnMut(...)` | контекст типизирован ([гл. 12](ch12/index.md)) |
-| `static` функция в файле | функция без `pub` | видимость на уровне модуля ([гл. 8](ch08/01-modules.md)) |
+| колбэк + `void *ctx` | [замыкание][g-closure]: `impl FnMut(...)`, `&mut dyn FnMut(...)` | контекст типизирован ([гл. 12](ch12/index.md)) |
+| `static` функция в файле | функция без `pub` | видимость на уровне [модуля][g-module] ([гл. 8](ch08/01-modules.md)) |
 | `extern` объявление | `use`; для C — `unsafe extern "C" { ... }` | [гл. 18](ch18/01-abi.md), [приложение B](appendix-b.md) |
 | `inline`, `__attribute__((always_inline))`, `noinline` | `#[inline]`, `#[inline(always)]`, `#[inline(never)]` | |
 | `__attribute__((noreturn))` | `-> !` | |
 | `...` (переменное число аргументов) | макрос; вызов C-функции с `...` возможен | [гл. 18](ch18/index.md), [23.2](ch23/02-repeat.md) |
-| перегрузка, аргументы по умолчанию | нет; трейты, `Option`, строители | |
-| `static` переменная в функции | `static` с атомиком, `OnceLock`, `LazyLock` | [гл. 14](ch14/06-lazy.md), [гл. 25](ch25/04-statics.md) |
+| перегрузка, аргументы по умолчанию | нет; [трейты][g-trait], `Option`, строители | |
+| `static` переменная в функции | `static` с [атомиком][g-atomic], `OnceLock`, `LazyLock` | [гл. 14](ch14/06-lazy.md), [гл. 25](ch25/04-statics.md) |
 | `__attribute__((constructor))` | нет: до `main` код не выполняется | явная инициализация или `LazyLock` |
-| `qsort(v, n, size, cmp)` | `v.sort_unstable_by(\|a, b\| ...)` | мономорфизация, компаратор встраивается ([гл. 10](ch10/06-inlining.md)) |
+| `qsort(v, n, size, cmp)` | `v.sort_unstable_by(\|a, b\| ...)` | [мономорфизация][g-monomorphization], компаратор [встраивается][g-inlining] ([гл. 10](ch10/06-inlining.md)) |
 
 ```rust
 {{#include ../code/appendix-a/src/funcs.rs:callback}}
@@ -583,10 +583,10 @@ overflow: 2147483647 - -1 cannot be represented in type 'int'`, а без
 |---|---|---|
 | `#include` | `mod`, `use` | заголовков нет ([гл. 8](ch08/01-modules.md)) |
 | `#define N 16` | `const N: usize = 16;` | типизирована, видна отладчику |
-| `#define MAX(a, b) ...` | `fn`, `core::cmp::max`, `macro_rules!` | ловушка ниже |
+| `#define MAX(a, b) ...` | `fn`, `core::cmp::max`, [`macro_rules!`][g-declarative-macro] | ловушка ниже |
 | `#ifdef DEBUG` | `#[cfg(debug_assertions)]`, `cfg!(...)` | |
 | `#if defined(__x86_64__)` | `#[cfg(target_arch = "x86_64")]` | также `target_os`, `target_has_atomic` |
-| `-DFEATURE` | возможности Cargo (`features`), `--cfg` | [гл. 8](ch08/04-features.md) |
+| `-DFEATURE` | [возможности Cargo][g-feature] (`features`), `--cfg` | [гл. 8](ch08/04-features.md) |
 | `#error` | `compile_error!` | |
 | `_Static_assert` | `const _: () = assert!(...);` | [6.2](ch06/02-repr-c.md) |
 | `__FILE__`, `__LINE__` | `file!()`, `line!()` | `#[track_caller]` и `Location::caller()` для места вызова |
@@ -614,7 +614,7 @@ overflow: 2147483647 - -1 cannot be represented in type 'int'`, а без
 {{#include ../code/appendix-a/c/max.c:max}}
 ```
 
-Программа печатает `m = 6, i = 7`: `i++` выполнился дважды. Гигиена
+Программа печатает `m = 6, i = 7`: `i++` выполнился дважды. [Гигиена][g-hygiene]
 `macro_rules!` защищает имена переменных, но не число вычислений, и
 буквальный перенос ведёт себя точно так же:
 
@@ -678,15 +678,15 @@ appa_clz:                   appa_clz:
 
 | C (POSIX) | Rust | Замечание |
 |---|---|---|
-| `pthread_create`, `pthread_join` | `thread::spawn`, `JoinHandle::join` | `thread::scope` для заимствования данных со стека ([гл. 20](ch20/04-scoped.md)) |
-| `pthread_mutex_t` рядом с данными | `Mutex<T>` с данными внутри | доступ только через guard |
+| `pthread_create`, `pthread_join` | `thread::spawn`, `JoinHandle::join` | [`thread::scope`][g-scoped-threads] для [заимствования][g-borrowing] данных со стека ([гл. 20](ch20/04-scoped.md)) |
+| `pthread_mutex_t` рядом с данными | `Mutex<T>` с данными внутри | доступ только через [guard][g-guard] |
 | `pthread_rwlock_t` | `RwLock<T>` | |
 | `pthread_cond_t` | `Condvar` | |
 | `pthread_once` | `Once`, `OnceLock`, `LazyLock` | |
-| `_Atomic`, `atomic_fetch_add_explicit` | `AtomicU64::fetch_add(v, Ordering)` | порядок памяти обязателен ([гл. 21](ch21/02-ordering.md)) |
+| `_Atomic`, `atomic_fetch_add_explicit` | `AtomicU64::fetch_add(v, Ordering)` | [порядок памяти][g-memory-ordering] обязателен ([гл. 21](ch21/02-ordering.md)) |
 | `volatile int flag` между потоками | `AtomicBool` | `volatile` не синхронизирует ни в C, ни в Rust |
 | `__thread`, `_Thread_local` | `thread_local!` | |
-| гонка данных | ошибка компиляции | `Send` и `Sync` ([гл. 20](ch20/02-marker.md)) |
+| гонка данных | ошибка компиляции | [`Send`][g-send-sync] и `Sync` ([гл. 20](ch20/02-marker.md)) |
 | `signal`, `sigaction` | нет в std; `libc::sigaction`, крейт `signal-hook` | [28.4](ch28/04-signals.md) |
 | `fork` | `std::process::Command`; сам `fork` — через libc и `unsafe` | [28.3](ch28/03-processes.md) |
 
@@ -709,7 +709,7 @@ appa_clz:                   appa_clz:
 ```
 
 У `Rc` неатомарный счётчик ссылок, поэтому `Rc` не реализует `Send`.
-Ошибку E0277 проверяет doc-тест в `threads.rs`.
+Ошибку E0277 проверяет [doc-тест][g-doctest] в `threads.rs`.
 
 ## A.10. Сборка и инструменты
 
@@ -722,14 +722,14 @@ appa_clz:                   appa_clz:
 | `-ffunction-sections -Wl,--gc-sections` | по умолчанию | |
 | `-march=native` | `-C target-cpu=native` | |
 | `-mcpu=cortex-m4 -mthumb -mfloat-abi=hard` | `--target thumbv7em-none-eabihf` | |
-| `-ffreestanding -nostdlib` | `#![no_std]`, `#![no_main]` | [гл. 26](ch26/index.md) |
+| `-ffreestanding -nostdlib` | [`#![no_std]`][g-no-std], `#![no_main]` | [гл. 26](ch26/index.md) |
 | `-fno-exceptions` | `panic = "abort"` | [гл. 7](ch07/index.md) |
 | `-ftrapv` | `overflow-checks = true` | |
 | `-fwrapv` | `wrapping_*`, `Wrapping<T>` | |
 | `-fno-strict-aliasing` | не нужен: алиасинг на основе типов в Rust не используется | правила для `&` и `&mut` ([гл. 4](ch04/index.md)) |
 | `-Wall -Wextra -Werror` | `cargo clippy -- -D warnings` | |
 | `-fsanitize=address`, `thread` | `-Zsanitizer=address`, `thread` (nightly) | для `unsafe` — ещё и Miri ([гл. 31](ch31/06-miri-loom.md)) |
-| скрипт компоновки `-T` | `memory.x` и `-C link-arg=-Tlink.x` | `firmware/.cargo/config.toml` |
+| [скрипт компоновки][g-linker-script] `-T` | `memory.x` и `-C link-arg=-Tlink.x` | `firmware/.cargo/config.toml` |
 | `.a`, `.so` | `crate-type = ["staticlib"]`, `["cdylib"]` | [гл. 8](ch08/06-crate-types.md), [гл. 18](ch18/04-owned.md) |
 | `pkg-config`, `-lfoo` | `build.rs` и `cargo:rustc-link-lib=foo` | |
 | `objdump -d`, `nm` | `cargo asm`, `llvm-objdump`, `nm` | [гл. 0](ch00/03-asm.md) |
@@ -779,3 +779,53 @@ appa_clz:                   appa_clz:
 4. Что напечатают `format!("[{:6}]", "ab")` и `printf("[%6s]", "ab")`?
 
 </div>
+
+<!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
+[g-aapcs]: appendix-f.md#aapcs "AAPCS (Procedure Call Standard for the Arm Architecture): Соглашение о вызовах 32-битного ARM: целые аргументы в r0–r3, результат в r0 (и r1), регистры r4–r11 сохраняет вызываемая функция, адрес возврата лежит в lr."
+[g-abi]: appendix-f.md#abi "ABI (application binary interface): Двоичный интерфейс платформы: соглашение о вызовах, раскладка типов в памяти, имена символов."
+[g-aliasing]: appendix-f.md#aliasing "Алиасинг (aliasing): Два пути к одной памяти: два указателя, ссылка и указатель."
+[g-armv7m]: appendix-f.md#armv7m "ARMv6-M, ARMv7-M, ARMv7E-M: Версии архитектуры ARM для микроконтроллеров."
+[g-atomic]: appendix-f.md#atomic "Атомик (atomic): Тип из core::sync::atomic (AtomicU32, AtomicBool и другие), операции над которым неделимы и упорядочены по выбранной модели памяти."
+[g-bindgen]: appendix-f.md#bindgen "bindgen: Генератор привязок: читает заголовки C через libclang и пишет объявления Rust для их функций, структур и констант."
+[g-borrowing]: appendix-f.md#borrowing "Заимствование (borrowing): Создание ссылки на значение без передачи владения: &x — разделяемое, &mut x — уникальное."
+[g-closure]: appendix-f.md#closure "Замыкание (closure): Функция вместе со своим контекстом — захваченными переменными."
+[g-const-fn]: appendix-f.md#const-fn "const fn: Функция, которую компилятор умеет выполнить при компиляции своим интерпретатором, когда её результат нужен в константном контексте."
+[g-crate]: appendix-f.md#crate "Крейт (crate): Единица компиляции Rust: одно дерево модулей, один вызов rustc, один результат — библиотека или программа."
+[g-declarative-macro]: appendix-f.md#declarative-macro "Декларативный макрос (declarative macro): Макрос macro_rules!: список правил «образец — подстановка»."
+[g-destructor]: appendix-f.md#destructor "Деструктор (destructor): Код, который выполняется при уничтожении значения: реализация трейта Drop, затем уничтожение полей."
+[g-doctest]: appendix-f.md#doctest "doc-тест (doctest): Пример кода в документирующем комментарии ///, который cargo test собирает и запускает как тест."
+[g-dst]: appendix-f.md#dst "Тип динамического размера (dynamically sized type, DST): Тип, размер которого при компиляции неизвестен: [T], str, dyn Trait, структура с таким последним полем."
+[g-eabi]: appendix-f.md#eabi "EABI (Embedded ABI): ABI ARM для встраиваемых систем: соглашение о вызовах AAPCS, раскладка структур, работа со стеком."
+[g-exhaustiveness]: appendix-f.md#exhaustiveness "Полнота (exhaustiveness): Требование к match: ветки обязаны покрыть все возможные значения."
+[g-feature]: appendix-f.md#feature "Возможность (feature): Именованный переключатель пакета Cargo, который превращается в условие feature для #[cfg]."
+[g-ffi]: appendix-f.md#ffi "FFI (foreign function interface): Вызов функций, написанных на другом языке, и показ своих функций ему."
+[g-generic]: appendix-f.md#generic "Обобщение (generic): Функция или тип с параметрами-типами: fn max(a: T, b: T) -> T."
+[g-global-allocator]: appendix-f.md#global-allocator "Глобальный аллокатор (global allocator): Распределитель памяти, который зовут Box, Vec, String и все коллекции alloc: тип, реализующий GlobalAlloc и объявленный атрибутом #[global_allocator]."
+[g-guard]: appendix-f.md#guard "Страж (guard): Значение, чей деструктор отпускает ресурс: MutexGuard отпускает мьютекс, IrqGuard из главы 3 снова разрешает прерывания."
+[g-hygiene]: appendix-f.md#hygiene "Гигиена (hygiene): Свойство макросов: имена из тела макроса и имена вызывающего не смешиваются, даже если пишутся одинаково."
+[g-inlining]: appendix-f.md#inlining "Встраивание (inlining): Подстановка тела функции в место вызова."
+[g-iterator]: appendix-f.md#iterator "Итератор (iterator): Тип, реализующий трейт Iterator: состояние обхода с методом next, который выдаёт следующий элемент или None."
+[g-layout]: appendix-f.md#layout "Раскладка (layout): Размер, выравнивание и смещения полей типа в памяти."
+[g-linker-script]: appendix-f.md#linker-script "Скрипт компоновщика (linker script): Файл, который говорит компоновщику, по каким адресам разместить секции программы: таблицу векторов — по адресу 0, код и константы — во флеш-память, .data и .bss — в ОЗУ."
+[g-lp64]: appendix-f.md#lp64 "LP64, ILP32: Модели данных C."
+[g-memory-ordering]: appendix-f.md#memory-ordering "Порядок памяти (memory ordering): Аргумент Ordering атомарной операции: какие из соседних обращений к памяти другие потоки обязаны увидеть до неё или после."
+[g-module]: appendix-f.md#module "Модуль (module): Пространство имён внутри крейта со своими правилами видимости: объявляется словом mod, с телом в скобках или в отдельном файле."
+[g-monomorphization]: appendix-f.md#monomorphization "Мономорфизация (monomorphization): Создание отдельной копии обобщённой функции для каждого набора типов, с которым её вызвали."
+[g-newtype]: appendix-f.md#newtype "Newtype: Кортежная структура с одним полем, которая делает из существующего типа новый: struct Millimeters(i32)."
+[g-no-std]: appendix-f.md#no-std "no_std: Атрибут крейта #![no_std]: крейт пользуется только core (и, если нужно, alloc), без стандартной библиотеки ОС."
+[g-ownership]: appendix-f.md#ownership "Владение (ownership): Правило Rust: у каждого значения ровно один владелец — переменная, поле или элемент коллекции, — и он отвечает за уничтожение значения."
+[g-panic]: appendix-f.md#panic "Паника (panic): Аварийная реакция на ошибку в самой программе: индекс за границей, unwrap на None, переполнение в отладочной сборке."
+[g-profile]: appendix-f.md#profile "Профиль (profile): Именованный набор параметров компиляции cargo: уровень оптимизации, отладочная информация, проверки переполнения, стратегия паники."
+[g-provenance]: appendix-f.md#provenance "Provenance (происхождение указателя): Невидимая часть указателя: к какому выделению памяти он относится и что через него можно трогать."
+[g-raw-pointer]: appendix-f.md#raw-pointer "Сырой указатель (raw pointer): Указатель *const T или *mut T без гарантий ссылки: он может быть нулевым, висячим, невыровненным."
+[g-saturating]: appendix-f.md#saturating "Насыщающая арифметика (saturating arithmetic): Арифметика, в которой результат за границей диапазона заменяется ближайшей границей: 200u8.saturating_add(100) равно 255."
+[g-scoped-threads]: appendix-f.md#scoped-threads "Область потоков (scoped threads): Блок std::thread::scope, внутри которого порождённые потоки гарантированно присоединяются до выхода из блока."
+[g-send-sync]: appendix-f.md#send-sync "Send, Sync: Автотрейты потокобезопасности."
+[g-slice]: appendix-f.md#slice "Срез (slice): Непрерывная последовательность элементов, длина которой известна только во время выполнения: [T], а str — срез байт UTF-8."
+[g-soundness]: appendix-f.md#soundness "Корректность (soundness): Свойство безопасного API над unsafe: никакой безопасный код, как бы он этот API ни вызывал, не получит UB."
+[g-stacked-borrows]: appendix-f.md#stacked-borrows "Stacked Borrows, Tree Borrows: Две модели алиасинга, по которым Miri проверяет ссылки и сырые указатели."
+[g-target]: appendix-f.md#target "Цель (target): То, для чего генерируется код: архитектура, ОС и ABI, записанные в имени-триплете (thumbv7m-none-eabi)."
+[g-trait]: appendix-f.md#trait "Трейт (trait): Набор методов, типов и констант, которые тип обязуется предоставить: Drop, Iterator, Copy."
+[g-ubsan]: appendix-f.md#ubsan "UBSan (UndefinedBehaviorSanitizer): Санитайзер GCC и Clang, который ловит неопределённое поведение C во время выполнения: знаковое переполнение, сдвиг на ширину типа и больше, деление на ноль, невыровненный указатель."
+[g-unicode-scalar]: appendix-f.md#unicode-scalar "Скалярное значение Unicode (Unicode scalar value): Число от 0 до 0x10FFFF, кроме суррогатов 0xD800..=0xDFFF."
+[g-zst]: appendix-f.md#zst "Тип нулевого размера (zero-sized type, ZST): Тип, значения которого не занимают памяти: (), единичные структуры, PhantomData, [T; 0], перечисление из одного варианта без данных."

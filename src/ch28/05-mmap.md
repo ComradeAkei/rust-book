@@ -138,8 +138,8 @@ $ cargo run -q -p ch28 --release --bin mm -- faults
 
 <div class="box hood">
 
-**Под капотом: почему не видно промахов TLB.** Промахи TLB считает PMU
-процессора: `perf stat -e dTLB-load-misses,dTLB-loads`. Эта машина —
+**Под капотом: почему не видно промахов TLB.** Промахи TLB считает [PMU][g-pmu]
+процессора: [`perf stat -e dTLB-load-misses,dTLB-loads`][g-perf]. Эта машина —
 виртуальная, и гипервизор не даёт гостю аппаратных счётчиков:
 `perf_event_open` с `PERF_TYPE_HARDWARE` возвращает `ENOENT`. Страничные
 сбои — программное событие ядра, их видно везде. Разницу во времени,
@@ -205,3 +205,5 @@ rustix это `rustix::mm::madvise` с перечислением `Advice`.
 
 <!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
 [g-atomic]: ../appendix-f.md#atomic "Атомик (atomic): Тип из core::sync::atomic (AtomicU32, AtomicBool и другие), операции над которым неделимы и упорядочены по выбранной модели памяти."
+[g-perf]: ../appendix-f.md#perf "perf: Профилировщик Linux поверх системного вызова perf_event_open: perf stat считает события — такты, инструкции, промахи, — perf record снимает выборки адреса и стека по таймеру или по переполнению счётчика, perf report и perf annotate показывают, где идёт время."
+[g-pmu]: ../appendix-f.md#pmu "PMU (performance monitoring unit): Блок счётчиков производительности в каждом ядре процессора: ОС программирует несколько счётчиков на события — такты, выполненные инструкции, промахи кэша, неугаданные переходы."

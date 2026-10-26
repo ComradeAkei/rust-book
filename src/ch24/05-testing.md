@@ -123,7 +123,7 @@ fn expanded_crate() -> String {
 <div class="box check">
 
 **Проверка.** `cargo test -p ch24` запускает 14 тестов примеров,
-doc-тесты и четыре интеграционных теста: `rustc_ui` (8 снимков),
+doc-тесты и четыре [интеграционных теста][g-integration-test]: `rustc_ui` (8 снимков),
 `rustc_expansions_match_snapshots`, `rustc_proc_macro_is_built_for_host`
 и `rustc_crate_path_attribute`; `cargo test -p ch24-macros` — четыре
 модульных теста макросов. Под Miri: `cargo +nightly miri test -p ch24`.
@@ -132,3 +132,4 @@ doc-тесты и четыре интеграционных теста: `rustc_u
 
 <!-- Ссылки на глоссарий (приложение F); обновляет tools/check-terms.py --refs -->
 [g-aliasing]: ../appendix-f.md#aliasing "Алиасинг (aliasing): Два пути к одной памяти: два указателя, ссылка и указатель."
+[g-integration-test]: ../appendix-f.md#integration-test "Интеграционный тест (integration test): Файл прямо в каталоге tests/ пакета: отдельный крейт, который зависит от библиотеки как обычный пользователь и видит только её публичный API."

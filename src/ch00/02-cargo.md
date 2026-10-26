@@ -28,7 +28,7 @@
 |---|---|
 | `cargo check -p ch00` | Проверка типов и [заимствований][g-borrowing] без генерации кода. Самая быстрая обратная связь |
 | `cargo build -p ch00 --release --target thumbv7m-none-eabi` | Сборка под Cortex-M3 |
-| `cargo test -p ch00` | Модульные и интеграционные тесты, [doc-тесты][g-doctest], сборка примеров |
+| `cargo test -p ch00` | Модульные и [интеграционные тесты][g-integration-test], [doc-тесты][g-doctest], сборка примеров |
 | `cargo run -p ch00 --example fold` | Сборка и запуск примера из `examples/` |
 | `cargo doc -p ch00 --open` | Документация из `///`-комментариев |
 | `cargo clippy --workspace --all-targets` | [Линтер][g-lint] (раздел [0.5](05-checks.md)) |
@@ -173,6 +173,7 @@ units) и отдаёт их LLVM параллельно. Плата за ско�
 [g-doctest]: ../appendix-f.md#doctest "doc-тест (doctest): Пример кода в документирующем комментарии ///, который cargo test собирает и запускает как тест."
 [g-dwarf]: ../appendix-f.md#dwarf "DWARF: Стандартный формат отладочной информации в ELF: соответствие адресов строкам исходника, переменные, типы, а также таблицы CFI, по которым раскручивается стек."
 [g-inlining]: ../appendix-f.md#inlining "Встраивание (inlining): Подстановка тела функции в место вызова."
+[g-integration-test]: ../appendix-f.md#integration-test "Интеграционный тест (integration test): Файл прямо в каталоге tests/ пакета: отдельный крейт, который зависит от библиотеки как обычный пользователь и видит только её публичный API."
 [g-lint]: ../appendix-f.md#lint "Линт (lint): Правило, которое срабатывает на подозрительном, но допустимом коде: unused_comparisons в rustc, manual_memcpy в clippy."
 [g-lto]: ../appendix-f.md#lto "LTO (link-time optimization): Оптимизация всей программы на этапе компоновки: LLVM видит сразу все крейты, включая стандартную библиотеку, и встраивает функции через их границы."
 [g-panic]: ../appendix-f.md#panic "Паника (panic): Аварийная реакция на ошибку в самой программе: индекс за границей, unwrap на None, переполнение в отладочной сборке."
