@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="535" viewBox="0 0 1000 535" role="img" aria-labelledby="title desc">
+<title id="title">Читатели или один писатель</title>
+<desc id="desc">Периоды двух разделяемых заимствований могут перекрываться. Уникальное заимствование тех же данных начинается после их последнего использования.</desc>
+<defs><marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#2864b4"/></marker><marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#287354"/></marker><marker id="arrow-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a45b12"/></marker><marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a93832"/></marker><marker id="arrow-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7552a3"/></marker><marker id="arrow-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#536477"/></marker></defs>
+<style>text{font-family:"DejaVu Sans",sans-serif;fill:#172b41}.tag{font-size:15px;font-weight:700;letter-spacing:2px;fill:#536477}.title{font-size:30px;font-weight:700}.label{font-size:23px;font-weight:700}.body{font-size:21px}.small{font-size:18px;fill:#455c73}.code{font-family:"DejaVu Sans Mono",monospace;font-size:21px}.note{font-size:20px;fill:#455c73}</style>
+<rect width="1000" height="535" rx="18" fill="#f8fafc"/>
+<rect x="0" y="0" width="8" height="535" rx="4" fill="#2864b4"/>
+<text x="36" y="34" class="tag" text-anchor="start">RUST · СХЕМА</text>
+<text x="36" y="77" class="title" text-anchor="start">Читатели или один писатель</text>
+<path d="M 260 149 L 940 149" fill="none" stroke="#536477" stroke-width="2.5" marker-end="url(#arrow-gray)"/>
+<text x="937" y="130" class="small" text-anchor="end">порядок исполнения</text>
+<text x="36" y="233" class="body" text-anchor="start">Читатель 1</text>
+<text x="36" y="303" class="body" text-anchor="start">Читатель 2</text>
+<text x="36" y="373" class="body" text-anchor="start">Писатель</text>
+<rect x="260" y="200" width="285" height="52" rx="12" fill="#e8f1ff" stroke="#2864b4" stroke-width="2"/>
+<text x="402" y="234" class="code" text-anchor="middle">r1: &amp;T</text>
+<rect x="335" y="270" width="210" height="52" rx="12" fill="#e5f4ed" stroke="#287354" stroke-width="2"/>
+<text x="440" y="304" class="code" text-anchor="middle">r2: &amp;T</text>
+<rect x="630" y="340" width="285" height="52" rx="12" fill="#fff0dc" stroke="#a45b12" stroke-width="2"/>
+<text x="772" y="374" class="code" text-anchor="middle">w: &amp;mut T</text>
+<path d="M 585 180 V 415" fill="none" stroke="#536477" stroke-width="2.5" stroke-dasharray="7 5"/>
+<text x="610" y="218" class="small" text-anchor="start">Оба читателя</text>
+<text x="610" y="247" class="small" text-anchor="start">больше не нужны</text>
+<text x="260" y="450" class="body" text-anchor="start">Проверка относится к одним и тем же данным.</text>
+<text x="36" y="498" class="note" text-anchor="start">Периоды доступа читателей и писателя не перекрываются.</text>
+</svg>

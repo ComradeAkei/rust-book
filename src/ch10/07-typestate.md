@@ -61,6 +61,13 @@ error[E0308]: mismatched types
 {{#include ../../code/ch10/src/typestate.rs:transitions}}
 ```
 
+Проследите за [владельцем][g-ownership] в двух строках: `let off = Uart::new(regs);`
+создаёт выключенный драйвер, а `let on = off.enable(...)` забирает
+`off` и возвращает включённый. Это всё тот же аппаратный UART;
+меняется тип доступного программе значения. Поля `enabled: bool`
+для выбора метода не требуется: наличие `write_byte` определяется
+типом `on` ещё при компиляции.
+
 У `Uart<Disabled>` есть `enable`, у `Uart<Enabled>` — `write_byte`,
 `disable` и `fmt::Write`, а `release` есть у обоих. Компилятор
 отвергает три вида ошибок. Запись через выключенный UART:

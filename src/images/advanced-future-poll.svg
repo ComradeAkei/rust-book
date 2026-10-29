@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="610" viewBox="0 0 1000 610" role="img" aria-labelledby="title desc">
+<title id="title">Future: ожидание без занятого потока</title>
+<desc id="desc">Исполнитель опрашивает Future. Pending возвращает управление. Внешнее событие вызывает wake, исполнитель позже опрашивает задачу снова. Готовая операция возвращает Ready; повторный опрос может также снова дать Pending.</desc>
+<defs><marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#2864b4"/></marker><marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#287354"/></marker><marker id="arrow-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a45b12"/></marker><marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a93832"/></marker><marker id="arrow-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7552a3"/></marker><marker id="arrow-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#536477"/></marker></defs>
+<style>text{font-family:"DejaVu Sans",sans-serif;fill:#172b41}.tag{font-size:15px;font-weight:700;letter-spacing:2px;fill:#536477}.title{font-size:30px;font-weight:700}.label{font-size:23px;font-weight:700}.body{font-size:21px}.small{font-size:18px;fill:#455c73}.code{font-family:"DejaVu Sans Mono",monospace;font-size:21px}.note{font-size:20px;fill:#455c73}</style>
+<rect width="1000" height="610" rx="18" fill="#f8fafc"/>
+<rect x="0" y="0" width="8" height="610" rx="4" fill="#2864b4"/>
+<text x="36" y="34" class="tag" text-anchor="start">RUST · СХЕМА</text>
+<text x="36" y="77" class="title" text-anchor="start">Future: ожидание без занятого потока</text>
+<rect x="40" y="155" width="200" height="180" rx="12" fill="#e8f1ff" stroke="#2864b4" stroke-width="2"/>
+<text x="58" y="189" class="label" text-anchor="start" style="fill:#2864b4">1. Опрос</text>
+<text x="58" y="222" class="body" text-anchor="start">poll()</text>
+<text x="58" y="251" class="body" text-anchor="start">короткий шаг</text>
+<rect x="280" y="155" width="200" height="180" rx="12" fill="#fff0dc" stroke="#a45b12" stroke-width="2"/>
+<text x="298" y="189" class="label" text-anchor="start" style="fill:#a45b12">2. Ожидание</text>
+<text x="298" y="222" class="body" text-anchor="start">Pending</text>
+<text x="298" y="251" class="body" text-anchor="start">управление</text>
+<text x="298" y="280" class="body" text-anchor="start">возвращено</text>
+<rect x="520" y="155" width="200" height="180" rx="12" fill="#f1eafa" stroke="#7552a3" stroke-width="2"/>
+<text x="538" y="189" class="label" text-anchor="start" style="fill:#7552a3">3. Событие</text>
+<text x="538" y="222" class="body" text-anchor="start">wake()</text>
+<text x="538" y="251" class="body" text-anchor="start">задача</text>
+<text x="538" y="280" class="body" text-anchor="start">в очереди</text>
+<rect x="760" y="155" width="200" height="180" rx="12" fill="#e5f4ed" stroke="#287354" stroke-width="2"/>
+<text x="778" y="189" class="label" text-anchor="start" style="fill:#287354">4. Опрос</text>
+<text x="778" y="222" class="body" text-anchor="start">poll()</text>
+<text x="778" y="251" class="body" text-anchor="start">Ready(результат)</text>
+<path d="M 240 245 L 280 245" fill="none" stroke="#536477" stroke-width="2.5" marker-end="url(#arrow-gray)"/>
+<path d="M 480 245 L 520 245" fill="none" stroke="#536477" stroke-width="2.5" marker-end="url(#arrow-gray)"/>
+<path d="M 720 245 L 760 245" fill="none" stroke="#536477" stroke-width="2.5" marker-end="url(#arrow-gray)"/>
+<rect x="520" y="405" width="200" height="95" rx="12" fill="#eef1f5" stroke="#536477" stroke-width="2"/>
+<text x="538" y="439" class="label" text-anchor="start" style="fill:#536477">Внешний мир</text>
+<text x="538" y="472" class="body" text-anchor="start">ввод или таймер</text>
+<path d="M 620 405 L 620 335" fill="none" stroke="#7552a3" stroke-width="2.5" marker-end="url(#arrow-purple)"/>
+<text x="40" y="411" class="body" text-anchor="start">wake() просит новый опрос,</text>
+<text x="40" y="440" class="body" text-anchor="start">но не выполняет его сразу.</text>
+<text x="40" y="469" class="body" text-anchor="start">Между опросами исполнитель</text>
+<text x="40" y="498" class="body" text-anchor="start">может заниматься другими задачами.</text>
+<text x="36" y="573" class="note" text-anchor="start">Повторный poll может снова вернуть Pending: готовность ещё проверяется.</text>
+</svg>

@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="650" viewBox="0 0 1000 650" role="img" aria-labelledby="title desc">
+<title id="title">Готовность ещё не означает полный кадр</title>
+<desc id="desc">После события epoll программа читает неблокирующий дескриптор. Байты добавляются в буфер, EAGAIN возвращает к ожиданию, ноль означает конец потока.</desc>
+<defs><marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#2864b4"/></marker><marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#287354"/></marker><marker id="arrow-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a45b12"/></marker><marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a93832"/></marker><marker id="arrow-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7552a3"/></marker><marker id="arrow-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#536477"/></marker></defs>
+<style>text{font-family:"DejaVu Sans",sans-serif;fill:#172b41}.tag{font-size:15px;font-weight:700;letter-spacing:2px;fill:#536477}.title{font-size:30px;font-weight:700}.label{font-size:23px;font-weight:700}.body{font-size:21px}.small{font-size:18px;fill:#455c73}.code{font-family:"DejaVu Sans Mono",monospace;font-size:21px}.note{font-size:20px;fill:#455c73}</style>
+<rect width="1000" height="650" rx="18" fill="#f8fafc"/>
+<rect x="0" y="0" width="8" height="650" rx="4" fill="#2864b4"/>
+<text x="36" y="34" class="tag" text-anchor="start">RUST · СХЕМА</text>
+<text x="36" y="77" class="title" text-anchor="start">Готовность ещё не означает полный кадр</text>
+<rect x="40" y="140" width="280" height="100" rx="12" fill="#f1eafa" stroke="#7552a3" stroke-width="2"/>
+<text x="58" y="174" class="label" text-anchor="start" style="fill:#7552a3">epoll_wait</text>
+<text x="58" y="207" class="body" text-anchor="start">дождаться события</text>
+<rect x="450" y="140" width="400" height="100" rx="12" fill="#e8f1ff" stroke="#2864b4" stroke-width="2"/>
+<text x="468" y="174" class="label" text-anchor="start" style="fill:#2864b4">read в O_NONBLOCK</text>
+<text x="468" y="207" class="body" text-anchor="start">попробовать чтение</text>
+<path d="M 325 190 L 445 190" fill="none" stroke="#536477" stroke-width="2.5" marker-end="url(#arrow-gray)"/>
+<text x="385" y="130" class="small" text-anchor="middle">событие</text>
+<path d="M 650 245 L 650 295 L 180 295 L 180 345" fill="none" stroke="#536477" stroke-width="2.5" marker-end="url(#arrow-gray)"/>
+<path d="M 650 295 L 500 295 L 500 345" fill="none" stroke="#536477" stroke-width="2.5" marker-end="url(#arrow-gray)"/>
+<path d="M 650 295 L 820 295 L 820 345" fill="none" stroke="#536477" stroke-width="2.5" marker-end="url(#arrow-gray)"/>
+<rect x="40" y="350" width="280" height="160" rx="12" fill="#e5f4ed" stroke="#287354" stroke-width="2"/>
+<text x="58" y="384" class="label" text-anchor="start" style="fill:#287354">n &gt; 0: есть байты</text>
+<text x="58" y="417" class="body" text-anchor="start">добавить в буфер</text>
+<text x="58" y="446" class="body" text-anchor="start">достать полные кадры</text>
+<text x="58" y="475" class="body" text-anchor="start">читать дальше</text>
+<rect x="360" y="350" width="280" height="160" rx="12" fill="#eef1f5" stroke="#536477" stroke-width="2"/>
+<text x="378" y="384" class="label" text-anchor="start" style="fill:#536477">EAGAIN</text>
+<text x="378" y="417" class="body" text-anchor="start">пока читать нечего</text>
+<text x="378" y="446" class="body" text-anchor="start">вернуться к ожиданию</text>
+<text x="378" y="475" class="body" text-anchor="start">через epoll_wait</text>
+<rect x="680" y="350" width="280" height="160" rx="12" fill="#fff0dc" stroke="#a45b12" stroke-width="2"/>
+<text x="698" y="384" class="label" text-anchor="start" style="fill:#a45b12">n = 0: конец</text>
+<text x="698" y="417" class="body" text-anchor="start">для потока — EOF</text>
+<text x="698" y="446" class="body" text-anchor="start">убрать дескриптор</text>
+<text x="698" y="475" class="body" text-anchor="start">из наблюдения</text>
+<text x="40" y="560" class="note" text-anchor="start">Другие ошибки обрабатывают отдельно; EINTR позволяет повторить попытку.</text>
+<text x="36" y="613" class="note" text-anchor="start">Один кадр может потребовать нескольких успешных read.</text>
+</svg>

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="570" viewBox="0 0 1000 570" role="img" aria-labelledby="title desc">
+<title id="title">Ссылка не продлевает жизнь данных</title>
+<desc id="desc">В вызове longest(&amp;port, &amp;mode) результат best допустим только пока доступны оба аргумента. После уничтожения mode пользоваться best нельзя.</desc>
+<defs><marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#2864b4"/></marker><marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#287354"/></marker><marker id="arrow-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a45b12"/></marker><marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a93832"/></marker><marker id="arrow-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7552a3"/></marker><marker id="arrow-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#536477"/></marker></defs>
+<style>text{font-family:"DejaVu Sans",sans-serif;fill:#172b41}.tag{font-size:15px;font-weight:700;letter-spacing:2px;fill:#536477}.title{font-size:30px;font-weight:700}.label{font-size:23px;font-weight:700}.body{font-size:21px}.small{font-size:18px;fill:#455c73}.code{font-family:"DejaVu Sans Mono",monospace;font-size:21px}.note{font-size:20px;fill:#455c73}</style>
+<rect width="1000" height="570" rx="18" fill="#f8fafc"/>
+<rect x="0" y="0" width="8" height="570" rx="4" fill="#2864b4"/>
+<text x="36" y="34" class="tag" text-anchor="start">RUST · СХЕМА</text>
+<text x="36" y="77" class="title" text-anchor="start">Ссылка не продлевает жизнь данных</text>
+<text x="36" y="126" class="code" text-anchor="start">best = longest(&amp;port, &amp;mode)</text>
+<path d="M 225 153 L 935 153" fill="none" stroke="#536477" stroke-width="2.5" marker-end="url(#arrow-gray)"/>
+<text x="934" y="132" class="small" text-anchor="end">порядок исполнения</text>
+<text x="36" y="224" class="code" text-anchor="start">port</text>
+<rect x="225" y="188" width="695" height="56" rx="12" fill="#e8f1ff" stroke="#2864b4" stroke-width="2"/>
+<text x="572.5" y="224" class="small" text-anchor="middle">данные доступны</text>
+<text x="36" y="314" class="code" text-anchor="start">mode</text>
+<rect x="370" y="278" width="280" height="56" rx="12" fill="#e5f4ed" stroke="#287354" stroke-width="2"/>
+<text x="510.0" y="314" class="small" text-anchor="middle">данные доступны</text>
+<text x="36" y="404" class="code" text-anchor="start">best</text>
+<rect x="480" y="368" width="170" height="56" rx="12" fill="#f1eafa" stroke="#7552a3" stroke-width="2"/>
+<text x="565.0" y="404" class="small" text-anchor="middle">доступ по ссылке</text>
+<path d="M 660 264 V 455" fill="none" stroke="#a93832" stroke-width="2.5" stroke-dasharray="7 5"/>
+<text x="690" y="304" class="small" text-anchor="start" style="fill:#a93832">mode</text>
+<text x="690" y="333" class="small" text-anchor="start" style="fill:#a93832">уничтожен</text>
+<rect x="700" y="365" width="240" height="85" rx="12" fill="#fce8e6" stroke="#a93832" stroke-width="2"/>
+<text x="718" y="399" class="label" text-anchor="start" style="fill:#a93832">Здесь нельзя</text>
+<text x="718" y="432" class="body" text-anchor="start">использовать best</text>
+<text x="36" y="490" class="body" text-anchor="start">&#x27;a описывает допустимый участок использования ссылки.</text>
+<text x="36" y="533" class="note" text-anchor="start">Аннотация времени жизни не заставляет mode существовать дольше.</text>
+</svg>

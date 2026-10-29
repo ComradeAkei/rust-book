@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="650" viewBox="0 0 1000 650" role="img" aria-labelledby="title desc">
+<title id="title">От драйвера к регистрам периферии</title>
+<desc id="desc">Драйвер требует трейты embedded-hal, HAL реализует эти трейты для конкретного микроконтроллера и обращается к регистрам через PAC.</desc>
+<defs><marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#2864b4"/></marker><marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#287354"/></marker><marker id="arrow-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a45b12"/></marker><marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a93832"/></marker><marker id="arrow-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7552a3"/></marker><marker id="arrow-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#536477"/></marker></defs>
+<style>text{font-family:"DejaVu Sans",sans-serif;fill:#172b41}.tag{font-size:15px;font-weight:700;letter-spacing:2px;fill:#536477}.title{font-size:30px;font-weight:700}.label{font-size:23px;font-weight:700}.body{font-size:21px}.small{font-size:18px;fill:#455c73}.code{font-family:"DejaVu Sans Mono",monospace;font-size:21px}.note{font-size:20px;fill:#455c73}</style>
+<rect width="1000" height="650" rx="18" fill="#f8fafc"/>
+<rect x="0" y="0" width="8" height="650" rx="4" fill="#2864b4"/>
+<text x="36" y="34" class="tag" text-anchor="start">RUST · СХЕМА</text>
+<text x="36" y="77" class="title" text-anchor="start">От драйвера к регистрам периферии</text>
+<rect x="90" y="120" width="820" height="90" rx="12" fill="#f1eafa" stroke="#7552a3" stroke-width="2"/>
+<text x="108" y="154" class="label" text-anchor="start" style="fill:#7552a3">Драйвер устройства</text>
+<text x="108" y="187" class="body" text-anchor="start">Запросы: вывести бит, передать байты</text>
+<rect x="90" y="235" width="820" height="90" rx="12" fill="#f1eafa" stroke="#7552a3" stroke-width="2"/>
+<text x="108" y="269" class="label" text-anchor="start" style="fill:#7552a3">Трейты embedded-hal</text>
+<text x="108" y="302" class="body" text-anchor="start">Контракт: OutputPin, I2c, SpiDevice</text>
+<rect x="90" y="350" width="820" height="90" rx="12" fill="#e8f1ff" stroke="#2864b4" stroke-width="2"/>
+<text x="108" y="384" class="label" text-anchor="start" style="fill:#2864b4">HAL микроконтроллера</text>
+<text x="108" y="417" class="body" text-anchor="start">Реализация контракта для GPIO, I2C, SPI</text>
+<rect x="90" y="465" width="820" height="90" rx="12" fill="#e5f4ed" stroke="#287354" stroke-width="2"/>
+<text x="108" y="499" class="label" text-anchor="start" style="fill:#287354">PAC</text>
+<text x="108" y="532" class="body" text-anchor="start">Типизированный доступ к регистрам</text>
+<path d="M 500 212 L 500 233" fill="none" stroke="#536477" stroke-width="2.5" marker-end="url(#arrow-gray)"/>
+<path d="M 500 327 L 500 348" fill="none" stroke="#536477" stroke-width="2.5" marker-end="url(#arrow-gray)"/>
+<path d="M 500 442 L 500 463" fill="none" stroke="#536477" stroke-width="2.5" marker-end="url(#arrow-gray)"/>
+<text x="500" y="590" class="label" text-anchor="middle">Периферия микроконтроллера</text>
+<path d="M 500 558 L 500 568" fill="none" stroke="#536477" stroke-width="2.5" marker-end="url(#arrow-gray)"/>
+<text x="36" y="613" class="note" text-anchor="start">Это зависимости кода; после оптимизации границы не обязаны стать вызовами.</text>
+</svg>

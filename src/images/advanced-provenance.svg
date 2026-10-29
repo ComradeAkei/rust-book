@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="590" viewBox="0 0 1000 590" role="img" aria-labelledby="title desc">
+<title id="title">Одинаковый адрес — разные выделения</title>
+<desc id="desc">Пока выделение A живо, указатель с его происхождением может обращаться к A при соблюдении остальных правил. Освобождение A и создание B по тому же адресу не даёт старому указателю права обращаться к B.</desc>
+<defs><marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#2864b4"/></marker><marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#287354"/></marker><marker id="arrow-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a45b12"/></marker><marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a93832"/></marker><marker id="arrow-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7552a3"/></marker><marker id="arrow-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#536477"/></marker></defs>
+<style>text{font-family:"DejaVu Sans",sans-serif;fill:#172b41}.tag{font-size:15px;font-weight:700;letter-spacing:2px;fill:#536477}.title{font-size:30px;font-weight:700}.label{font-size:23px;font-weight:700}.body{font-size:21px}.small{font-size:18px;fill:#455c73}.code{font-family:"DejaVu Sans Mono",monospace;font-size:21px}.note{font-size:20px;fill:#455c73}</style>
+<rect width="1000" height="590" rx="18" fill="#f8fafc"/>
+<rect x="0" y="0" width="8" height="590" rx="4" fill="#2864b4"/>
+<text x="36" y="34" class="tag" text-anchor="start">RUST · СХЕМА</text>
+<text x="36" y="77" class="title" text-anchor="start">Одинаковый адрес — разные выделения</text>
+<text x="40" y="123" class="label" text-anchor="start">До освобождения A</text>
+<rect x="40" y="150" width="430" height="130" rx="12" fill="#e8f1ff" stroke="#2864b4" stroke-width="2"/>
+<text x="58" y="184" class="label" text-anchor="start" style="fill:#2864b4">Указатель p</text>
+<text x="58" y="217" class="body" text-anchor="start">адрес: 0x1000</text>
+<text x="58" y="246" class="body" text-anchor="start">происхождение: выделение A</text>
+<rect x="650" y="150" width="310" height="130" rx="12" fill="#e5f4ed" stroke="#287354" stroke-width="2"/>
+<text x="668" y="184" class="label" text-anchor="start" style="fill:#287354">Выделение A</text>
+<text x="668" y="217" class="body" text-anchor="start">живые данные</text>
+<text x="668" y="246" class="body" text-anchor="start">по адресу 0x1000</text>
+<path d="M 470 215 L 650 215" fill="none" stroke="#287354" stroke-width="2.5" marker-end="url(#arrow-green)"/>
+<text x="560.0" y="203.0" class="small" text-anchor="middle">доступ к A</text>
+<text x="40" y="332" class="label" text-anchor="start">После освобождения A</text>
+<rect x="40" y="360" width="430" height="130" rx="12" fill="#fce8e6" stroke="#a93832" stroke-width="2"/>
+<text x="58" y="394" class="label" text-anchor="start" style="fill:#a93832">Старый указатель p</text>
+<text x="58" y="427" class="body" text-anchor="start">тот же адрес: 0x1000</text>
+<text x="58" y="456" class="body" text-anchor="start">то же происхождение: A</text>
+<rect x="650" y="360" width="310" height="130" rx="12" fill="#f1eafa" stroke="#7552a3" stroke-width="2"/>
+<text x="668" y="394" class="label" text-anchor="start" style="fill:#7552a3">Новое выделение B</text>
+<text x="668" y="427" class="body" text-anchor="start">другие данные</text>
+<text x="668" y="456" class="body" text-anchor="start">по адресу 0x1000</text>
+<path d="M 470 425 L 650 425" fill="none" stroke="#a93832" stroke-width="2.5" marker-end="url(#arrow-red)" stroke-dasharray="7 5"/>
+<path d="M 548 410 L 572 440 M 572 410 L 548 440" fill="none" stroke="#a93832" stroke-width="2.5"/>
+<text x="560" y="465" class="small" text-anchor="middle">нет права на B</text>
+<text x="36" y="553" class="note" text-anchor="start">Одного совпадения числа адреса недостаточно для корректного доступа.</text>
+</svg>

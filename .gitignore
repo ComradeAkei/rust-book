@@ -1,5 +1,6 @@
 /target
 /book
+/tools/__pycache__/
 /firmware/target
 /code/ch00/lints/target
 /exercises/ch00/hello-nostd/target

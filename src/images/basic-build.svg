@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="540" viewBox="0 0 1000 540" role="img" aria-labelledby="title desc">
+<title id="title">Как исходник становится программой</title>
+<desc id="desc">Компилятор переводит исходник в объектный файл. Компоновщик объединяет объектный файл и библиотеки в готовый файл для выбранной платформы.</desc>
+<defs><marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#2864b4"/></marker><marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#287354"/></marker><marker id="arrow-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a45b12"/></marker><marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a93832"/></marker><marker id="arrow-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7552a3"/></marker><marker id="arrow-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#536477"/></marker></defs>
+<style>text{font-family:"DejaVu Sans",sans-serif;fill:#172b41}.tag{font-size:15px;font-weight:700;letter-spacing:2px;fill:#536477}.title{font-size:30px;font-weight:700}.label{font-size:23px;font-weight:700}.body{font-size:21px}.small{font-size:18px;fill:#455c73}.code{font-family:"DejaVu Sans Mono",monospace;font-size:21px}.note{font-size:20px;fill:#455c73}</style>
+<rect width="1000" height="540" rx="18" fill="#f8fafc"/>
+<rect x="0" y="0" width="8" height="540" rx="4" fill="#2864b4"/>
+<text x="36" y="34" class="tag" text-anchor="start">RUST · СХЕМА</text>
+<text x="36" y="77" class="title" text-anchor="start">Как исходник становится программой</text>
+<rect x="36" y="143" width="240" height="114" rx="12" fill="#e8f1ff" stroke="#2864b4" stroke-width="2"/>
+<text x="54" y="177" class="label" text-anchor="start" style="fill:#2864b4">Исходник</text>
+<text x="54" y="210" class="body" text-anchor="start">main.rs</text>
+<rect x="380" y="143" width="240" height="114" rx="12" fill="#e8f1ff" stroke="#2864b4" stroke-width="2"/>
+<text x="398" y="177" class="label" text-anchor="start" style="fill:#2864b4">Компилятор</text>
+<text x="398" y="210" class="body" text-anchor="start">rustc</text>
+<rect x="724" y="143" width="240" height="114" rx="12" fill="#e8f1ff" stroke="#2864b4" stroke-width="2"/>
+<text x="742" y="177" class="label" text-anchor="start" style="fill:#2864b4">Объектный файл</text>
+<text x="742" y="210" class="body" text-anchor="start">код и ссылки</text>
+<path d="M 276 200 L 377 200" fill="none" stroke="#536477" stroke-width="2.5" marker-end="url(#arrow-gray)"/>
+<path d="M 620 200 L 721 200" fill="none" stroke="#536477" stroke-width="2.5" marker-end="url(#arrow-gray)"/>
+<rect x="36" y="341" width="240" height="114" rx="12" fill="#f1eafa" stroke="#7552a3" stroke-width="2"/>
+<text x="54" y="375" class="label" text-anchor="start" style="fill:#7552a3">Библиотеки</text>
+<text x="54" y="408" class="body" text-anchor="start">готовые части</text>
+<rect x="380" y="341" width="240" height="114" rx="12" fill="#f1eafa" stroke="#7552a3" stroke-width="2"/>
+<text x="398" y="375" class="label" text-anchor="start" style="fill:#7552a3">Компоновщик</text>
+<text x="398" y="408" class="body" text-anchor="start">соединяет части</text>
+<rect x="724" y="341" width="240" height="114" rx="12" fill="#e5f4ed" stroke="#287354" stroke-width="2"/>
+<text x="742" y="375" class="label" text-anchor="start" style="fill:#287354">Готовый файл</text>
+<text x="742" y="408" class="body" text-anchor="start">для выбранной</text>
+<text x="742" y="437" class="body" text-anchor="start">платформы</text>
+<path d="M 276 398 L 377 398" fill="none" stroke="#7552a3" stroke-width="2.5" marker-end="url(#arrow-purple)"/>
+<path d="M 620 398 L 721 398" fill="none" stroke="#287354" stroke-width="2.5" marker-end="url(#arrow-green)"/>
+<path d="M 844 257 V 295 H 500 V 338" fill="none" stroke="#7552a3" stroke-width="2.5" marker-end="url(#arrow-purple)"/>
+<text x="36" y="503" class="note" text-anchor="start">cargo build организует сборку; cargo run после сборки запускает программу.</text>
+</svg>

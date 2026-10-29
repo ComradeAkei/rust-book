@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="550" viewBox="0 0 1000 550" role="img" aria-labelledby="title desc">
+<title id="title">Значение есть или отсутствует</title>
+<desc id="desc">В match Some(n) извлекает число n, а None выбирает запасное значение. Some(0) даёт 0, None даёт 42.</desc>
+<defs><marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#2864b4"/></marker><marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#287354"/></marker><marker id="arrow-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a45b12"/></marker><marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a93832"/></marker><marker id="arrow-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7552a3"/></marker><marker id="arrow-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#536477"/></marker></defs>
+<style>text{font-family:"DejaVu Sans",sans-serif;fill:#172b41}.tag{font-size:15px;font-weight:700;letter-spacing:2px;fill:#536477}.title{font-size:30px;font-weight:700}.label{font-size:23px;font-weight:700}.body{font-size:21px}.small{font-size:18px;fill:#455c73}.code{font-family:"DejaVu Sans Mono",monospace;font-size:21px}.note{font-size:20px;fill:#455c73}</style>
+<rect width="1000" height="550" rx="18" fill="#f8fafc"/>
+<rect x="0" y="0" width="8" height="550" rx="4" fill="#2864b4"/>
+<text x="36" y="34" class="tag" text-anchor="start">RUST · СХЕМА</text>
+<text x="36" y="77" class="title" text-anchor="start">Значение есть или отсутствует</text>
+<rect x="36" y="135" width="420" height="78" rx="12" fill="#e8f1ff" stroke="#2864b4" stroke-width="2"/>
+<text x="54" y="169" class="label" text-anchor="start" style="fill:#2864b4">reading = Some(0)</text>
+<rect x="544" y="135" width="420" height="78" rx="12" fill="#fff0dc" stroke="#a45b12" stroke-width="2"/>
+<text x="562" y="169" class="label" text-anchor="start" style="fill:#a45b12">reading = None</text>
+<path d="M 246 215 L 246 258" fill="none" stroke="#536477" stroke-width="2.5" marker-end="url(#arrow-gray)"/>
+<path d="M 754 215 L 754 258" fill="none" stroke="#a45b12" stroke-width="2.5" marker-end="url(#arrow-orange)"/>
+<rect x="36" y="260" width="420" height="103" rx="12" fill="#e8f1ff" stroke="#2864b4" stroke-width="2"/>
+<text x="54" y="294" class="label" text-anchor="start" style="fill:#2864b4">Some(n) =&gt; n</text>
+<text x="54" y="327" class="body" text-anchor="start">n получает число 0</text>
+<rect x="544" y="260" width="420" height="103" rx="12" fill="#fff0dc" stroke="#a45b12" stroke-width="2"/>
+<text x="562" y="294" class="label" text-anchor="start" style="fill:#a45b12">None =&gt; 42</text>
+<text x="562" y="327" class="body" text-anchor="start">числа нет: берём запасное</text>
+<path d="M 246 365 L 246 408" fill="none" stroke="#287354" stroke-width="2.5" marker-end="url(#arrow-green)"/>
+<path d="M 754 365 L 754 408" fill="none" stroke="#a45b12" stroke-width="2.5" marker-end="url(#arrow-orange)"/>
+<rect x="36" y="410" width="420" height="75" rx="12" fill="#e5f4ed" stroke="#287354" stroke-width="2"/>
+<text x="54" y="444" class="label" text-anchor="start" style="fill:#287354">Результат: 0</text>
+<rect x="544" y="410" width="420" height="75" rx="12" fill="#fff0dc" stroke="#a45b12" stroke-width="2"/>
+<text x="562" y="444" class="label" text-anchor="start" style="fill:#a45b12">Результат: 42</text>
+<text x="36" y="513" class="note" text-anchor="start">Some(0) содержит число; None обозначает отсутствие числа.</text>
+</svg>

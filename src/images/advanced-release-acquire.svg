@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="660" viewBox="0 0 1000 660" role="img" aria-labelledby="title desc">
+<title id="title">Публикация данных через один флаг</title>
+<desc id="desc">Четыре события образуют цепочку: писатель записывает data, публикует ready с Release, читатель получает именно эту запись с Acquire и затем читает data. Исходное false не создаёт этой связи.</desc>
+<defs><marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#2864b4"/></marker><marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#287354"/></marker><marker id="arrow-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a45b12"/></marker><marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a93832"/></marker><marker id="arrow-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7552a3"/></marker><marker id="arrow-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#536477"/></marker></defs>
+<style>text{font-family:"DejaVu Sans",sans-serif;fill:#172b41}.tag{font-size:15px;font-weight:700;letter-spacing:2px;fill:#536477}.title{font-size:30px;font-weight:700}.label{font-size:23px;font-weight:700}.body{font-size:21px}.small{font-size:18px;fill:#455c73}.code{font-family:"DejaVu Sans Mono",monospace;font-size:21px}.note{font-size:20px;fill:#455c73}</style>
+<rect width="1000" height="660" rx="18" fill="#f8fafc"/>
+<rect x="0" y="0" width="8" height="660" rx="4" fill="#2864b4"/>
+<text x="36" y="34" class="tag" text-anchor="start">RUST · СХЕМА</text>
+<text x="36" y="77" class="title" text-anchor="start">Публикация данных через один флаг</text>
+<text x="40" y="125" class="label" text-anchor="start">Писатель</text>
+<text x="570" y="125" class="label" text-anchor="start">Читатель</text>
+<rect x="40" y="155" width="390" height="100" rx="12" fill="#e8f1ff" stroke="#2864b4" stroke-width="2"/>
+<text x="58" y="189" class="label" text-anchor="start" style="fill:#2864b4">1. data.store(42)</text>
+<text x="58" y="222" class="body" text-anchor="start">Relaxed</text>
+<rect x="40" y="330" width="390" height="100" rx="12" fill="#e5f4ed" stroke="#287354" stroke-width="2"/>
+<text x="58" y="364" class="label" text-anchor="start" style="fill:#287354">2. ready.store(true)</text>
+<text x="58" y="397" class="body" text-anchor="start">Release</text>
+<rect x="570" y="330" width="390" height="100" rx="12" fill="#e5f4ed" stroke="#287354" stroke-width="2"/>
+<text x="588" y="364" class="label" text-anchor="start" style="fill:#287354">3. ready.load()</text>
+<text x="588" y="397" class="body" text-anchor="start">Acquire: получено это true</text>
+<rect x="570" y="485" width="390" height="100" rx="12" fill="#e8f1ff" stroke="#2864b4" stroke-width="2"/>
+<text x="588" y="519" class="label" text-anchor="start" style="fill:#2864b4">4. data.load() → 42</text>
+<text x="588" y="552" class="body" text-anchor="start">Relaxed</text>
+<path d="M 235 255 L 235 330" fill="none" stroke="#536477" stroke-width="2.5" marker-end="url(#arrow-gray)"/>
+<text x="260" y="299" class="small" text-anchor="start">порядок в потоке</text>
+<path d="M 430 380 L 570 380" fill="none" stroke="#287354" stroke-width="2.5" marker-end="url(#arrow-green)"/>
+<text x="500.0" y="368.0" class="small" text-anchor="middle">связь потоков</text>
+<path d="M 765 430 L 765 485" fill="none" stroke="#536477" stroke-width="2.5" marker-end="url(#arrow-gray)"/>
+<text x="40" y="500" class="body" text-anchor="start">До публикации записываем данные.</text>
+<text x="40" y="529" class="body" text-anchor="start">После принятой публикации</text>
+<text x="40" y="558" class="body" text-anchor="start">можно читать эти данные.</text>
+<text x="36" y="623" class="note" text-anchor="start">Связь возникает, когда Acquire увидел именно Release-публикацию.</text>
+</svg>

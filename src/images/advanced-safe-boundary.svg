@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="590" viewBox="0 0 1000 590" role="img" aria-labelledby="title desc">
+<title id="title">Безопасный интерфейс вокруг unsafe</title>
+<desc id="desc">Вызывающий пользуется безопасной функцией. Внутри функция проверяет индексы, обосновывает непересечение строк и лишь затем создаёт ссылки через сырые указатели.</desc>
+<defs><marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#2864b4"/></marker><marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#287354"/></marker><marker id="arrow-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a45b12"/></marker><marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a93832"/></marker><marker id="arrow-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7552a3"/></marker><marker id="arrow-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#536477"/></marker></defs>
+<style>text{font-family:"DejaVu Sans",sans-serif;fill:#172b41}.tag{font-size:15px;font-weight:700;letter-spacing:2px;fill:#536477}.title{font-size:30px;font-weight:700}.label{font-size:23px;font-weight:700}.body{font-size:21px}.small{font-size:18px;fill:#455c73}.code{font-family:"DejaVu Sans Mono",monospace;font-size:21px}.note{font-size:20px;fill:#455c73}</style>
+<rect width="1000" height="590" rx="18" fill="#f8fafc"/>
+<rect x="0" y="0" width="8" height="590" rx="4" fill="#2864b4"/>
+<text x="36" y="34" class="tag" text-anchor="start">RUST · СХЕМА</text>
+<text x="36" y="77" class="title" text-anchor="start">Безопасный интерфейс вокруг unsafe</text>
+<rect x="330" y="118" width="630" height="375" rx="12" fill="#e8f1ff" stroke="#2864b4" stroke-width="2"/>
+<text x="355" y="154" class="label" text-anchor="start">Безопасная функция two_rows_raw</text>
+<rect x="40" y="203" width="230" height="145" rx="12" fill="#eef1f5" stroke="#536477" stroke-width="2"/>
+<text x="58" y="237" class="label" text-anchor="start" style="fill:#536477">Вызывающий</text>
+<text x="58" y="270" class="body" text-anchor="start">передаёт матрицу</text>
+<text x="58" y="299" class="body" text-anchor="start">и два индекса</text>
+<rect x="355" y="203" width="260" height="145" rx="12" fill="#e5f4ed" stroke="#287354" stroke-width="2"/>
+<text x="373" y="237" class="label" text-anchor="start" style="fill:#287354">Проверки</text>
+<text x="373" y="270" class="body" text-anchor="start">индексы в границах</text>
+<text x="373" y="299" class="body" text-anchor="start">строки различны</text>
+<rect x="660" y="203" width="275" height="145" rx="12" fill="#fff0dc" stroke="#a45b12" stroke-width="2"/>
+<text x="678" y="237" class="label" text-anchor="start" style="fill:#a45b12">Блок unsafe</text>
+<text x="678" y="270" class="body" text-anchor="start">создаёт две ссылки</text>
+<text x="678" y="299" class="body" text-anchor="start">на разные строки</text>
+<path d="M 270 275 L 355 275" fill="none" stroke="#536477" stroke-width="2.5" marker-end="url(#arrow-gray)"/>
+<path d="M 615 275 L 660 275" fill="none" stroke="#536477" stroke-width="2.5" marker-end="url(#arrow-gray)"/>
+<text x="355" y="401" class="body" text-anchor="start">Сигнатура связывает срок ссылок с матрицей.</text>
+<text x="355" y="430" class="body" text-anchor="start">Реализация сохраняет инварианты при любом вызове.</text>
+<text x="36" y="553" class="note" text-anchor="start">Неверные индексы → паника; корректные → непересекающиеся &amp;mut.</text>
+</svg>

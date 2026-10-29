@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="540" viewBox="0 0 1000 540" role="img" aria-labelledby="title desc">
+<title id="title">Откуда берутся 12 байт структуры</title>
+<desc id="desc">repr(C) с полями u8 channel, u32 value и u8 flags: channel по смещению 0, value по 4, flags по 8; три байта заполнения перед value и три в конце.</desc>
+<defs><marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#2864b4"/></marker><marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#287354"/></marker><marker id="arrow-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a45b12"/></marker><marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a93832"/></marker><marker id="arrow-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7552a3"/></marker><marker id="arrow-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#536477"/></marker></defs>
+<style>text{font-family:"DejaVu Sans",sans-serif;fill:#172b41}.tag{font-size:15px;font-weight:700;letter-spacing:2px;fill:#536477}.title{font-size:30px;font-weight:700}.label{font-size:23px;font-weight:700}.body{font-size:21px}.small{font-size:18px;fill:#455c73}.code{font-family:"DejaVu Sans Mono",monospace;font-size:21px}.note{font-size:20px;fill:#455c73}</style>
+<rect width="1000" height="540" rx="18" fill="#f8fafc"/>
+<rect x="0" y="0" width="8" height="540" rx="4" fill="#2864b4"/>
+<text x="36" y="34" class="tag" text-anchor="start">RUST · СХЕМА</text>
+<text x="36" y="77" class="title" text-anchor="start">Откуда берутся 12 байт структуры</text>
+<text x="36" y="125" class="code" text-anchor="start">repr(C): channel: u8, value: u32, flags: u8</text>
+<text x="160" y="186" class="small" text-anchor="middle">0</text>
+<rect x="130" y="205" width="60" height="72" rx="12" fill="#e8f1ff" stroke="#2864b4" stroke-width="2"/>
+<text x="160" y="250" class="code" text-anchor="middle">ch</text>
+<text x="226" y="186" class="small" text-anchor="middle">1</text>
+<rect x="196" y="205" width="60" height="72" rx="12" fill="#eef1f5" stroke="#536477" stroke-width="2" stroke-dasharray="7 5"/>
+<text x="226" y="250" class="code" text-anchor="middle">·</text>
+<text x="292" y="186" class="small" text-anchor="middle">2</text>
+<rect x="262" y="205" width="60" height="72" rx="12" fill="#eef1f5" stroke="#536477" stroke-width="2" stroke-dasharray="7 5"/>
+<text x="292" y="250" class="code" text-anchor="middle">·</text>
+<text x="358" y="186" class="small" text-anchor="middle">3</text>
+<rect x="328" y="205" width="60" height="72" rx="12" fill="#eef1f5" stroke="#536477" stroke-width="2" stroke-dasharray="7 5"/>
+<text x="358" y="250" class="code" text-anchor="middle">·</text>
+<text x="424" y="186" class="small" text-anchor="middle">4</text>
+<rect x="394" y="205" width="60" height="72" rx="12" fill="#f1eafa" stroke="#7552a3" stroke-width="2"/>
+<text x="424" y="250" class="code" text-anchor="middle">v0</text>
+<text x="490" y="186" class="small" text-anchor="middle">5</text>
+<rect x="460" y="205" width="60" height="72" rx="12" fill="#f1eafa" stroke="#7552a3" stroke-width="2"/>
+<text x="490" y="250" class="code" text-anchor="middle">v1</text>
+<text x="556" y="186" class="small" text-anchor="middle">6</text>
+<rect x="526" y="205" width="60" height="72" rx="12" fill="#f1eafa" stroke="#7552a3" stroke-width="2"/>
+<text x="556" y="250" class="code" text-anchor="middle">v2</text>
+<text x="622" y="186" class="small" text-anchor="middle">7</text>
+<rect x="592" y="205" width="60" height="72" rx="12" fill="#f1eafa" stroke="#7552a3" stroke-width="2"/>
+<text x="622" y="250" class="code" text-anchor="middle">v3</text>
+<text x="688" y="186" class="small" text-anchor="middle">8</text>
+<rect x="658" y="205" width="60" height="72" rx="12" fill="#e5f4ed" stroke="#287354" stroke-width="2"/>
+<text x="688" y="250" class="code" text-anchor="middle">fl</text>
+<text x="754" y="186" class="small" text-anchor="middle">9</text>
+<rect x="724" y="205" width="60" height="72" rx="12" fill="#eef1f5" stroke="#536477" stroke-width="2" stroke-dasharray="7 5"/>
+<text x="754" y="250" class="code" text-anchor="middle">·</text>
+<text x="820" y="186" class="small" text-anchor="middle">10</text>
+<rect x="790" y="205" width="60" height="72" rx="12" fill="#eef1f5" stroke="#536477" stroke-width="2" stroke-dasharray="7 5"/>
+<text x="820" y="250" class="code" text-anchor="middle">·</text>
+<text x="886" y="186" class="small" text-anchor="middle">11</text>
+<rect x="856" y="205" width="60" height="72" rx="12" fill="#eef1f5" stroke="#536477" stroke-width="2" stroke-dasharray="7 5"/>
+<text x="886" y="250" class="code" text-anchor="middle">·</text>
+<text x="36" y="175" class="small" text-anchor="start">байт</text>
+<text x="160" y="311" class="small" text-anchor="middle">channel</text>
+<text x="523" y="311" class="small" text-anchor="middle">value: байты v0…v3</text>
+<text x="688" y="342" class="small" text-anchor="middle">flags</text>
+<rect x="40" y="367" width="420" height="100" rx="12" fill="#e8f1ff" stroke="#2864b4" stroke-width="2"/>
+<text x="58" y="401" class="label" text-anchor="start" style="fill:#2864b4">Полезные данные: 6 байт</text>
+<text x="58" y="434" class="body" text-anchor="start">1 + 4 + 1</text>
+<rect x="530" y="367" width="420" height="100" rx="12" fill="#eef1f5" stroke="#536477" stroke-width="2"/>
+<text x="548" y="401" class="label" text-anchor="start" style="fill:#536477">Заполнение: 6 байт</text>
+<text x="548" y="434" class="body" text-anchor="start">3 перед value + 3 в конце</text>
+<text x="36" y="503" class="note" text-anchor="start">Размер 12 кратен выравниванию структуры 4; точка означает padding.</text>
+</svg>

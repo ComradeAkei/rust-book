@@ -1,0 +1,23 @@
+/* Учебные схемы сохраняют читаемый текст и в тёмной теме, и на телефоне.
+   На узком экране можно прокрутить рисунок, не уменьшая его подписи. */
+.diagram {
+    margin: 1.5em 0 0.7em;
+    overflow-x: auto;
+    border-radius: 12px;
+    background: #f8fafc;
+    scrollbar-width: thin;
+}
+.diagram p { margin: 0; }
+.diagram > p > img,
+.diagram .checkbox-label > img {
+    display: block;
+    width: 100%;
+    min-width: 700px;
+    max-width: none;
+    height: auto;
+}
+@media print {
+    .diagram { break-inside: avoid; overflow: visible; }
+    .diagram > p > img,
+    .diagram .checkbox-label > img { min-width: 0; }
+}

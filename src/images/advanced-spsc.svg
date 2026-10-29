@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="620" viewBox="0 0 1000 620" role="img" aria-labelledby="title desc">
+<title id="title">SPSC: один пишет, другой читает</title>
+<desc id="desc">Очередь на четыре слота после push(A) и push(B): tail равен нулю и указывает на A; head равен двум и указывает на следующий свободный слот. Вместимость равна трём, один слот должен оставаться пустым.</desc>
+<defs><marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#2864b4"/></marker><marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#287354"/></marker><marker id="arrow-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a45b12"/></marker><marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a93832"/></marker><marker id="arrow-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7552a3"/></marker><marker id="arrow-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#536477"/></marker></defs>
+<style>text{font-family:"DejaVu Sans",sans-serif;fill:#172b41}.tag{font-size:15px;font-weight:700;letter-spacing:2px;fill:#536477}.title{font-size:30px;font-weight:700}.label{font-size:23px;font-weight:700}.body{font-size:21px}.small{font-size:18px;fill:#455c73}.code{font-family:"DejaVu Sans Mono",monospace;font-size:21px}.note{font-size:20px;fill:#455c73}</style>
+<rect width="1000" height="620" rx="18" fill="#f8fafc"/>
+<rect x="0" y="0" width="8" height="620" rx="4" fill="#2864b4"/>
+<text x="36" y="34" class="tag" text-anchor="start">RUST · СХЕМА</text>
+<text x="36" y="77" class="title" text-anchor="start">SPSC: один пишет, другой читает</text>
+<text x="190" y="133" class="body" text-anchor="middle">Читатель: tail = 0</text>
+<text x="190" y="162" class="body" text-anchor="middle">следующим заберёт A</text>
+<text x="610" y="133" class="body" text-anchor="middle">Писатель: head = 2</text>
+<text x="610" y="162" class="body" text-anchor="middle">следующим положит C</text>
+<rect x="110" y="230" width="160" height="105" rx="12" fill="#e8f1ff" stroke="#2864b4" stroke-width="2"/>
+<text x="190" y="363" class="small" text-anchor="middle">слот 0</text>
+<text x="190" y="292" class="label" text-anchor="middle">A</text>
+<rect x="320" y="230" width="160" height="105" rx="12" fill="#e8f1ff" stroke="#2864b4" stroke-width="2"/>
+<text x="400" y="363" class="small" text-anchor="middle">слот 1</text>
+<text x="400" y="292" class="label" text-anchor="middle">B</text>
+<rect x="530" y="230" width="160" height="105" rx="12" fill="#e5f4ed" stroke="#287354" stroke-width="2"/>
+<text x="610" y="363" class="small" text-anchor="middle">слот 2</text>
+<text x="610" y="292" class="label" text-anchor="middle">пусто</text>
+<rect x="740" y="230" width="160" height="105" rx="12" fill="#eef1f5" stroke="#536477" stroke-width="2"/>
+<text x="820" y="363" class="small" text-anchor="middle">слот 3</text>
+<text x="820" y="292" class="label" text-anchor="middle">пусто</text>
+<path d="M 190 177 L 190 230" fill="none" stroke="#2864b4" stroke-width="2.5" marker-end="url(#arrow-blue)"/>
+<path d="M 610 177 L 610 230" fill="none" stroke="#287354" stroke-width="2.5" marker-end="url(#arrow-green)"/>
+<path d="M 900 285 L 950 285 L 950 385 L 65 385 L 65 285 L 110 285" fill="none" stroke="#536477" stroke-width="2.5" marker-end="url(#arrow-gray)"/>
+<text x="500" y="416" class="body" text-anchor="middle">После слота 3 индекс снова становится 0</text>
+<rect x="40" y="452" width="440" height="98" rx="12" fill="#eef1f5" stroke="#536477" stroke-width="2"/>
+<text x="58" y="486" class="label" text-anchor="start" style="fill:#536477">Пустая очередь</text>
+<text x="58" y="519" class="body" text-anchor="start">head == tail</text>
+<rect x="520" y="452" width="440" height="98" rx="12" fill="#fff0dc" stroke="#a45b12" stroke-width="2"/>
+<text x="538" y="486" class="label" text-anchor="start" style="fill:#a45b12">Полная очередь</text>
+<text x="538" y="519" class="body" text-anchor="start">(head + 1) % N == tail</text>
+<text x="36" y="583" class="note" text-anchor="start">При N = 4 помещаются 3 элемента; положение пустого слота меняется.</text>
+</svg>

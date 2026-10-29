@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="645" viewBox="0 0 1000 645" role="img" aria-labelledby="title desc">
+<title id="title">Как выбирается вызываемый метод</title>
+<desc id="desc">Обобщение специализируется для Thermo при компиляции. Вызов через dyn Sensor получает адрес реализации из таблицы методов; сама ссылка также хранит адрес исходного датчика.</desc>
+<defs><marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#2864b4"/></marker><marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#287354"/></marker><marker id="arrow-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a45b12"/></marker><marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a93832"/></marker><marker id="arrow-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7552a3"/></marker><marker id="arrow-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#536477"/></marker></defs>
+<style>text{font-family:"DejaVu Sans",sans-serif;fill:#172b41}.tag{font-size:15px;font-weight:700;letter-spacing:2px;fill:#536477}.title{font-size:30px;font-weight:700}.label{font-size:23px;font-weight:700}.body{font-size:21px}.small{font-size:18px;fill:#455c73}.code{font-family:"DejaVu Sans Mono",monospace;font-size:21px}.note{font-size:20px;fill:#455c73}</style>
+<rect width="1000" height="645" rx="18" fill="#f8fafc"/>
+<rect x="0" y="0" width="8" height="645" rx="4" fill="#2864b4"/>
+<text x="36" y="34" class="tag" text-anchor="start">RUST · СХЕМА</text>
+<text x="36" y="77" class="title" text-anchor="start">Как выбирается вызываемый метод</text>
+<rect x="40" y="125" width="920" height="185" rx="12" fill="#eef1f5" stroke="#536477" stroke-width="2"/>
+<text x="62" y="162" class="label" text-anchor="start">Обобщение: тип известен при компиляции</text>
+<rect x="65" y="195" width="260" height="80" rx="12" fill="#e8f1ff" stroke="#2864b4" stroke-width="2"/>
+<text x="83" y="229" class="label" text-anchor="start" style="fill:#2864b4">read&lt;Thermo&gt;</text>
+<path d="M 325 235 L 580 235" fill="none" stroke="#287354" stroke-width="2.5" marker-end="url(#arrow-green)"/>
+<text x="452.5" y="223.0" class="small" text-anchor="middle">прямой вызов</text>
+<rect x="590" y="195" width="330" height="80" rx="12" fill="#e5f4ed" stroke="#287354" stroke-width="2"/>
+<text x="608" y="229" class="label" text-anchor="start" style="fill:#287354">Thermo::read</text>
+<rect x="40" y="345" width="920" height="235" rx="12" fill="#eef1f5" stroke="#536477" stroke-width="2"/>
+<text x="62" y="381" class="label" text-anchor="start">dyn: выбор через таблицу методов</text>
+<rect x="65" y="410" width="230" height="95" rx="12" fill="#e8f1ff" stroke="#2864b4" stroke-width="2"/>
+<text x="83" y="444" class="label" text-anchor="start" style="fill:#2864b4">&amp;dyn Sensor</text>
+<text x="83" y="477" class="body" text-anchor="start">data | vtable</text>
+<path d="M 295 457 L 405 457" fill="none" stroke="#7552a3" stroke-width="2.5" marker-end="url(#arrow-purple)"/>
+<rect x="415" y="410" width="220" height="95" rx="12" fill="#f1eafa" stroke="#7552a3" stroke-width="2"/>
+<text x="433" y="444" class="label" text-anchor="start" style="fill:#7552a3">vtable</text>
+<text x="433" y="477" class="body" text-anchor="start">адрес read</text>
+<path d="M 635 457 L 715 457" fill="none" stroke="#287354" stroke-width="2.5" marker-end="url(#arrow-green)"/>
+<rect x="725" y="410" width="210" height="95" rx="12" fill="#e5f4ed" stroke="#287354" stroke-width="2"/>
+<text x="743" y="444" class="label" text-anchor="start" style="fill:#287354">Thermo::read</text>
+<path d="M 150 505 L 150 523" fill="none" stroke="#2864b4" stroke-width="2.5" marker-end="url(#arrow-blue)"/>
+<rect x="65" y="525" width="230" height="40" rx="12" fill="#e5f4ed" stroke="#287354" stroke-width="2"/>
+<text x="180" y="552" class="code" text-anchor="middle">Thermo { raw }</text>
+<text x="330" y="553" class="small" text-anchor="start">Данные остаются на прежнем месте</text>
+<text x="36" y="608" class="note" text-anchor="start">Схема выбора вызова; оптимизатор может встроить или упростить его.</text>
+</svg>

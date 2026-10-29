@@ -1,6 +1,7 @@
 # Summary
 
 [Введение](introduction.md)
+[Перед началом: основы и обозначения](foundations.md)
 
 - [Глава 0. Окружение и инструменты](ch00/index.md)
     - [0.1. rustup: тулчейны и цели](ch00/01-rustup.md)

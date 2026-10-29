@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="590" viewBox="0 0 1000 590" role="img" aria-labelledby="title desc">
+<title id="title">Перемещение передаёт владение</title>
+<desc id="desc">Два снимка одного буфера Vec: до send им владеет frame в produce, после передачи — параметр frame в send. Адрес буфера не меняется.</desc>
+<defs><marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#2864b4"/></marker><marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#287354"/></marker><marker id="arrow-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a45b12"/></marker><marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a93832"/></marker><marker id="arrow-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7552a3"/></marker><marker id="arrow-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#536477"/></marker></defs>
+<style>text{font-family:"DejaVu Sans",sans-serif;fill:#172b41}.tag{font-size:15px;font-weight:700;letter-spacing:2px;fill:#536477}.title{font-size:30px;font-weight:700}.label{font-size:23px;font-weight:700}.body{font-size:21px}.small{font-size:18px;fill:#455c73}.code{font-family:"DejaVu Sans Mono",monospace;font-size:21px}.note{font-size:20px;fill:#455c73}</style>
+<rect width="1000" height="590" rx="18" fill="#f8fafc"/>
+<rect x="0" y="0" width="8" height="590" rx="4" fill="#2864b4"/>
+<text x="36" y="34" class="tag" text-anchor="start">RUST · СХЕМА</text>
+<text x="36" y="77" class="title" text-anchor="start">Перемещение передаёт владение</text>
+<text x="65" y="128" class="label" text-anchor="start">ДО вызова</text>
+<text x="600" y="128" class="label" text-anchor="start">ВО ВРЕМЯ send</text>
+<rect x="65" y="158" width="300" height="125" rx="12" fill="#e8f1ff" stroke="#2864b4" stroke-width="2"/>
+<text x="83" y="192" class="label" text-anchor="start" style="fill:#2864b4">produce: frame</text>
+<text x="83" y="225" class="body" text-anchor="start">ptr = А</text>
+<text x="83" y="254" class="body" text-anchor="start">len = 64, cap = 64</text>
+<rect x="600" y="158" width="320" height="125" rx="12" fill="#e8f1ff" stroke="#2864b4" stroke-width="2"/>
+<text x="618" y="192" class="label" text-anchor="start" style="fill:#2864b4">send: frame</text>
+<text x="618" y="225" class="body" text-anchor="start">ptr = А</text>
+<text x="618" y="254" class="body" text-anchor="start">len = 64, cap = 64</text>
+<path d="M 385 219 L 575 219" fill="none" stroke="#2864b4" stroke-width="2.5" marker-end="url(#arrow-blue)"/>
+<text x="480.0" y="207.0" class="small" text-anchor="middle">send(frame)</text>
+<path d="M 215 283 L 215 367" fill="none" stroke="#287354" stroke-width="2.5" marker-end="url(#arrow-green)"/>
+<path d="M 760 283 L 760 367" fill="none" stroke="#287354" stroke-width="2.5" marker-end="url(#arrow-green)"/>
+<rect x="65" y="370" width="300" height="100" rx="12" fill="#e5f4ed" stroke="#287354" stroke-width="2"/>
+<text x="83" y="404" class="label" text-anchor="start" style="fill:#287354">Буфер по адресу А</text>
+<text x="83" y="437" class="body" text-anchor="start">0xA5  0xA5  …</text>
+<rect x="600" y="370" width="320" height="100" rx="12" fill="#e5f4ed" stroke="#287354" stroke-width="2"/>
+<text x="618" y="404" class="label" text-anchor="start" style="fill:#287354">Тот же буфер А</text>
+<text x="618" y="437" class="body" text-anchor="start">0xA5  0xA5  …</text>
+<text x="600" y="315" class="small" text-anchor="start" style="fill:#a93832">Старое имя</text>
+<text x="600" y="344" class="small" text-anchor="start" style="fill:#a93832">недоступно</text>
+<text x="65" y="512" class="body" text-anchor="start">Это два момента времени, а не два выделенных блока.</text>
+<text x="36" y="553" class="note" text-anchor="start">При выходе из send буфер освобождается один раз.</text>
+</svg>

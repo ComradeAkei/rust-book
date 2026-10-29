@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="565" viewBox="0 0 1000 565" role="img" aria-labelledby="title desc">
+<title id="title">Оператор ? выбирает один из двух путей</title>
+<desc id="desc">При Ok первое чтение отдаёт байт hi и выполнение продолжается. При Err ошибка возвращается из read_temp, а второе чтение не выполняется.</desc>
+<defs><marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#2864b4"/></marker><marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#287354"/></marker><marker id="arrow-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a45b12"/></marker><marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a93832"/></marker><marker id="arrow-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7552a3"/></marker><marker id="arrow-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#536477"/></marker></defs>
+<style>text{font-family:"DejaVu Sans",sans-serif;fill:#172b41}.tag{font-size:15px;font-weight:700;letter-spacing:2px;fill:#536477}.title{font-size:30px;font-weight:700}.label{font-size:23px;font-weight:700}.body{font-size:21px}.small{font-size:18px;fill:#455c73}.code{font-family:"DejaVu Sans Mono",monospace;font-size:21px}.note{font-size:20px;fill:#455c73}</style>
+<rect width="1000" height="565" rx="18" fill="#f8fafc"/>
+<rect x="0" y="0" width="8" height="565" rx="4" fill="#2864b4"/>
+<text x="36" y="34" class="tag" text-anchor="start">RUST · СХЕМА</text>
+<text x="36" y="77" class="title" text-anchor="start">Оператор ? выбирает один из двух путей</text>
+<rect x="345" y="145" width="310" height="105" rx="12" fill="#e8f1ff" stroke="#2864b4" stroke-width="2"/>
+<text x="363" y="179" class="label" text-anchor="start" style="fill:#2864b4">Первое чтение</text>
+<text x="363" y="212" class="body" text-anchor="start">bus.read(0x00)?</text>
+<path d="M 425 250 L 250 335" fill="none" stroke="#287354" stroke-width="2.5" marker-end="url(#arrow-green)"/>
+<text x="337.5" y="280.5" class="small" text-anchor="middle">Ok</text>
+<path d="M 575 250 L 750 335" fill="none" stroke="#a93832" stroke-width="2.5" marker-end="url(#arrow-red)"/>
+<text x="662.5" y="280.5" class="small" text-anchor="middle">Err</text>
+<rect x="50" y="340" width="400" height="130" rx="12" fill="#e5f4ed" stroke="#287354" stroke-width="2"/>
+<text x="68" y="374" class="label" text-anchor="start" style="fill:#287354">Ok(hi)</text>
+<text x="68" y="407" class="body" text-anchor="start">извлечь байт hi</text>
+<text x="68" y="436" class="body" text-anchor="start">выполнить второе чтение</text>
+<rect x="550" y="340" width="400" height="130" rx="12" fill="#fce8e6" stroke="#a93832" stroke-width="2"/>
+<text x="568" y="374" class="label" text-anchor="start" style="fill:#a93832">Err(e)</text>
+<text x="568" y="407" class="body" text-anchor="start">вернуть Err(e)</text>
+<text x="568" y="436" class="body" text-anchor="start">сразу выйти из read_temp</text>
+<text x="36" y="528" class="note" text-anchor="start">При ошибке второго чтения ? точно так же завершает функцию.</text>
+</svg>

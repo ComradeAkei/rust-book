@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="600" viewBox="0 0 1000 600" role="img" aria-labelledby="title desc">
+<title id="title">Pin: указатель переносится, T остаётся</title>
+<desc id="desc">Сначала владельцем Pin&lt;Box&lt;T&gt;&gt; служит переменная a. После let b = a владельцем становится b, но закреплённое значение T, не реализующее Unpin, остаётся по прежнему адресу в куче.</desc>
+<defs><marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#2864b4"/></marker><marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#287354"/></marker><marker id="arrow-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a45b12"/></marker><marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a93832"/></marker><marker id="arrow-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7552a3"/></marker><marker id="arrow-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#536477"/></marker></defs>
+<style>text{font-family:"DejaVu Sans",sans-serif;fill:#172b41}.tag{font-size:15px;font-weight:700;letter-spacing:2px;fill:#536477}.title{font-size:30px;font-weight:700}.label{font-size:23px;font-weight:700}.body{font-size:21px}.small{font-size:18px;fill:#455c73}.code{font-family:"DejaVu Sans Mono",monospace;font-size:21px}.note{font-size:20px;fill:#455c73}</style>
+<rect width="1000" height="600" rx="18" fill="#f8fafc"/>
+<rect x="0" y="0" width="8" height="600" rx="4" fill="#2864b4"/>
+<text x="36" y="34" class="tag" text-anchor="start">RUST · СХЕМА</text>
+<text x="36" y="77" class="title" text-anchor="start">Pin: указатель переносится, T остаётся</text>
+<text x="40" y="127" class="label" text-anchor="start">До передачи</text>
+<rect x="40" y="150" width="270" height="105" rx="12" fill="#e8f1ff" stroke="#2864b4" stroke-width="2"/>
+<text x="58" y="184" class="label" text-anchor="start" style="fill:#2864b4">Владелец a</text>
+<text x="58" y="217" class="body" text-anchor="start">Pin&lt;Box&lt;T&gt;&gt;</text>
+<text x="40" y="332" class="label" text-anchor="start">После let b = a</text>
+<rect x="40" y="355" width="270" height="105" rx="12" fill="#f1eafa" stroke="#7552a3" stroke-width="2"/>
+<text x="58" y="389" class="label" text-anchor="start" style="fill:#7552a3">Владелец b</text>
+<text x="58" y="422" class="body" text-anchor="start">a больше недоступен</text>
+<rect x="650" y="175" width="310" height="255" rx="12" fill="#e5f4ed" stroke="#287354" stroke-width="2"/>
+<text x="668" y="209" class="label" text-anchor="start" style="fill:#287354">Значение T: !Unpin</text>
+<text x="668" y="242" class="body" text-anchor="start">адрес 0x1000</text>
+<text x="668" y="271" class="body" text-anchor="start"></text>
+<text x="668" y="300" class="body" text-anchor="start">тот же объект</text>
+<text x="668" y="329" class="body" text-anchor="start">по тому же адресу</text>
+<path d="M 310 202 L 650 202" fill="none" stroke="#536477" stroke-width="2.5" marker-end="url(#arrow-gray)"/>
+<path d="M 310 407 L 550 407 L 550 370 L 650 370" fill="none" stroke="#7552a3" stroke-width="2.5" marker-end="url(#arrow-purple)"/>
+<text x="470" y="180" class="small" text-anchor="middle">в куче</text>
+<text x="40" y="516" class="body" text-anchor="start">Передача владельца указателя не перемещает закреплённый T.</text>
+<text x="36" y="563" class="note" text-anchor="start">Для T: Unpin ограничение на перемещение значения снимается.</text>
+</svg>

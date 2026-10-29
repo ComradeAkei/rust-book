@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="650" viewBox="0 0 1000 650" role="img" aria-labelledby="title desc">
+<title id="title">Разные проверки — разные вопросы</title>
+<desc id="desc">Обычные тесты проверяют примеры, proptest порождает случаи для свойства, фаззинг ищет сбой, Miri на исполненных путях проверяет правила памяти. Kani доказывает утверждения только внутри заданной модели и границ.</desc>
+<defs><marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#2864b4"/></marker><marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#287354"/></marker><marker id="arrow-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a45b12"/></marker><marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a93832"/></marker><marker id="arrow-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7552a3"/></marker><marker id="arrow-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#536477"/></marker></defs>
+<style>text{font-family:"DejaVu Sans",sans-serif;fill:#172b41}.tag{font-size:15px;font-weight:700;letter-spacing:2px;fill:#536477}.title{font-size:30px;font-weight:700}.label{font-size:23px;font-weight:700}.body{font-size:21px}.small{font-size:18px;fill:#455c73}.code{font-family:"DejaVu Sans Mono",monospace;font-size:21px}.note{font-size:20px;fill:#455c73}</style>
+<rect width="1000" height="650" rx="18" fill="#f8fafc"/>
+<rect x="0" y="0" width="8" height="650" rx="4" fill="#2864b4"/>
+<text x="36" y="34" class="tag" text-anchor="start">RUST · СХЕМА</text>
+<text x="36" y="77" class="title" text-anchor="start">Разные проверки — разные вопросы</text>
+<rect x="40" y="125" width="440" height="140" rx="12" fill="#e8f1ff" stroke="#2864b4" stroke-width="2"/>
+<text x="58" y="159" class="label" text-anchor="start" style="fill:#2864b4">Тесты</text>
+<text x="58" y="192" class="body" text-anchor="start">Заданные автором входы.</text>
+<text x="58" y="221" class="body" text-anchor="start">Совпадает ли результат с ожиданием?</text>
+<rect x="520" y="125" width="440" height="140" rx="12" fill="#e5f4ed" stroke="#287354" stroke-width="2"/>
+<text x="538" y="159" class="label" text-anchor="start" style="fill:#287354">proptest</text>
+<text x="538" y="192" class="body" text-anchor="start">Сгенерированные случаи.</text>
+<text x="538" y="221" class="body" text-anchor="start">Сохраняется ли свойство?</text>
+<rect x="40" y="300" width="440" height="140" rx="12" fill="#fff0dc" stroke="#a45b12" stroke-width="2"/>
+<text x="58" y="334" class="label" text-anchor="start" style="fill:#a45b12">Фаззинг</text>
+<text x="58" y="367" class="body" text-anchor="start">Много новых и изменённых входов.</text>
+<text x="58" y="396" class="body" text-anchor="start">Есть ли сбой или провал assert?</text>
+<rect x="520" y="300" width="440" height="140" rx="12" fill="#f1eafa" stroke="#7552a3" stroke-width="2"/>
+<text x="538" y="334" class="label" text-anchor="start" style="fill:#7552a3">Miri</text>
+<text x="538" y="367" class="body" text-anchor="start">Пути, которые удалось исполнить.</text>
+<text x="538" y="396" class="body" text-anchor="start">Нарушены ли правила памяти Rust?</text>
+<rect x="40" y="475" width="920" height="100" rx="12" fill="#eef1f5" stroke="#536477" stroke-width="2"/>
+<text x="58" y="509" class="label" text-anchor="start" style="fill:#536477">Kani: все допустимые входы заданной модели</text>
+<text x="58" y="542" class="body" text-anchor="start">Вывод ограничен предпосылками, моделью окружения и границами проверки.</text>
+<text x="36" y="613" class="note" text-anchor="start">Успешные тесты и поисковые проверки сами по себе не доказывают все входы.</text>
+</svg>

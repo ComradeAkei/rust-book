@@ -40,10 +40,10 @@ pub fn store_buffering_both_zero(rounds: usize) -> usize {
 // ANCHOR_END: seqcst
 
 // ANCHOR: fence
-/// Отдельный барьер вместо порядка на самой операции. `fence(Release)` после
-/// обычных Relaxed-записей и `fence(Acquire)` перед Relaxed-чтениями дают ту
-/// же happens-before, что Release-store и Acquire-load, но барьер отделён от
-/// конкретной переменной — удобно, когда публикуемых данных несколько.
+/// Публикация через отдельный Release-барьер перед записью флага.
+/// Читатель должен получить эту запись через Acquire-чтение флага,
+/// как в тесте ниже, либо через Relaxed-чтение и последующий Acquire-барьер.
+/// Барьеры без связывающей атомарной записи и чтения не создают happens-before.
 pub fn publish_with_fence(data: &AtomicUsize, flag: &std::sync::atomic::AtomicBool) {
     data.store(99, Ordering::Relaxed);
     fence(Ordering::Release); // всё выше — до флага

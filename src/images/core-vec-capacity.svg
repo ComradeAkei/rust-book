@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="535" viewBox="0 0 1000 535" role="img" aria-labelledby="title desc">
+<title id="title">Длина и ёмкость Vec — разные числа</title>
+<desc id="desc">Vec u32 имеет длину 3 и ёмкость 8. В буфере созданы три значения, а пять мест ещё не содержат доступных u32. Буфер занимает 32 байта.</desc>
+<defs><marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#2864b4"/></marker><marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#287354"/></marker><marker id="arrow-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a45b12"/></marker><marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a93832"/></marker><marker id="arrow-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7552a3"/></marker><marker id="arrow-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#536477"/></marker></defs>
+<style>text{font-family:"DejaVu Sans",sans-serif;fill:#172b41}.tag{font-size:15px;font-weight:700;letter-spacing:2px;fill:#536477}.title{font-size:30px;font-weight:700}.label{font-size:23px;font-weight:700}.body{font-size:21px}.small{font-size:18px;fill:#455c73}.code{font-family:"DejaVu Sans Mono",monospace;font-size:21px}.note{font-size:20px;fill:#455c73}</style>
+<rect width="1000" height="535" rx="18" fill="#f8fafc"/>
+<rect x="0" y="0" width="8" height="535" rx="4" fill="#2864b4"/>
+<text x="36" y="34" class="tag" text-anchor="start">RUST · СХЕМА</text>
+<text x="36" y="77" class="title" text-anchor="start">Длина и ёмкость Vec — разные числа</text>
+<rect x="40" y="150" width="280" height="165" rx="12" fill="#e8f1ff" stroke="#2864b4" stroke-width="2"/>
+<text x="58" y="184" class="label" text-anchor="start" style="fill:#2864b4">Vec&lt;u32&gt;</text>
+<text x="58" y="217" class="body" text-anchor="start">ptr → буфер</text>
+<text x="58" y="246" class="body" text-anchor="start">len = 3</text>
+<text x="58" y="275" class="body" text-anchor="start">cap = 8</text>
+<text x="390" y="130" class="label" text-anchor="start">Буфер: 8 мест по 4 байта</text>
+<text x="420" y="170" class="small" text-anchor="middle">0</text>
+<rect x="390" y="190" width="60" height="82" rx="12" fill="#e5f4ed" stroke="#287354" stroke-width="2"/>
+<text x="420" y="239" class="code" text-anchor="middle">10</text>
+<text x="486" y="170" class="small" text-anchor="middle">1</text>
+<rect x="456" y="190" width="60" height="82" rx="12" fill="#e5f4ed" stroke="#287354" stroke-width="2"/>
+<text x="486" y="239" class="code" text-anchor="middle">20</text>
+<text x="552" y="170" class="small" text-anchor="middle">2</text>
+<rect x="522" y="190" width="60" height="82" rx="12" fill="#e5f4ed" stroke="#287354" stroke-width="2"/>
+<text x="552" y="239" class="code" text-anchor="middle">30</text>
+<text x="618" y="170" class="small" text-anchor="middle">3</text>
+<rect x="588" y="190" width="60" height="82" rx="12" fill="#eef1f5" stroke="#536477" stroke-width="2" stroke-dasharray="7 5"/>
+<text x="618" y="239" class="code" text-anchor="middle">·</text>
+<text x="684" y="170" class="small" text-anchor="middle">4</text>
+<rect x="654" y="190" width="60" height="82" rx="12" fill="#eef1f5" stroke="#536477" stroke-width="2" stroke-dasharray="7 5"/>
+<text x="684" y="239" class="code" text-anchor="middle">·</text>
+<text x="750" y="170" class="small" text-anchor="middle">5</text>
+<rect x="720" y="190" width="60" height="82" rx="12" fill="#eef1f5" stroke="#536477" stroke-width="2" stroke-dasharray="7 5"/>
+<text x="750" y="239" class="code" text-anchor="middle">·</text>
+<text x="816" y="170" class="small" text-anchor="middle">6</text>
+<rect x="786" y="190" width="60" height="82" rx="12" fill="#eef1f5" stroke="#536477" stroke-width="2" stroke-dasharray="7 5"/>
+<text x="816" y="239" class="code" text-anchor="middle">·</text>
+<text x="882" y="170" class="small" text-anchor="middle">7</text>
+<rect x="852" y="190" width="60" height="82" rx="12" fill="#eef1f5" stroke="#536477" stroke-width="2" stroke-dasharray="7 5"/>
+<text x="882" y="239" class="code" text-anchor="middle">·</text>
+<path d="M 320 231 L 385 231" fill="none" stroke="#2864b4" stroke-width="2.5" marker-end="url(#arrow-blue)"/>
+<path d="M 390 290 V 310 H 582 V 290" fill="none" stroke="#287354" stroke-width="2.5"/>
+<text x="486" y="345" class="code" text-anchor="middle">len = 3</text>
+<path d="M 588 290 V 310 H 918 V 290" fill="none" stroke="#536477" stroke-width="2.5"/>
+<text x="753" y="345" class="small" text-anchor="middle">5 свободных мест</text>
+<text x="753" y="374" class="small" text-anchor="middle">читать как u32 нельзя</text>
+<path d="M 390 397 V 414 H 918 V 397" fill="none" stroke="#2864b4" stroke-width="2.5"/>
+<text x="654" y="453" class="code" text-anchor="middle">Буфер: 8 × 4 = 32 байта</text>
+<text x="36" y="498" class="note" text-anchor="start">Показаны логические поля Vec; их порядок в памяти не гарантирован.</text>
+</svg>
